@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de la Cuenta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <style>
+        :root {
+            --primary-dark: #2c3e50;
+            --primary: #2c3e50;
+            --primary-light: #334155;
+            --accent: #15a086;
+            --accent-dark: #15a086;
+            --text: #fff;
+            --text-light: #15a086;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --neon-shadow: 0 0 10px rgba(0, 216, 255, 0.5);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: var(--text);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            animation: neon-glow 3s linear infinite;
+        }
+
+        @keyframes neon-glow {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            background: linear-gradient(to right, var(--text-light), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), var(--neon-shadow);
+        }
+
+        .config-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Ocultar elementos que requieren permisos por defecto */
+        .config-item[data-requires-permission] {
+            display: none;
+        }
+
+        .config-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(0, 216, 255, 0.05), transparent);
+            pointer-events: none;
+        }
+
+        .config-item:hover {
+            background-color: var(--accent);
+            transform: translateX(5px);
+        }
+
+        .config-item:last-child {
+            border-bottom: none;
+        }
+
+        .icon {
+            font-size: 24px;
+            margin-right: 15px;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .config-item:hover .icon {
+            color: var(--text);
+            transform: scale(1.1);
+        }
+
+        .config-title {
+            flex: 1;
+            font-size: 18px;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: var(--text);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button i {
+            margin-right: 8px;
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 216, 255, 0.4);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--glass);
+            border: 1px solid var(--glass-border);
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: var(--text);
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 2px solid var(--accent);
+            box-shadow: var(--neon-shadow);
+        }
+
+        /* Efecto de hover para los enlaces */
+        .config-item:hover .config-title {
+            color: var(--text);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .config-item {
+                padding: 12px;
+            }
+            
+            .icon {
+                font-size: 20px;
+                margin-right: 12px;
+            }
+            
+            .config-title {
+                font-size: 16px;
+            }
+            
+            .toggle-switch {
+                width: 50px;
+                height: 28px;
+            }
+            
+            .slider:before {
+                height: 20px;
+                width: 20px;
+            }
+            
+            input:checked + .slider:before {
+                transform: translateX(22px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 20px;
+            }
+            
+            .back-button {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Configuración del sistema</h1>
+</header>
+
+<div class="container">
+    <!-- Configuración de cuenta con imagen de perfil (siempre visible) -->
+    <div class="config-item">
+        <img id="profileImage" class="profile-img" src="logo-retom.ico" alt="Foto de perfil">
+        <a href="perfil.html" class="config-title">Cuenta</a>
+    </div>
+    
+    <!-- Todos los elementos con sus iconos y permisos correspondientes -->
+    <div class="config-item" id="gestionHorarioItem" data-requires-permission="configuracion">
+        <i class="fa-solid fa-clock icon"></i>
+        <a href="gestion-de-horario.html" class="config-title">Gestionar Horarios Laboral</a>
+    </div>
+    
+    <div class="config-item" id="gestionContrasenaItem" data-requires-permission="configuracion">
+        <i class="fa-solid fa-calendar icon"></i>
+        <a href="contraseña-para-el-horario.html" class="config-title">Gestionar Contraseñas de Horarios Laboral</a>
+    </div>
+
+    <div class="config-item" id="gestionContrasenaItem" data-requires-permission="configuracion">
+        <i class="fas fa-cube icon"></i>
+        <a href="lost-found-configuracion.html" class="config-title">Configuración de Lost And Found</a>
+    </div>
+    
+    <div class="config-item" id="generarQrItem" data-requires-permission="configuracion">
+        <i class="fa-solid fa-qrcode icon"></i>
+        <a href="generar-qr.html" class="config-title">Generar QR</a>
+    </div>
+    
+    <div class="config-item" id="scannerQrItem" data-requires-permission="configuracion">
+        <i class="fa-solid fa-camera icon"></i>
+        <a href="qr-scanerr.html" class="config-title">Scanner QR</a>
+    </div>
+    
+    <div class="config-item" id="crearCuentaItem" data-requires-permission="configuracion">
+        <i class="fa-solid fa-right-to-bracket icon"></i>
+        <a href="crear-cuenta.html" class="config-title">Crear Nuevas Cuentas</a>
+    </div>
+    
+    <div class="config-item" id="admPermisosItem" data-requires-permission="configuracion">
+        <i class="fa-solid fa-universal-access icon"></i>
+        <a href="adm-permisos.html" class="config-title">Administrador de Permisos</a>
+    </div>
+    
+    <div class="config-item" id="cambioPinItem" data-requires-permission="cambio-pin">
+        <i class="fa-solid fa-key icon"></i>
+        <a href="cambio-de-pin-login.html" class="config-title">Cambiar Pin del Login</a>
+    </div>
+    
+    <div class="config-item" id="admUsuariosItem" data-requires-permission="configuracion">
+        <i class="fa-solid fa-earth-americas icon"></i>
+        <a href="usuarios.html" class="config-title">Administrador De Usuarios</a>
+    </div>
+    
+    <div class="config-item" id="datosEmpresaItem" data-requires-permission="configuracion">
+        <i class="fa-solid fa-gopuram icon"></i>
+        <a href="datos-de-la-empresa.html" class="config-title">Datos De La Empresa</a>
+    </div> 
+    
+    <div class="config-item" id="registrarEmpresaItem" data-requires-permission="configuracion">
+        <i class="fa-solid fa-chalkboard-user icon"></i>
+        <a href="nombre-de-empresa.html" class="config-title">Registrar Datos de la Empresa</a>
+    </div>
+
+    <!-- Elementos que NO requieren permisos (siempre visibles) -->
+    <div class="config-item">
+        <i class="fas fa-headset icon"></i>
+        <a href="soporte.html" class="config-title">Soporte</a>
+    </div>
+    
+    <div class="config-item">
+        <i class="fas fa-keyboard icon"></i>
+        <a href="guia-de-accesos-directos.html" class="config-title">Guía de atajos</a>
+    </div>
+
+    <div class="config-item">
+        <i class="fas fa-info-circle icon"></i>
+        <a href="acerca-de-r.html" class="config-title">Acerca de</a>
+    </div>
+    
+    <div class="config-item">
+        <i class="fas fa-user-shield icon"></i>
+        <a href="política-de-privacidad.html" class="config-title">Política de privacidad</a>
+    </div>
+    
+    <div class="config-item">
+        <i class="fas fa-shield-alt icon"></i>
+        <a href="politica-de-seguridad.html" class="config-title">Política de seguridad</a>
+    </div>
+
+    <!-- Botones de toggle (no requieren permisos) -->
+    <div class="config-item">
+        <i class="fas fa-toggle-on icon"></i>
+        <span class="config-title">Mostrar Hora y Fecha</span>
+        <label class="toggle-switch">
+            <input type="checkbox" id="toggleButton">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <div class="config-item">
+        <i class="fas fa-mouse-pointer icon"></i>
+        <span class="config-title">Mostrar Títulos al Pasar el Mouse</span>
+        <label class="toggle-switch">
+            <input type="checkbox" id="toggleHover">
+            <span class="slider"></span>
+        </label>
+    </div>
+</div>
+
+<script type="module">
+    // Firebase y otras configuraciones
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+        authDomain: "inventario-35d6b.firebaseapp.com",
+        projectId: "inventario-35d6b",
+        storageBucket: "inventario-35d6b.appspot.com",
+        messagingSenderId: "266100399659",
+        appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // Configurar ambos botones
+    const toggleButton = document.getElementById('toggleButton');
+    const toggleHover = document.getElementById('toggleHover');
+    const profileImage = document.getElementById('profileImage');
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            // Cargar foto de perfil desde Firebase Auth
+            if (user.photoURL) {
+                profileImage.src = user.photoURL;
+            } else {
+                // Si no hay foto en Auth, intentar obtenerla de Firestore
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    if (userData.photoURL) {
+                        profileImage.src = userData.photoURL;
+                    } else {
+                        profileImage.src = 'https://i.imgur.com/8Km9tLL.png';
+                    }
+                } else {
+                    profileImage.src = 'https://i.imgur.com/8Km9tLL.png';
+                }
+            }
+
+            // Cargar estados de los toggles
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                
+                // Configurar toggles
+                toggleButton.checked = userData.toggleState || false;
+                toggleHover.checked = userData.hoverState || false;
+                
+                // Configurar visibilidad basada en permisos
+                if (userData.permisos) {
+                    // Seleccionar todos los elementos que requieren permisos
+                    const permissionElements = document.querySelectorAll('[data-requires-permission]');
+                    
+                    permissionElements.forEach(element => {
+                        const requiredPermission = element.getAttribute('data-requires-permission');
+                        // Mostrar solo si el usuario tiene el permiso requerido
+                        element.style.display = userData.permisos.includes(requiredPermission) ? 'flex' : 'none';
+                    });
+                }
+            }
+
+            // Event listeners para los toggles
+            toggleButton.addEventListener('change', async () => {
+                await setDoc(doc(db, 'users', user.uid), { toggleState: toggleButton.checked }, { merge: true });
+            });
+
+            toggleHover.addEventListener('change', async () => {
+                await setDoc(doc(db, 'users', user.uid), { hoverState: toggleHover.checked }, { merge: true });
+            });
+        }
+    });
+
+    // Bloquear inspección
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+        if (e.key === "F12" || 
+            (e.ctrlKey && e.shiftKey && e.key === 'I') || 
+            (e.ctrlKey && e.key === 'u') || 
+            (e.ctrlKey && e.shiftKey && e.key === 'J')) {
+            e.preventDefault();
+        }
+    });
+</script>
+
+<!-- Verificación de autenticación -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+        authDomain: "inventario-35d6b.firebaseapp.com",
+        projectId: "inventario-35d6b",
+        storageBucket: "inventario-35d6b.appspot.com",
+        messagingSenderId: "266100399659",
+        appId: "1:266100399659:web:92358d28cbd803c8a7d46e",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Verifica si el usuario está autenticado
+    onAuthStateChanged(auth, user => {
+        if (!user) {
+            // Si el usuario no está autenticado, redirigir a index.html
+            window.location.href = "index.html";
+        }
+    });
+</script>
+</body>
+</html>
