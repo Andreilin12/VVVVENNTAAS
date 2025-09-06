@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diseñador de Facturas Profesional</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            font-size: 0.9em; /* Tamaño general de la página reducido */
+        }
+
+        /* --- Menú Lateral (Paleta de Campos) --- */
+        #menuLateral {
+            width: 200px; /* Ancho reducido */
+            background-color: #333;
+            color: white;
+            padding: 15px 0; /* Padding reducido */
+            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        #menuLateral h2 {
+            text-align: center;
+            margin-bottom: 15px; /* Margen reducido */
+            color: #4CAF50;
+            font-size: 1.3em;
+        }
+
+        .tipoCampoBtn {
+            display: flex;
+            align-items: center;
+            width: 90%; /* Ajuste de ancho */
+            margin: 6px auto; /* Margen reducido */
+            padding: 8px; /* Padding reducido */
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 0.9em; /* Fuente reducida */
+        }
+
+        .tipoCampoBtn i {
+            margin-right: 8px; /* Margen reducido */
+            font-size: 1.1em;
+        }
+
+        .tipoCampoBtn:hover {
+            background-color: #777;
+        }
+
+        .seccion-iconos {
+            margin-top: 15px;
+            padding: 8px;
+            border-top: 1px solid #666;
+            text-align: center;
+        }
+        .seccion-iconos h3 {
+            font-size: 0.9em;
+            color: #bbb;
+            margin-bottom: 8px;
+        }
+        .icon-btn {
+            background: none;
+            border: 1px solid #777;
+            color: white;
+            padding: 6px;
+            margin: 3px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s ease;
+        }
+        .icon-btn:hover {
+            background-color: #666;
+        }
+
+
+        /* --- Controles Globales y Área de Diseño --- */
+        #mainContent {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 15px; /* Padding reducido */
+            overflow: auto;
+            position: relative;
+            align-items: center; /* Centrar horizontalmente si hay espacio */
+        }
+
+        #controlesSuperiores {
+            margin-bottom: 15px; /* Margen reducido */
+            background-color: #fff;
+            padding: 12px 20px; /* Padding reducido */
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px; /* Espacio reducido entre elementos */
+            align-items: center;
+            justify-content: center;
+        }
+
+        #controlesSuperiores label {
+            font-weight: bold;
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        #controlesSuperiores select,
+        #controlesSuperiores button,
+        #controlesSuperiores input[type="file"],
+        #controlesSuperiores input[type="color"] {
+            padding: 7px 12px; /* Padding reducido */
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 0.9em; /* Fuente reducida */
+            cursor: pointer;
+            background-color: white;
+        }
+
+        #controlesSuperiores button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            transition: background-color 0.2s ease;
+        }
+
+        #controlesSuperiores button:hover {
+            background-color: #45a049;
+        }
+        
+        #logoUploadLabel, #backgroundUploadLabel {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            padding: 7px 12px;
+            border-radius: 5px;
+            border: none;
+            transition: background-color 0.2s ease;
+        }
+        #logoUploadLabel:hover, #backgroundUploadLabel:hover {
+            background-color: #0056b3;
+        }
+        #logoUpload, #backgroundUpload {
+            display: none;
+        }
+
+        #removeBackgroundBtn {
+            background-color: #f44336;
+        }
+        #removeBackgroundBtn:hover {
+            background-color: #da190b;
+        }
+
+        /* --- Panel de Propiedades --- */
+        #panelPropiedades {
+            width: 250px; /* Ancho fijo para que la factura se adapte */
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            padding: 15px; /* Padding reducido */
+            display: flex;
+            flex-direction: column;
+            gap: 8px; /* Espacio entre elementos reducido */
+            flex-shrink: 0; /* No se encogerá */
+            margin-left: 15px; /* Espacio entre factura y panel */
+            overflow-y: auto; /* Para desplazamiento si el contenido es largo */
+        }
+        #panelPropiedades.hidden { /* Clase para ocultar, no display: none */
+            width: 0;
+            padding: 0;
+            margin-left: 0;
+            overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+        #panelPropiedades h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .prop-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 8px;
+        }
+        .prop-group label {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 3px;
+        }
+        .prop-group input[type="text"],
+        .prop-group input[type="number"],
+        .prop-group input[type="color"],
+        .prop-group select,
+        .prop-group textarea {
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+        .prop-group input[type="color"] {
+            height: 30px; /* Altura ajustada */
+            padding: 0;
+            border: none;
+            width: 100%;
+        }
+        .prop-group button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 7px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 8px;
+            font-size: 0.9em;
+        }
+        .prop-group button:hover {
+            background-color: #c82333;
+        }
+        #textStyleButtons button {
+            background-color: #6c757d;
+            margin-right: 5px;
+            padding: 6px 10px;
+            font-size: 0.9em;
+        }
+        #textStyleButtons button.active {
+            background-color: #4CAF50;
+        }
+        #textStyleButtons button:hover {
+            background-color: #5a6268;
+        }
+
+
+        /* --- Contenedor de la Factura (El Lienzo de Diseño) --- */
+        #contenedorFactura {
+            border: 2px dashed #ccc;
+            background-color: #fff;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            resize: both; /* Permitir redimensionamiento manual */
+            min-width: 250px; /* Mínimo para 80mm */
+            min-height: 200px;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-image: var(--bg-image, none);
+            background-color: var(--bg-color, white);
+            flex-shrink: 0; /* Permite que la factura tenga un tamaño inicial fijo y luego se adapte */
+            /* Se establece un tamaño inicial y luego flex-grow lo ajusta */
+            width: 794px; /* A4 aprox. en px (210mm) */
+            height: 1123px; /* A4 aprox. en px (297mm) */
+            /* Añadir overflow: auto para redimensionar con scroll si los campos se salen */
+            overflow: auto;
+        }
+
+        /* Tamaños predefinidos */
+        #contenedorFactura.size-a4 {
+            width: 794px; /* A4 aprox. en px (210mm) */
+            height: 1123px; /* A4 aprox. en px (297mm) */
+        }
+
+        #contenedorFactura.size-80mm {
+            width: 302px; /* 80mm aprox. en px */
+            height: 600px; /* Altura ajustable para ticket, puede ser menor si es necesario */
+        }
+
+        /* --- Campos Arrastrables Comunes --- */
+        .campoArrastrable {
+            background-color: #e0f7fa;
+            border: 1px solid #00bcd4;
+            padding: 8px 12px;
+            cursor: grab;
+            position: absolute;
+            min-width: 50px; /* Mínimo reducido */
+            min-height: 20px; /* Mínimo reducido */
+            text-align: left;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            user-select: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em; /* Fuente reducida para campos */
+            /* Variables CSS para estilos de impresión */
+            --font-weight: normal;
+            --font-style: normal;
+            --text-decoration: none;
+            --font-size: 0.9em;
+            --text-color: black;
+            --bg-field-color: #e0f7fa;
+            --border-width: 1px;
+            --border-style: solid;
+            --border-color: #00bcd4;
+        }
+
+        .campoArrastrable.selected {
+            outline: 2px solid #007bff;
+            z-index: 1000;
+        }
+
+        .campoArrastrable:hover {
+            border-color: #00838F;
+        }
+
+        .campoArrastrable:active {
+            cursor: grabbing;
+        }
+
+        .campoArrastrable.editing {
+            background-color: #fffde7;
+            border: 1px solid #ffb300;
+            outline: none;
+            cursor: text;
+            white-space: normal;
+            padding: 7px 11px;
+            height: auto;
+            overflow: visible;
+            text-overflow: clip;
+            display: block;
+        }
+
+        /* Redimensionadores de esquinas */
+        .resizer {
+            width: 10px;
+            height: 10px;
+            background: #007bff;
+            border: 1px solid #fff;
+            position: absolute;
+            z-index: 1001;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+        }
+        .campoArrastrable.selected .resizer {
+            opacity: 1;
+        }
+
+        .resizer.top-left { top: -5px; left: -5px; cursor: nwse-resize; }
+        .resizer.top-right { top: -5px; right: -5px; cursor: nesw-resize; }
+        .resizer.bottom-left { bottom: -5px; left: -5px; cursor: nesw-resize; }
+        .resizer.bottom-right { bottom: -5px; right: -5px; cursor: nwse-resize; }
+
+        /* --- Tipos de Campos Especiales --- */
+        .campo-texto {
+            background-color: #f7f7f7;
+            border: 1px dashed #999;
+            color: #333;
+            font-size: 0.9em;
+            font-weight: normal;
+        }
+        .campo-titulo {
+            font-size: 1.5em; /* Tamaño reducido */
+            font-weight: bold;
+            text-align: center;
+            background-color: #fce4ec;
+            border-color: #E91E63;
+        }
+        .campo-total, .campo-precio, .campo-itbis, .campo-iva, .campo-subtotal {
+            font-weight: bold;
+            text-align: right;
+            background-color: #e8f5e9;
+            border-color: #4CAF50;
+            color: #1B5E20;
+            font-size: 0.95em;
+        }
+        .campo-productos {
+            border: 1px dashed #90a4ae;
+            background-color: #eceff1;
+            padding: 5px;
+            min-height: 60px; /* Altura mínima reducida */
+            resize: horizontal;
+            overflow: auto;
+            white-space: normal;
+            display: block;
+            font-size: 0.85em;
+        }
+        /* Líneas más finas */
+        .campo-linea {
+            background-color: #333;
+            width: 50px;
+            height: 1px; /* Fina */
+            min-width: 1px;
+            min-height: 1px;
+            border: none;
+            padding: 0; /* Asegurar que no tenga padding */
+        }
+        .campo-linea.vertical {
+            width: 1px; /* Fina */
+            height: 50px;
+        }
+        .campo-logo img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+        .campo-icono i {
+            font-size: 1.8em; /* Tamaño de icono reducido */
+            color: #333;
+        }
+
+
+        /* --- Estilo de impresión (oculta UI y limpia factura) --- */
+        @media print {
+            body {
+                display: block;
+                height: auto;
+                overflow: visible;
+                margin: 0;
+                padding: 0;
+                margin: 0 !important;
+                padding: 0 !important;
+                font-size: 12pt; /* Tamaño de fuente base para impresión */
+            }
+            #menuLateral, #controlesSuperiores, #panelPropiedades {
+                display: none;
+            }
+            #mainContent {
+                padding: 0;
+                margin: 0;
+                justify-content: flex-start;
+                align-items: flex-start;
+                overflow: visible;
+                width: 100% !important;
+                flex-direction: row; /* Necesario para que la factura no ocupe todo el ancho */
+            }
+            #contenedorFactura {
+                border: none;
+                box-shadow: none;
+                margin: 0 auto; /* Centrar en la página de impresión */
+                padding: 0;
+                /* Ajustar tamaño del contenedor para impresión */
+                width: calc(100vw - 20mm) !important; /* Aproximado para margen de página */
+                max-width: 210mm !important; /* Para A4, pero adaptativo */
+                height: auto !important; /* Permitir que la altura se ajuste */
+                resize: none;
+                /* Asegurar que las imágenes de fondo de la factura se escalen bien */
+                background-size: contain !important; /* o 'cover' si prefieres cubrir */
+                background-repeat: no-repeat !important;
+                background-position: center !important;
+                /* Permitir que el fondo se imprima */
+                -webkit-print-color-adjust: exact !important; /* Para Chrome/Safari */
+                print-color-adjust: exact !important; /* Estándar */
+                background-image: var(--bg-image, none) !important;
+                background-color: var(--bg-color, white) !important;
+            }
+
+            /* Forzar el tamaño A4 o 80mm si la página lo permite, de lo contrario se escala */
+            #contenedorFactura.size-a4 {
+                width: 210mm !important;
+                height: 297mm !important;
+                min-width: 210mm !important;
+                min-height: 297mm !important;
+            }
+            #contenedorFactura.size-80mm {
+                width: 80mm !important;
+                height: auto !important; /* Altura se ajusta a contenido */
+                min-width: 80mm !important;
+                max-width: 80mm !important;
+            }
+
+            .campoArrastrable {
+                border: var(--border-width, 1px) var(--border-style, solid) var(--border-color, #000) !important;
+                background-color: var(--bg-field-color, transparent) !important;
+                box-shadow: none !important;
+                padding: 0 !important; /* Eliminar padding en impresión para mayor control */
+                user-select: auto;
+                cursor: default;
+                outline: none !important;
+                /* Usar variables CSS para estilos que el usuario pueda personalizar */
+                font-weight: var(--font-weight, normal) !important;
+                font-style: var(--font-style, normal) !important;
+                text-decoration: var(--text-decoration, none) !important;
+                font-size: var(--font-size, 16px) !important;
+                color: var(--text-color, black) !important;
+                
+                /* Mantener posición y tamaño exactos basados en las variables CSS */
+                left: var(--field-left) !important;
+                top: var(--field-top) !important;
+                width: var(--field-width) !important;
+                height: var(--field-height) !important;
+                box-sizing: border-box; /* Incluir padding y borde en width/height */
+            }
+            .campoArrastrable.editing {
+                background-color: transparent !important;
+                border: none !important;
+            }
+            .resizer {
+                display: none !important; /* Oculta los redimensionadores en impresión */
+            }
+
+            /* Estilos específicos que quieres que se mantengan en la impresión */
+            .campo-titulo, .campo-total, .campo-precio, .campo-itbis, .campo-iva, .campo-subtotal, .campo-productos, .campo-texto, .campo-empresa, .campo-rnc, .campo-ncf, .campo-fecha, .campo-cliente, .campo-direccion, .campo-telefono, .campo-email, .campo-firma, .campo-observaciones {
+                background-color: transparent !important;
+                border-color: transparent !important;
+                box-shadow: none !important;
+            }
+            .campo-icono i {
+                color: var(--text-color, black) !important; /* Mantiene color de icono si se personalizó */
+            }
+            /* Forzar líneas a negro y 1px sólido en impresión */
+            .campo-linea {
+                background-color: black !important;
+                height: 1px !important;
+                width: var(--field-width) !important;
+                border: none !important; /* Eliminar bordes para que solo sea la raya */
+            }
+            .campo-linea.vertical {
+                width: 1px !important;
+                height: var(--field-height) !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="menuLateral">
+        <h2>Añadir Elemento</h2>
+        <button class="tipoCampoBtn" data-type="titulo" data-content="Título de Factura"><i class="fas fa-heading"></i> Título</button>
+        <button class="tipoCampoBtn" data-type="texto" data-content="Texto Libre para su Factura"><i class="fas fa-font"></i> Texto Libre</button>
+        <button class="tipoCampoBtn" data-type="empresa" data-content="Nombre de la Empresa"><i class="fas fa-building"></i> Empresa</button>
+        <button class="tipoCampoBtn" data-type="rnc" data-content="RNC: XXXXXXXXX"><i class="fas fa-id-card"></i> RNC</button>
+        <button class="tipoCampoBtn" data-type="ncf" data-content="NCF: XXXXXXXXXXXXX"><i class="fas fa-file-invoice"></i> NCF</button>
+        <button class="tipoCampoBtn" data-type="fecha" data-content="Fecha: DD/MM/AAAA"><i class="fas fa-calendar-alt"></i> Fecha</button>
+        <button class="tipoCampoBtn" data-type="cliente" data-content="Cliente: Nombre Cliente"><i class="fas fa-user"></i> Cliente</button>
+        <button class="tipoCampoBtn" data-type="direccion" data-content="Dirección: Calle, Ciudad, País"><i class="fas fa-map-marker-alt"></i> Dirección</button>
+        <button class="tipoCampoBtn" data-type="telefono" data-content="Teléfono: (XXX) XXX-XXXX"><i class="fas fa-phone"></i> Teléfono</button>
+        <button class="tipoCampoBtn" data-type="email" data-content="Email: info@ejemplo.com"><i class="fas fa-envelope"></i> Email</button>
+        <button class="tipoCampoBtn" data-type="productos" data-content="Descripción        Cant.    Precio U.    Total"><i class="fas fa-boxes"></i> Productos/Detalle</button>
+        <button class="tipoCampoBtn" data-type="precio" data-content="Precio: $0.00"><i class="fas fa-dollar-sign"></i> Precio (U)</button>
+        <button class="tipoCampoBtn" data-type="subtotal" data-content="Subtotal: $0.00"><i class="fas fa-money-bill-wave"></i> Subtotal</button>
+        <button class="tipoCampoBtn" data-type="itbis" data-content="ITBIS (18%): $0.00"><i class="fas fa-percent"></i> ITBIS</button>
+        <button class="tipoCampoBtn" data-type="iva" data-content="IVA (XX%): $0.00"><i class="fas fa-calculator"></i> IVA</button>
+        <button class="tipoCampoBtn" data-type="total" data-content="Total a Pagar: $0.00"><i class="fas fa-hand-holding-usd"></i> TOTAL</button>
+        <button class="tipoCampoBtn" data-type="firma" data-content="Firma: ____________________"><i class="fas fa-signature"></i> Firma</button>
+        <button class="tipoCampoBtn" data-type="observaciones" data-content="Observaciones:"><i class="fas fa-info-circle"></i> Observaciones</button>
+        <button class="tipoCampoBtn" data-type="linea" data-orientation="horizontal" data-content=""><i class="fas fa-minus"></i> Línea Horizontal</button>
+        <button class="tipoCampoBtn" data-type="linea" data-orientation="vertical" data-content=""><i class="fas fa-grip-lines-vertical"></i> Línea Vertical</button>
+
+        <div class="seccion-iconos">
+            <h3>Iconos</h3>
+            <button class="icon-btn" data-icon="fas fa-star"><i class="fas fa-star"></i></button>
+            <button class="icon-btn" data-icon="fas fa-check-circle"><i class="fas fa-check-circle"></i></button>
+            <button class="icon-btn" data-icon="fas fa-times-circle"><i class="fas fa-times-circle"></i></button>
+            <button class="icon-btn" data-icon="fas fa-truck"><i class="fas fa-truck"></i></button>
+            <button class="icon-btn" data-icon="fas fa-building"><i class="fas fa-building"></i></button>
+            <button class="icon-btn" data-icon="fas fa-map-marker-alt"><i class="fas fa-map-marker-alt"></i></button>
+            <button class="icon-btn" data-icon="fas fa-phone"><i class="fas fa-phone"></i></button>
+            <button class="icon-btn" data-icon="fas fa-envelope"><i class="fas fa-envelope"></i></button>
+            </div>
+    </div>
+
+    <div id="mainContent">
+        <div id="controlesSuperiores">
+            <label for="tamanoFactura">Tamaño Factura:</label>
+            <select id="tamanoFactura">
+                <option value="a4">Normal (A4)</option>
+                <option value="80mm">Ticket (80mm)</option>
+            </select>
+            <label for="plantillaFactura">Plantilla:</label>
+            <select id="plantillaFactura">
+                <option value="vacia">Vacía</option>
+                <option value="basica">Básica (Defecto)</option>
+                <option value="moderna">Moderna (Ejemplo)</option>
+            </select>
+            <label for="fondoFacturaColor">Fondo Factura:</label>
+            <input type="color" id="fondoFacturaColor" value="#FFFFFF">
+            <button id="removeBackgroundBtn"><i class="fas fa-times"></i> Quitar Fondo Imagen</button>
+            <label id="logoUploadLabel" for="logoUpload"><i class="fas fa-upload"></i> Subir Logo</label>
+            <input type="file" id="logoUpload" accept="image/*">
+            <label id="backgroundUploadLabel" for="backgroundUpload"><i class="fas fa-image"></i> Fondo/Marca Agua</label>
+            <input type="file" id="backgroundUpload" accept="image/*">
+            <button id="btnImprimir"><i class="fas fa-print"></i> Imprimir</button>
+            <button id="togglePanelBtn"><i class="fas fa-cog"></i> Propiedades</button>
+        </div>
+
+        <div id="contenedorFactura" class="size-a4">
+            </div>
+    </div>
+
+    <div id="panelPropiedades">
+        <h3>Propiedades del Campo</h3>
+        <div class="prop-group">
+            <label for="propContent">Contenido:</label>
+            <textarea id="propContent" rows="3"></textarea>
+        </div>
+        <div class="prop-group">
+            <label>Tamaño y Posición (px):</label>
+            <input type="number" id="propWidth" placeholder="Ancho">
+            <input type="number" id="propHeight" placeholder="Alto">
+            <input type="number" id="propLeft" placeholder="Left">
+            <input type="number" id="propTop" placeholder="Top">
+        </div>
+        <div class="prop-group" id="textStyleButtons">
+            <label>Estilo de Texto:</label>
+            <button id="boldBtn"><i class="fas fa-bold"></i> Negrita</button>
+            <button id="italicBtn"><i class="fas fa-italic"></i> Cursiva</button>
+            <button id="underlineBtn"><i class="fas fa-underline"></i> Subrayado</button>
+        </div>
+        <div class="prop-group">
+            <label for="propFontSize">Tamaño de Fuente:</label>
+            <input type="number" id="propFontSize" min="8" max="72" value="16">
+        </div>
+        <div class="prop-group">
+            <label for="propTextColor">Color de Texto:</label>
+            <input type="color" id="propTextColor" value="#000000">
+        </div>
+        <div class="prop-group">
+            <label for="propBgColor">Color de Fondo del Campo:</label>
+            <input type="color" id="propBgColor" value="#e0f7fa">
+        </div>
+        <div class="prop-group">
+            <label>Borde del Campo:</label>
+            <input type="number" id="propBorderWidth" placeholder="Ancho (px)" min="0" value="1">
+            <select id="propBorderStyle">
+                <option value="none">Ninguno</option>
+                <option value="solid">Sólido</option>
+                <option value="dashed">Discontinuo</option>
+                <option value="dotted">Puntos</option>
+                <option value="double">Doble</option>
+            </select>
+            <input type="color" id="propBorderColor" value="#00bcd4">
+        </div>
+        <div class="prop-group">
+            <button id="deleteFieldBtn"><i class="fas fa-trash-alt"></i> Eliminar Campo (Supr)</button>
+        </div>
+    </div>
+
+    <script>
+        const contenedorFactura = document.getElementById('contenedorFactura');
+        const tipoCampoBtns = document.querySelectorAll('.tipoCampoBtn');
+        const iconBtns = document.querySelectorAll('.icon-btn');
+        const tamanoFacturaSelect = document.getElementById('tamanoFactura');
+        const plantillaFacturaSelect = document.getElementById('plantillaFactura');
+        const fondoFacturaColorInput = document.getElementById('fondoFacturaColor');
+        const removeBackgroundBtn = document.getElementById('removeBackgroundBtn');
+        const logoUploadInput = document.getElementById('logoUpload');
+        const backgroundUploadInput = document.getElementById('backgroundUpload');
+        const btnImprimir = document.getElementById('btnImprimir');
+        const panelPropiedades = document.getElementById('panelPropiedades');
+        const togglePanelBtn = document.getElementById('togglePanelBtn');
+
+        const propContent = document.getElementById('propContent');
+        const propWidth = document.getElementById('propWidth');
+        const propHeight = document.getElementById('propHeight');
+        const propLeft = document.getElementById('propLeft');
+        const propTop = document.getElementById('propTop');
+        const propFontSize = document.getElementById('propFontSize');
+        const propTextColor = document.getElementById('propTextColor');
+        const propBgColor = document.getElementById('propBgColor');
+        const propBorderWidth = document.getElementById('propBorderWidth');
+        const propBorderStyle = document.getElementById('propBorderStyle');
+        const propBorderColor = document.getElementById('propBorderColor');
+        const boldBtn = document.getElementById('boldBtn');
+        const italicBtn = document.getElementById('italicBtn');
+        const underlineBtn = document.getElementById('underlineBtn');
+        const deleteFieldBtn = document.getElementById('deleteFieldBtn');
+
+        let elementoArrastrando = null;
+        let elementoRedimensionando = null;
+        let selectedField = null;
+        let offsetX, offsetY;
+        let isEditing = false;
+        let resizeStartX, resizeStartY, initialWidth, initialHeight, initialLeft, initialTop;
+
+        // Historial para Deshacer/Rehacer
+        const history = [];
+        let historyIndex = -1;
+
+        // --- Historial de Acciones (Deshacer/Rehacer) ---
+        function saveState() {
+            // Eliminar resizers antes de guardar el HTML
+            contenedorFactura.querySelectorAll('.resizer').forEach(r => r.style.display = 'none');
+            // Quitar la clase 'selected' antes de guardar el HTML
+            if (selectedField) {
+                selectedField.classList.remove('selected');
+            }
+
+            const currentHTML = contenedorFactura.innerHTML;
+
+            // Restaurar resizers y 'selected' class
+            if (selectedField) {
+                selectedField.classList.add('selected');
+                // Esto es solo para la interfaz, en impresión se ocultan por CSS
+                selectedField.querySelectorAll('.resizer').forEach(r => r.style.display = 'block'); 
+            }
+
+            // Limpiar historial si se añade una nueva acción después de deshacer
+            if (historyIndex < history.length - 1) {
+                history.splice(historyIndex + 1);
+            }
+            history.push(currentHTML);
+            historyIndex++;
+            console.log('Estado guardado. Historial:', history.length, 'Índice:', historyIndex);
+        }
+
+        function restoreState(index) {
+            if (index >= 0 && index < history.length) {
+                contenedorFactura.innerHTML = history[index];
+                historyIndex = index;
+                // Vuelve a añadir los event listeners a los nuevos elementos
+                addResizersToExistingFields();
+                // Deseleccionar cualquier campo después de restaurar
+                deselectField();
+                console.log('Estado restaurado. Historial:', history.length, 'Índice:', historyIndex);
+            }
+        }
+
+        function addResizersToExistingFields() {
+            document.querySelectorAll('.campoArrastrable').forEach(field => {
+                // Eliminar resizers existentes si los hay para evitar duplicados
+                field.querySelectorAll('.resizer').forEach(r => r.remove());
+                // Añadir nuevos resizers
+                const resizers = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+                resizers.forEach(pos => {
+                    const resizer = document.createElement('div');
+                    resizer.classList.add('resizer', pos);
+                    field.appendChild(resizer);
+                });
+            });
+        }
+
+
+        // --- Funciones Auxiliares ---
+        function deselectField() {
+            if (selectedField) {
+                selectedField.classList.remove('selected');
+                selectedField = null;
+                // Ocultar panel o añadir clase 'hidden'
+                panelPropiedades.classList.add('hidden');
+            }
+        }
+
+        function selectField(field) {
+            deselectField();
+            selectedField = field;
+            selectedField.classList.add('selected');
+            panelPropiedades.classList.remove('hidden'); // Mostrar panel
+            updatePropertiesPanel();
+        }
+
+        function updatePropertiesPanel() {
+            if (!selectedField) return;
+
+            // Mostrar/ocultar controles de contenido y texto
+            const isTextEditable = !selectedField.classList.contains('campo-linea') &&
+                                 !selectedField.classList.contains('campo-logo') &&
+                                 !selectedField.classList.contains('campo-icono');
+
+            propContent.parentNode.style.display = isTextEditable ? 'flex' : 'none';
+            textStyleButtons.style.display = isTextEditable ? 'flex' : 'none';
+            propFontSize.parentNode.style.display = isTextEditable ? 'flex' : 'none';
+            propTextColor.parentNode.style.display = isTextEditable ? 'flex' : 'none';
+
+            if (isTextEditable) {
+                propContent.value = selectedField.textContent;
+                boldBtn.classList.toggle('active', selectedField.style.fontWeight === 'bold');
+                italicBtn.classList.toggle('active', selectedField.style.fontStyle === 'italic');
+                underlineBtn.classList.toggle('active', selectedField.style.textDecoration.includes('underline'));
+            }
+
+            propWidth.value = parseFloat(selectedField.style.width) || selectedField.offsetWidth;
+            propHeight.value = parseFloat(selectedField.style.height) || selectedField.offsetHeight;
+            propLeft.value = parseFloat(selectedField.style.left) || 0;
+            propTop.value = parseFloat(selectedField.style.top) || 0;
+
+            propFontSize.value = parseFloat(selectedField.style.fontSize) || 16;
+            propTextColor.value = selectedField.style.color || '#000000';
+            propBgColor.value = selectedField.style.backgroundColor || '#e0f7fa';
+
+            propBorderWidth.value = parseFloat(selectedField.style.borderWidth) || 1;
+            propBorderStyle.value = selectedField.style.borderStyle || 'solid';
+            propBorderColor.value = selectedField.style.borderColor || '#00bcd4';
+        }
+
+        function applyPropertyChange() {
+            if (!selectedField) return;
+
+            if (propContent.parentNode.style.display !== 'none') {
+                 selectedField.textContent = propContent.value;
+            }
+
+            selectedField.style.width = `${propWidth.value}px`;
+            selectedField.style.height = `${propHeight.value}px`;
+            selectedField.style.left = `${propLeft.value}px`;
+            selectedField.style.top = `${propTop.value}px`;
+
+            selectedField.style.fontSize = `${propFontSize.value}px`;
+            selectedField.style.color = propTextColor.value;
+            selectedField.style.backgroundColor = propBgColor.value;
+
+            selectedField.style.borderWidth = `${propBorderWidth.value}px`;
+            selectedField.style.borderStyle = propBorderStyle.value;
+            selectedField.style.borderColor = propBorderColor.value;
+
+            // Actualizar variables CSS para impresión
+            selectedField.style.setProperty('--field-left', selectedField.style.left);
+            selectedField.style.setProperty('--field-top', selectedField.style.top);
+            selectedField.style.setProperty('--field-width', selectedField.style.width);
+            selectedField.style.setProperty('--field-height', selectedField.style.height);
+            selectedField.style.setProperty('--font-size', selectedField.style.fontSize);
+            selectedField.style.setProperty('--text-color', selectedField.style.color);
+            selectedField.style.setProperty('--bg-field-color', selectedField.style.backgroundColor);
+            selectedField.style.setProperty('--border-width', selectedField.style.borderWidth);
+            selectedField.style.setProperty('--border-style', selectedField.style.borderStyle);
+            selectedField.style.setProperty('--border-color', selectedField.style.borderColor);
+
+            // saveState(); // Descomentar si quieres guardar cada pequeño cambio
+        }
+
+        // --- 1. Funcionalidad de Arrastrar y Soltar / Selección ---
+        contenedorFactura.addEventListener('mousedown', (e) => {
+            if (isEditing) return;
+
+            if (e.target.classList.contains('campoArrastrable')) {
+                selectField(e.target);
+                elementoArrastrando = e.target;
+                const fieldRect = elementoArrastrando.getBoundingClientRect();
+                const containerRect = contenedorFactura.getBoundingClientRect();
+                offsetX = e.clientX - fieldRect.left;
+                offsetY = e.clientY - fieldRect.top;
+                elementoArrastrando.style.cursor = 'grabbing';
+                e.stopPropagation(); // Evitar que el clic en el campo deseleccione si hay otros listeners
+            } else if (e.target.classList.contains('resizer')) {
+                elementoRedimensionando = e.target.parentElement;
+                selectField(elementoRedimensionando); // Seleccionar el campo al redimensionar
+                resizeStartX = e.clientX;
+                resizeStartY = e.clientY;
+                initialWidth = elementoRedimensionando.offsetWidth;
+                initialHeight = elementoRedimensionando.offsetHeight;
+                initialLeft = elementoRedimensionando.offsetLeft;
+                initialTop = elementoRedimensionando.offsetTop;
+                e.preventDefault();
+                e.stopPropagation(); // Evitar que el resizer inicie el arrastre o deseleccione
+            } else {
+                deselectField();
+            }
+        });
+
+        contenedorFactura.addEventListener('mousemove', (e) => {
+            if (elementoArrastrando) {
+                e.preventDefault();
+                let nuevaLeft = e.clientX - offsetX - contenedorFactura.getBoundingClientRect().left;
+                let nuevaTop = e.clientY - offsetY - contenedorFactura.getBoundingClientRect().top;
+
+                nuevaLeft = Math.max(0, Math.min(nuevaLeft, contenedorFactura.scrollWidth - elementoArrastrando.offsetWidth));
+                nuevaTop = Math.max(0, Math.min(nuevaTop, contenedorFactura.scrollHeight - elementoArrastrando.offsetHeight));
+
+                elementoArrastrando.style.left = `${nuevaLeft}px`;
+                elementoArrastrando.style.top = `${nuevaTop}px`;
+                updatePropertiesPanel();
+            } else if (elementoRedimensionando) {
+                e.preventDefault();
+                const currentResizer = e.target;
+                const field = elementoRedimensionando;
+                const dx = e.clientX - resizeStartX;
+                const dy = e.clientY - resizeStartY;
+
+                let newWidth = initialWidth;
+                let newHeight = initialHeight;
+                let newLeft = initialLeft;
+                let newTop = initialTop;
+
+                // **Lógica de redimensionamiento corregida y más robusta**
+                if (currentResizer.classList.contains('bottom-right')) {
+                    newWidth = initialWidth + dx;
+                    newHeight = initialHeight + dy;
+                } else if (currentResizer.classList.contains('bottom-left')) {
+                    newWidth = initialWidth - dx;
+                    newHeight = initialHeight + dy;
+                    newLeft = initialLeft + dx;
+                } else if (currentResizer.classList.contains('top-right')) {
+                    newWidth = initialWidth + dx;
+                    newHeight = initialHeight - dy;
+                    newTop = initialTop + dy;
+                } else if (currentResizer.classList.contains('top-left')) {
+                    newWidth = initialWidth - dx;
+                    newHeight = initialHeight - dy;
+                    newLeft = initialLeft + dx;
+                    newTop = initialTop + dy;
+                }
+
+                // Asegurar tamaños mínimos
+                newWidth = Math.max(10, newWidth);
+                newHeight = Math.max(10, newHeight);
+
+                // Asegurar que no se salgan del contenedor
+                const containerScrollWidth = contenedorFactura.scrollWidth;
+                const containerScrollHeight = contenedorFactura.scrollHeight;
+
+                // Reajustar left/top si el width/height se encoge más allá del límite
+                if (currentResizer.classList.contains('bottom-left') || currentResizer.classList.contains('top-left')) {
+                    // Si el nuevo left supera al oldLeft mientras se encoge
+                    if (newLeft + newWidth > initialLeft + initialWidth) {
+                        newLeft = initialLeft + initialWidth - newWidth;
+                    }
+                }
+                if (currentResizer.classList.contains('top-left') || currentResizer.classList.contains('top-right')) {
+                    // Si el nuevo top supera al oldTop mientras se encoge
+                    if (newTop + newHeight > initialTop + initialHeight) {
+                        newTop = initialTop + initialHeight - newHeight;
+                    }
+                }
+
+                // Clamping al contenedor (usando scrollWidth/Height para permitir scrollbar)
+                if (newLeft < 0) { newWidth += newLeft; newLeft = 0; }
+                if (newTop < 0) { newHeight += newTop; newTop = 0; }
+                if (newLeft + newWidth > containerScrollWidth) { newWidth = containerScrollWidth - newLeft; }
+                if (newTop + newHeight > containerScrollHeight) { newHeight = containerScrollHeight - newTop; }
+
+
+                field.style.width = `${newWidth}px`;
+                field.style.height = `${newHeight}px`;
+                field.style.left = `${newLeft}px`;
+                field.style.top = `${newTop}px`;
+
+                updatePropertiesPanel();
+            }
+        });
+
+        contenedorFactura.addEventListener('mouseup', () => {
+            if (elementoArrastrando) {
+                elementoArrastrando.style.cursor = 'grab';
+                elementoArrastrando = null;
+                saveState(); // Guardar estado después de mover
+            }
+            if (elementoRedimensionando) {
+                elementoRedimensionando = null;
+                saveState(); // Guardar estado después de redimensionar
+            }
+        });
+
+        document.addEventListener('dragstart', (e) => {
+            if (e.target.classList.contains('campoArrastrable') || e.target.classList.contains('resizer')) {
+                e.preventDefault();
+            }
+        });
+
+        // --- 2. Añadir Nuevos Campos por Tipo ---
+        function createResizableField(type, content, initialWidth, initialHeight, specificClass = '', isTextEditable = true) {
+            const nuevoCampo = document.createElement('div');
+            nuevoCampo.classList.add('campoArrastrable');
+            if (specificClass) nuevoCampo.classList.add(specificClass);
+            nuevoCampo.dataset.type = type;
+
+            if (isTextEditable) {
+                nuevoCampo.textContent = content;
+            } else {
+                nuevoCampo.innerHTML = content;
+            }
+
+            // Posición inicial centrada en el área visible de la factura
+            const containerRect = contenedorFactura.getBoundingClientRect();
+            const scrollLeft = contenedorFactura.scrollLeft;
+            const scrollTop = contenedorFactura.scrollTop;
+
+            nuevoCampo.style.left = `${(containerRect.width / 2) - (initialWidth / 2) + scrollLeft}px`;
+            nuevoCampo.style.top = `${(containerRect.height / 2) - (initialHeight / 2) + scrollTop}px`;
+            nuevoCampo.style.width = `${initialWidth}px`;
+            nuevoCampo.style.height = `${initialHeight}px`;
+
+            // Establecer variables CSS para impresión
+            nuevoCampo.style.setProperty('--field-left', nuevoCampo.style.left);
+            nuevoCampo.style.setProperty('--field-top', nuevoCampo.style.top);
+            nuevoCampo.style.setProperty('--field-width', nuevoCampo.style.width);
+            nuevoCampo.style.setProperty('--field-height', nuevoCampo.style.height);
+            nuevoCampo.style.setProperty('--font-size', nuevoCampo.style.fontSize || '0.9em'); // Asegurar un valor por defecto
+            nuevoCampo.style.setProperty('--text-color', nuevoCampo.style.color || '#000000');
+            nuevoCampo.style.setProperty('--bg-field-color', nuevoCampo.style.backgroundColor || '#e0f7fa');
+            nuevoCampo.style.setProperty('--border-width', nuevoCampo.style.borderWidth || '1px');
+            nuevoCampo.style.setProperty('--border-style', nuevoCampo.style.borderStyle || 'solid');
+            nuevoCampo.style.setProperty('--border-color', nuevoCampo.style.borderColor || '#00bcd4');
+
+
+            const resizers = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+            resizers.forEach(pos => {
+                const resizer = document.createElement('div');
+                resizer.classList.add('resizer', pos);
+                nuevoCampo.appendChild(resizer);
+            });
+
+            contenedorFactura.appendChild(nuevoCampo);
+            selectField(nuevoCampo);
+            saveState(); // Guardar estado al añadir un campo
+            return nuevoCampo;
+        }
+
+        tipoCampoBtns.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const type = e.currentTarget.dataset.type;
+                const content = e.currentTarget.dataset.content;
+                let initialWidth = 150; // Tamaños iniciales un poco más pequeños
+                let initialHeight = 30;
+
+                if (type === 'linea') {
+                    if (e.currentTarget.dataset.orientation === 'horizontal') {
+                        initialWidth = 100;
+                        initialHeight = 1; // Línea fina
+                        createResizableField('linea', '', initialWidth, initialHeight, 'campo-linea');
+                    } else { // vertical
+                        initialWidth = 1; // Línea fina
+                        initialHeight = 100;
+                        createResizableField('linea', '', initialWidth, initialHeight, 'campo-linea vertical');
+                    }
+                } else if (type === 'titulo') {
+                    initialWidth = 250;
+                    initialHeight = 40;
+                    createResizableField(type, content, initialWidth, initialHeight, `campo-${type}`);
+                } else if (type === 'productos') {
+                    initialWidth = 350;
+                    initialHeight = 80;
+                    createResizableField(type, content, initialWidth, initialHeight, `campo-${type}`);
+                }
+                 else {
+                    createResizableField(type, content, initialWidth, initialHeight, `campo-${type}`);
+                }
+            });
+        });
+
+        iconBtns.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const iconClass = e.currentTarget.dataset.icon;
+                createResizableField('icono', `<i class="${iconClass}"></i>`, 40, 40, 'campo-icono', false); // Icono más pequeño
+            });
+        });
+
+        // --- 3. Edición de Contenido al Doble Clic ---
+        contenedorFactura.addEventListener('dblclick', (e) => {
+            if (e.target.classList.contains('campoArrastrable') && !isEditing) {
+                if (e.target.dataset.type === 'linea' || e.target.dataset.type === 'logo' || e.target.dataset.type === 'icono') {
+                    return;
+                }
+
+                const campo = e.target;
+                isEditing = true;
+
+                const input = document.createElement('textarea');
+                input.value = campo.textContent;
+                input.classList.add('campoArrastrable', 'editing');
+
+                // Copiar todos los estilos computados del campo original
+                const computedStyle = getComputedStyle(campo);
+                for (let i = 0; i < computedStyle.length; i++) {
+                    const prop = computedStyle[i];
+                    input.style[prop] = computedStyle[prop];
+                }
+
+                input.style.width = campo.offsetWidth + 'px';
+                input.style.height = campo.offsetHeight + 'px';
+                input.style.zIndex = '1001';
+                input.style.resize = 'none';
+
+                const resizers = campo.querySelectorAll('.resizer');
+                resizers.forEach(r => r.style.display = 'none');
+
+                contenedorFactura.replaceChild(input, campo);
+                input.focus();
+
+                const finalizarEdicion = () => {
+                    const nuevoCampo = document.createElement('div');
+                    nuevoCampo.classList.add('campoArrastrable');
+                    nuevoCampo.classList.add(`campo-${campo.dataset.type}`);
+                    nuevoCampo.textContent = input.value;
+                    nuevoCampo.dataset.type = campo.dataset.type;
+
+                    // Reaplicar estilos de la edición
+                    const inputComputedStyle = getComputedStyle(input);
+                    for (let i = 0; i < inputComputedStyle.length; i++) {
+                        const prop = inputComputedStyle[i];
+                        if (!prop.startsWith('webkit') && !prop.startsWith('moz')) { // Evitar prefijos de navegador si es posible
+                            nuevoCampo.style[prop] = inputComputedStyle[prop];
+                        }
+                    }
+                    
+                    nuevoCampo.style.display = 'flex';
+                    nuevoCampo.style.justifyContent = 'center';
+                    nuevoCampo.style.alignItems = 'center';
+
+                    // Restaurar variables CSS para impresión
+                    nuevoCampo.style.setProperty('--field-left', nuevoCampo.style.left);
+                    nuevoCampo.style.setProperty('--field-top', nuevoCampo.style.top);
+                    nuevoCampo.style.setProperty('--field-width', nuevoCampo.style.width);
+                    nuevoCampo.style.setProperty('--field-height', nuevoCampo.style.height);
+                    nuevoCampo.style.setProperty('--font-size', nuevoCampo.style.fontSize);
+                    nuevoCampo.style.setProperty('--text-color', nuevoCampo.style.color);
+                    nuevoCampo.style.setProperty('--bg-field-color', nuevoCampo.style.backgroundColor);
+                    nuevoCampo.style.setProperty('--font-weight', input.style.fontWeight);
+                    nuevoCampo.style.setProperty('--font-style', input.style.fontStyle);
+                    nuevoCampo.style.setProperty('--text-decoration', input.style.textDecoration);
+                    nuevoCampo.style.setProperty('--border-width', input.style.borderWidth);
+                    nuevoCampo.style.setProperty('--border-style', input.style.borderStyle);
+                    nuevoCampo.style.setProperty('--border-color', input.style.borderColor);
+
+
+                    const newResizers = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+                    newResizers.forEach(pos => {
+                        const resizer = document.createElement('div');
+                        resizer.classList.add('resizer', pos);
+                        nuevoCampo.appendChild(resizer);
+                    });
+
+                    contenedorFactura.replaceChild(nuevoCampo, input);
+                    isEditing = false;
+                    selectField(nuevoCampo);
+                    saveState(); // Guardar estado después de editar
+                };
+
+                input.addEventListener('blur', finalizarEdicion);
+                input.addEventListener('keydown', (keyEvent) => {
+                    if (keyEvent.key === 'Enter' && !keyEvent.shiftKey) {
+                        keyEvent.preventDefault();
+                        finalizarEdicion();
+                    }
+                });
+            }
+        });
+
+        // --- 4. Ajustar Tamaño de Factura y Adaptar Elementos ---
+        tamanoFacturaSelect.addEventListener('change', (e) => {
+            const oldWidth = contenedorFactura.offsetWidth;
+            const oldHeight = contenedorFactura.offsetHeight;
+
+            const selectedSize = e.target.value;
+            contenedorFactura.classList.remove('size-a4', 'size-80mm');
+            contenedorFactura.classList.add(`size-${selectedSize}`);
+
+            // Forzar reflow para obtener las nuevas dimensiones
+            void contenedorFactura.offsetWidth;
+
+            const newWidth = contenedorFactura.offsetWidth;
+            const newHeight = contenedorFactura.offsetHeight;
+
+            // Calcular ratios de escalado
+            const scaleX = newWidth / oldWidth;
+            const scaleY = newHeight / oldHeight;
+
+            // Adaptar posición y tamaño de cada campo existente
+            contenedorFactura.querySelectorAll('.campoArrastrable').forEach(field => {
+                let currentLeft = parseFloat(field.style.left) || field.offsetLeft;
+                let currentTop = parseFloat(field.style.top) || field.offsetTop;
+                let currentWidth = parseFloat(field.style.width) || field.offsetWidth;
+                let currentHeight = parseFloat(field.style.height) || field.offsetHeight;
+
+                field.style.left = `${currentLeft * scaleX}px`;
+                field.style.top = `${currentTop * scaleY}px`;
+                field.style.width = `${currentWidth * scaleX}px`;
+                field.style.height = `${currentHeight * scaleY}px`;
+
+                // Adaptar tamaño de fuente proporcionalmente
+                let currentFontSize = parseFloat(field.style.fontSize) || parseFloat(getComputedStyle(field).fontSize);
+                field.style.fontSize = `${currentFontSize * Math.min(scaleX, scaleY)}px`;
+
+                // Actualizar variables CSS
+                field.style.setProperty('--field-left', field.style.left);
+                field.style.setProperty('--field-top', field.style.top);
+                field.style.setProperty('--field-width', field.style.width);
+                field.style.setProperty('--field-height', field.style.height);
+                field.style.setProperty('--font-size', field.style.fontSize);
+            });
+            saveState(); // Guardar estado después de redimensionar el lienzo
+        });
+
+
+        // --- 5. Propiedades del Panel de Propiedades ---
+        panelPropiedades.addEventListener('input', applyPropertyChange);
+        panelPropiedades.addEventListener('change', applyPropertyChange);
+
+        // Estilos de texto (Negrita, Cursiva, Subrayado)
+        boldBtn.addEventListener('click', () => {
+            if (selectedField) {
+                selectedField.style.fontWeight = selectedField.style.fontWeight === 'bold' ? 'normal' : 'bold';
+                boldBtn.classList.toggle('active', selectedField.style.fontWeight === 'bold');
+                selectedField.style.setProperty('--font-weight', selectedField.style.fontWeight);
+                saveState();
+            }
+        });
+        italicBtn.addEventListener('click', () => {
+            if (selectedField) {
+                selectedField.style.fontStyle = selectedField.style.fontStyle === 'italic' ? 'normal' : 'italic';
+                italicBtn.classList.toggle('active', selectedField.style.fontStyle === 'italic');
+                selectedField.style.setProperty('--font-style', selectedField.style.fontStyle);
+                saveState();
+            }
+        });
+        underlineBtn.addEventListener('click', () => {
+            if (selectedField) {
+                const currentDecoration = selectedField.style.textDecoration;
+                selectedField.style.textDecoration = currentDecoration.includes('underline') ? currentDecoration.replace('underline', '').trim() : `${currentDecoration} underline`.trim();
+                underlineBtn.classList.toggle('active', selectedField.style.textDecoration.includes('underline'));
+                selectedField.style.setProperty('--text-decoration', selectedField.style.textDecoration);
+                saveState();
+            }
+        });
+
+        // --- 6. Carga de Logo y Fondo/Marca de Agua ---
+        logoUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    createResizableField('logo', `<img src="${event.target.result}" alt="Logo">`, 100, 70, 'campo-logo', false); // Logo más pequeño
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        backgroundUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    contenedorFactura.style.backgroundImage = `url('${event.target.result}')`;
+                    contenedorFactura.style.backgroundSize = 'cover';
+                    contenedorFactura.style.backgroundRepeat = 'no-repeat';
+                    contenedorFactura.style.backgroundPosition = 'center';
+                    contenedorFactura.style.setProperty('--bg-image', `url('${event.target.result}')`);
+                    saveState();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        removeBackgroundBtn.addEventListener('click', () => {
+            contenedorFactura.style.backgroundImage = 'none';
+            contenedorFactura.style.setProperty('--bg-image', 'none');
+            saveState();
+        });
+
+        // --- 7. Color de Fondo de la Factura ---
+        fondoFacturaColorInput.addEventListener('input', (e) => {
+            contenedorFactura.style.backgroundColor = e.target.value;
+            contenedorFactura.style.setProperty('--bg-color', e.target.value);
+        });
+        fondoFacturaColorInput.addEventListener('change', saveState);
+
+        // --- 8. Botón para alternar Panel de Propiedades ---
+        togglePanelBtn.addEventListener('click', () => {
+            panelPropiedades.classList.toggle('hidden');
+            if (panelPropiedades.classList.contains('hidden')) {
+                deselectField(); // Deseleccionar si se oculta el panel
+            }
+        });
+
+
+        // --- 9. Botón de Imprimir ---
+        btnImprimir.addEventListener('click', () => {
+            // Guardar el estado actual del panel antes de ocultarlo para la impresión
+            const panelWasHidden = panelPropiedades.classList.contains('hidden');
+            if (!panelWasHidden) {
+                panelPropiedades.classList.add('hidden');
+            }
+
+            document.querySelectorAll('.campoArrastrable.selected .resizer').forEach(resizer => resizer.style.display = 'none');
+            document.querySelectorAll('.campoArrastrable.selected').forEach(field => field.style.outline = 'none');
+
+            setTimeout(() => {
+                window.print();
+                document.querySelectorAll('.campoArrastrable.selected .resizer').forEach(resizer => resizer.style.display = 'block');
+                document.querySelectorAll('.campoArrastrable.selected').forEach(field => field.style.outline = '2px solid #007bff');
+                // Restaurar el estado del panel
+                if (!panelWasHidden) {
+                    panelPropiedades.classList.remove('hidden');
+                }
+            }, 100);
+        });
+
+        // --- 10. Atajos de Teclado ---
+        document.addEventListener('keydown', (e) => {
+            // Eliminar con Supr/Delete
+            if (e.key === 'Delete' && selectedField && !isEditing) {
+                if (confirm('¿Estás seguro de que quieres eliminar este campo?')) {
+                    selectedField.remove();
+                    deselectField();
+                    saveState();
+                }
+                return;
+            }
+
+            // Deshacer/Rehacer
+            if (e.altKey) {
+                if (e.key === 'z') { // Alt + Z (Deshacer)
+                    e.preventDefault();
+                    if (historyIndex > 0) {
+                        restoreState(historyIndex - 1);
+                    }
+                } else if (e.key === 'y') { // Alt + Y (Rehacer)
+                    e.preventDefault();
+                    if (historyIndex < history.length - 1) {
+                        restoreState(historyIndex + 1);
+                    }
+                } else if (e.key === 'j' && selectedField) { // Alt + J (Duplicar)
+                    e.preventDefault();
+                    const duplicatedField = selectedField.cloneNode(true); // Clonar el nodo
+                    duplicatedField.id = `copied-field-${Date.now()}`; // Nuevo ID único
+                    duplicatedField.style.left = `${parseFloat(selectedField.style.left) + 20}px`; // Desplazar un poco
+                    duplicatedField.style.top = `${parseFloat(selectedField.style.top) + 20}px`;
+                    duplicatedField.classList.remove('selected'); // No está seleccionado por defecto
+
+                    // Asegurarse de que los resizers se dupliquen correctamente y sean funcionales
+                    duplicatedField.querySelectorAll('.resizer').forEach(r => r.remove()); // Quitar los del clon si vienen
+                    const resizers = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+                    resizers.forEach(pos => {
+                        const resizer = document.createElement('div');
+                        resizer.classList.add('resizer', pos);
+                        duplicatedField.appendChild(resizer);
+                    });
+
+                    contenedorFactura.appendChild(duplicatedField);
+                    selectField(duplicatedField); // Seleccionar el duplicado
+                    saveState();
+                } else if (e.key === 'c' && selectedField) { // Alt + C (Copiar)
+                    e.preventDefault();
+                    // Almacenar una representación del campo en una variable global
+                    localStorage.setItem('copiedField', selectedField.outerHTML);
+                    console.log('Campo copiado:', selectedField.outerHTML);
+                } else if (e.key === 'v') { // Alt + V (Pegar)
+                    e.preventDefault();
+                    const copiedFieldHTML = localStorage.getItem('copiedField');
+                    if (copiedFieldHTML) {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = copiedFieldHTML;
+                        const pastedField = tempDiv.firstElementChild;
+
+                        pastedField.id = `pasted-field-${Date.now()}`;
+                        // Moverlo un poco para que no quede exactamente encima
+                        pastedField.style.left = `${parseFloat(pastedField.style.left) + 20}px`;
+                        pastedField.style.top = `${parseFloat(pastedField.style.top) + 20}px`;
+                        pastedField.classList.remove('selected');
+
+                        // Asegurarse de que los resizers estén presentes y sean funcionales
+                        pastedField.querySelectorAll('.resizer').forEach(r => r.remove());
+                        const resizers = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+                        resizers.forEach(pos => {
+                            const resizer = document.createElement('div');
+                            resizer.classList.add('resizer', pos);
+                            pastedField.appendChild(resizer);
+                        });
+
+                        contenedorFactura.appendChild(pastedField);
+                        selectField(pastedField); // Seleccionar el campo pegado
+                        saveState();
+                    } else {
+                        console.log('No hay campo copiado en el portapapeles.');
+                    }
+                }
+            }
+        });
+
+        // --- 11. Plantillas de Factura ---
+        const templates = {
+            vacia: [],
+            basica: [
+                { type: 'titulo', content: 'FACTURA', left: '24%', top: '30px', transform: 'translateX(-50%)', width: '300px', height: '40px', fontSize: '1.6em', fontWeight: 'bold' },
+                { type: 'empresa', content: 'Mi Empresa S.A.', left: '50px', top: '80px', width: '250px', height: '30px', fontSize: '0.9em' },
+                { type: 'linea', orientation: 'horizontal', content: '', left: '50px', top: '120px', width: '680px', height: '1px', backgroundColor: '#333' },
+                { type: 'fecha', content: 'Fecha: DD/MM/AAAA', left: '550px', top: '80px', width: '180px', height: '30px', fontSize: '0.9em' },
+                { type: 'cliente', content: 'Cliente: Nombre del Cliente', left: '50px', top: '140px', width: '300px', height: '30px', fontSize: '0.9em' },
+                { type: 'productos', content: 'Descripción        Cant.    Precio U.    Total', left: '50px', top: '200px', width: '680px', height: '100px', fontSize: '0.8em', borderStyle: 'solid', borderColor: '#90a4ae' },
+                { type: 'subtotal', content: 'Subtotal: $0.00', left: '550px', top: '400px', width: '180px', height: '30px', fontSize: '0.9em', fontWeight: 'bold', textAlign: 'right' },
+                { type: 'itbis', content: 'ITBIS (18%): $0.00', left: '550px', top: '430px', width: '180px', height: '30px', fontSize: '0.9em', fontWeight: 'bold', textAlign: 'right' },
+                { type: 'total', content: 'TOTAL: $0.00', left: '550px', top: '460px', width: '180px', height: '35px', fontSize: '1.1em', fontWeight: 'bold', textAlign: 'right' },
+            ],
+            moderna: [
+                { type: 'titulo', content: 'INVOICE', left: '50px', top: '30px', fontSize: '2em', fontWeight: 'bold', color: '#007bff' },
+                { type: 'linea', orientation: 'horizontal', content: '', left: '50px', top: '90px', width: '680px', height: '2px', backgroundColor: '#007bff' },
+                { type: 'empresa', content: 'Modern Biz Corp.', left: '50px', top: '110px', fontSize: '1.1em', fontWeight: 'bold' },
+                { type: 'direccion', content: '123 Calle Principal, Ciudad Moderna', left: '50px', top: '135px', fontSize: '0.85em' },
+                { type: 'telefono', content: 'Tel: (123) 456-7890', left: '50px', top: '155px', fontSize: '0.85em' },
+                { type: 'cliente', content: 'Cliente: John Doe', left: '500px', top: '110px', fontSize: '1em', fontWeight: 'bold' },
+                { type: 'fecha', content: 'Fecha: DD/MM/AAAA', left: '500px', top: '135px', fontSize: '0.85em' },
+                { type: 'productos', content: 'Item               Qty   Price    Subtotal', left: '50px', top: '220px', width: '680px', height: '120px', borderStyle: 'solid', borderColor: '#ccc', borderWidth: '1px', fontSize: '0.8em' },
+                { type: 'subtotal', content: 'Subtotal: $0.00', left: '550px', top: '380px', fontWeight: 'bold', fontSize: '0.9em' },
+                { type: 'iva', content: 'IVA (13%): $0.00', left: '550px', top: '410px', fontWeight: 'bold', fontSize: '0.9em' },
+                { type: 'total', content: 'GRAN TOTAL: $0.00', left: '550px', top: '440px', fontSize: '1.3em', fontWeight: 'bold', color: '#dc3545' },
+                { type: 'observaciones', content: 'Gracias por su negocio!', left: '50px', top: '520px', width: '300px', fontSize: '0.85em' },
+            ],
+        };
+
+        function loadTemplate(templateName) {
+            contenedorFactura.innerHTML = ''; // Limpiar factura actual
+            const currentTemplate = templates[templateName];
+            if (currentTemplate) {
+                currentTemplate.forEach(fieldData => {
+                    const newField = createResizableField(
+                        fieldData.type,
+                        fieldData.content,
+                        parseFloat(fieldData.width || 200),
+                        parseFloat(fieldData.height || 40),
+                        `campo-${fieldData.type}`,
+                        fieldData.type !== 'linea' && fieldData.type !== 'logo' && fieldData.type !== 'icono'
+                    );
+                    
+                    // Aplicar posición y tamaño desde los datos de la plantilla
+                    newField.style.left = fieldData.left || newField.style.left;
+                    newField.style.top = fieldData.top || newField.style.top;
+                    newField.style.width = fieldData.width || newField.style.width;
+                    newField.style.height = fieldData.height || newField.style.height;
+
+                    // Aplicar estilos adicionales de la plantilla
+                    if (fieldData.fontSize) newField.style.fontSize = fieldData.fontSize;
+                    if (fieldData.fontWeight) newField.style.fontWeight = fieldData.fontWeight;
+                    if (fieldData.fontStyle) newField.style.fontStyle = fieldData.fontStyle;
+                    if (fieldData.textDecoration) newField.style.textDecoration = fieldData.textDecoration;
+                    if (fieldData.color) newField.style.color = fieldData.color;
+                    if (fieldData.backgroundColor) newField.style.backgroundColor = fieldData.backgroundColor;
+                    if (fieldData.borderWidth) newField.style.borderWidth = fieldData.borderWidth;
+                    if (fieldData.borderStyle) newField.style.borderStyle = fieldData.borderStyle;
+                    if (fieldData.borderColor) newField.style.borderColor = fieldData.borderColor;
+                    if (fieldData.textAlign) newField.style.textAlign = fieldData.textAlign;
+                    if (fieldData.transform) newField.style.transform = fieldData.transform;
+
+                    // Para líneas, asegurar la orientación correcta si se guarda así en la plantilla
+                    if (fieldData.type === 'linea') {
+                        if (fieldData.orientation === 'vertical') {
+                            newField.classList.add('vertical');
+                            newField.style.width = '1px'; // Forzar 1px de ancho para líneas verticales
+                        } else { // horizontal
+                            newField.style.height = '1px'; // Forzar 1px de alto para líneas horizontales
+                        }
+                        newField.style.backgroundColor = fieldData.backgroundColor || 'black'; // Color de línea por defecto
+                    }
+
+                    // Actualizar las variables CSS para impresión en cada campo
+                    newField.style.setProperty('--field-left', newField.style.left);
+                    newField.style.setProperty('--field-top', newField.style.top);
+                    newField.style.setProperty('--field-width', newField.style.width);
+                    newField.style.setProperty('--field-height', newField.style.height);
+                    newField.style.setProperty('--font-size', newField.style.fontSize || '0.9em');
+                    newField.style.setProperty('--text-color', newField.style.color || 'black');
+                    newField.style.setProperty('--bg-field-color', newField.style.backgroundColor || 'transparent');
+                    newField.style.setProperty('--font-weight', newField.style.fontWeight || 'normal');
+                    newField.style.setProperty('--font-style', newField.style.fontStyle || 'normal');
+                    newField.style.setProperty('--text-decoration', newField.style.textDecoration || 'none');
+                    newField.style.setProperty('--border-width', newField.style.borderWidth || '0px');
+                    newField.style.setProperty('--border-style', newField.style.borderStyle || 'none');
+                    newField.style.setProperty('--border-color', newField.style.borderColor || 'transparent');
+
+                });
+            }
+            // Después de cargar todos los campos de la plantilla, ajustar a las dimensiones actuales del contenedor
+            const currentSize = tamanoFacturaSelect.value;
+            contenedorFactura.classList.remove('size-a4', 'size-80mm');
+            contenedorFactura.classList.add(`size-${currentSize}`);
+            
+            // Forzar una adaptación para que los elementos se posicionen correctamente en el tamaño actual
+            // Simular un cambio de tamaño para activar la lógica de adaptación
+            const tempOldWidth = contenedorFactura.offsetWidth; // Guardar el ancho actual
+            const tempOldHeight = contenedorFactura.offsetHeight; // Guardar el alto actual
+            // Cambiar temporalmente a una clase que no exista para forzar un cambio de tamaño interno
+            contenedorFactura.classList.remove(`size-${currentSize}`);
+            void contenedorFactura.offsetWidth; // Forzar reflow
+            contenedorFactura.classList.add(`size-${currentSize}`); // Volver a la clase correcta
+            
+            const newWidth = contenedorFactura.offsetWidth;
+            const newHeight = contenedorFactura.offsetHeight;
+
+            const scaleX = newWidth / tempOldWidth;
+            const scaleY = newHeight / tempOldHeight;
+
+            contenedorFactura.querySelectorAll('.campoArrastrable').forEach(field => {
+                let currentLeft = parseFloat(field.style.left) || field.offsetLeft;
+                let currentTop = parseFloat(field.style.top) || field.offsetTop;
+                let currentWidth = parseFloat(field.style.width) || field.offsetWidth;
+                let currentHeight = parseFloat(field.style.height) || field.offsetHeight;
+                let currentFontSize = parseFloat(field.style.fontSize) || parseFloat(getComputedStyle(field).fontSize);
+
+
+                field.style.left = `${currentLeft * scaleX}px`;
+                field.style.top = `${currentTop * scaleY}px`;
+                field.style.width = `${currentWidth * scaleX}px`;
+                field.style.height = `${currentHeight * scaleY}px`;
+                field.style.fontSize = `${currentFontSize * Math.min(scaleX, scaleY)}px`;
+
+                // Las variables CSS también deben reflejar los nuevos valores
+                field.style.setProperty('--field-left', field.style.left);
+                field.style.setProperty('--field-top', field.style.top);
+                field.style.setProperty('--field-width', field.style.width);
+                field.style.setProperty('--field-height', field.style.height);
+                field.style.setProperty('--font-size', field.style.fontSize);
+            });
+
+
+            saveState(); // Guardar el estado de la plantilla cargada
+        }
+
+
+        plantillaFacturaSelect.addEventListener('change', (e) => {
+            loadTemplate(e.target.value);
+        });
+
+
+        // --- Inicialización ---
+        deselectField();
+        loadTemplate('basica'); // Cargar la plantilla básica por defecto
+        saveState(); // Guardar el estado inicial después de cargar la plantilla
+
+        // Asegurarse de que el fondo de la factura se inicialice correctamente para la impresión
+        contenedorFactura.style.setProperty('--bg-color', fondoFacturaColorInput.value);
+
+        // Al cargar la página, también ajustar el tamaño del contenedor si es necesario
+        // Esto es importante para que los cálculos de posición sean correctos desde el inicio
+        // Obtener el tamaño actual del CSS
+        const initialContainerWidth = contenedorFactura.offsetWidth;
+        const initialContainerHeight = contenedorFactura.offsetHeight;
+
+        contenedorFactura.querySelectorAll('.campoArrastrable').forEach(field => {
+            field.dataset.initialWidth = field.offsetWidth;
+            field.dataset.initialHeight = field.offsetHeight;
+            field.dataset.initialLeft = field.offsetLeft;
+            field.dataset.initialTop = field.offsetTop;
+            field.dataset.initialFontSize = parseFloat(getComputedStyle(field).fontSize);
+        });
+        
+        // Ocultar panel de propiedades al inicio
+        panelPropiedades.classList.add('hidden');
+    </script>
+</body>
+</html>
