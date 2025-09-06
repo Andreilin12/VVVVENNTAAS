@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Pedidos</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #15a086;
+      --secondary-color: #2ecc71;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --success-color: #27ae60;
+      --info-color: #fff;
+      --dark-color: #2c3e50;
+      --light-color: #ecf0f1;
+      --gray-color: #95a5a6;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #2c3e50;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--header-color), var(--header-color));
+      color: white;
+      padding: 20px;
+      border-radius: var(--border-radius);
+      margin-bottom: 20px;
+      box-shadow: var(--box-shadow);
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      color: var(--dark-color);
+    }
+
+    .btn {
+      padding: 10px 15px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      background-color: var(--secondary-color);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background-color: var(--gray-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #7f8c8d;
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background-color: #243140;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+      padding: 15px;
+      background-color: var(--primary-color);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .status-badge {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status-pending {
+      background-color: var(--warning-color);
+    }
+
+    .status-completed {
+      background-color: var(--success-color);
+    }
+
+    .status-cancelled {
+      background-color: var(--danger-color);
+    }
+
+    .card-body {
+      padding: 15px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .detail-value {
+      color: #fff;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+    }
+
+    .no-results i {
+      font-size: 50px;
+      margin-bottom: 15px;
+      color: #ddd;
+    }
+
+    /* Modal Styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+
+    .modal.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background-color: #2c3e50;
+      border-radius: var(--border-radius);
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      color: #fff;
+    }
+
+    .modal-close {
+      font-size: 24px;
+      cursor: pointer;
+      color: #999;
+      transition: var(--transition);
+    }
+
+    .modal-close:hover {
+      color: var(--danger-color);
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      background-color: #243140;
+      color: #fff;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    /* Loading Styles */
+    .loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      color: white;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 15px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Alert Styles */
+    .alert-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+      color: #fff;
+    }
+
+    .alert-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .alert-box {
+      background-color: #2c3e50;
+      border-radius: var(--border-radius);
+      width: 90%;
+      max-width: 400px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .alert-box.success {
+      border-top: 5px solid var(--success-color);
+    }
+
+    .alert-box.error {
+      border-top: 5px solid var(--danger-color);
+    }
+
+    .alert-box.warning {
+      border-top: 5px solid var(--warning-color);
+    }
+
+    .alert-box.info {
+      border-top: 5px solid var(--info-color);
+    }
+
+    .alert-icon {
+      font-size: 50px;
+      margin-bottom: 15px;
+    }
+
+    .alert-icon.success {
+      color: #fff;
+    }
+
+    .alert-icon.error {
+      color: #fff
+    }
+
+    .alert-icon.warning {
+      color: #fff;
+    }
+
+    .alert-icon.info {
+      color: #fff;
+    }
+
+    .alert-title {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #fff);
+    }
+
+    .alert-message {
+      margin-bottom: 20px;
+      color: #fff;
+    }
+
+    .alert-button {
+      padding: 10px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .alert-button.success {
+      background-color: var(--success-color);
+    }
+
+    .alert-button.error {
+      background-color: var(--danger-color);
+    }
+
+    .alert-button.warning {
+      background-color: var(--warning-color);
+    }
+
+    .alert-button.info {
+      background-color: var(--info-color);
+    }
+
+    .alert-button:hover {
+      opacity: 0.9;
+    }
+
+    @media (max-width: 768px) {
+      .cards-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .form-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">Gestión de Pedidos</div>
+    </header>
+
+    <section id="ordersSection">
+      <div class="section-header">
+        <h2 class="section-title">Lista de Pedidos</h2>
+        <button class="btn" id="createOrderBtn">
+          <i class="fas fa-plus"></i> Nuevo Pedido
+        </button>
+      </div>
+      <div id="ordersContainer" class="cards-container">
+        <div class="no-results">
+          <i class="fas fa-clipboard"></i>
+          <p>Cargando pedidos...</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal para Nuevo Pedido -->
+  <div id="addOrderModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Crear Nuevo Pedido</h3>
+        <span class="modal-close" id="closeOrderModal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div id="addOrderForm"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading" class="loading" style="display: none;">
+    <div class="loading-spinner"></div>
+    <p>Procesando...</p>
+  </div>
+
+  <!-- Alertas elegantes -->
+  <div id="alertOverlay" class="alert-overlay">
+    <div id="alertBox" class="alert-box">
+      <div id="alertIcon" class="alert-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h3 id="alertTitle" class="alert-title">Título</h3>
+      <p id="alertMessage" class="alert-message">Mensaje de alerta</p>
+      <button id="alertButton" class="alert-button">Aceptar</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-storage-compat.js"></script>
+
+  <script>
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    const storage = firebase.storage();
+
+    // Variables globales
+    let allOrders = [];
+    let allProducts = [];
+    let allBusinesses = [];
+
+    // Mostrar modal
+    function showModal(modalId, content = '', title = "") {
+      const modal = document.getElementById(modalId);
+      if (title) {
+        modal.querySelector('.modal-title').textContent = title;
+      }
+      if (content) {
+        const body = modal.querySelector('.modal-body');
+        if (body.children.length > 0 && body.children[0].id) {
+          document.getElementById(body.children[0].id).innerHTML = content;
+        } else {
+          body.innerHTML = content;
+        }
+      }
+      modal.classList.add('show');
+    }
+
+    // Cerrar modal
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('show');
+    }
+
+    // Mostrar loading
+    function showLoading(message = "Procesando...") {
+      const loading = document.getElementById("loading");
+      loading.querySelector("p").textContent = message;
+      loading.style.display = "flex";
+    }
+
+    // Ocultar loading
+    function hideLoading() {
+      document.getElementById("loading").style.display = "none";
+    }
+
+    // Mostrar alerta elegante
+    function showAlert(message, type = "success", title = "") {
+      const alertOverlay = document.getElementById("alertOverlay");
+      const alertBox = document.getElementById("alertBox");
+      const alertIcon = document.getElementById("alertIcon");
+      const alertTitle = document.getElementById("alertTitle");
+      const alertMessage = document.getElementById("alertMessage");
+      const alertButton = document.getElementById("alertButton");
+      
+      // Configurar según el tipo
+      alertBox.className = "alert-box " + type;
+      alertIcon.className = "alert-icon " + type;
+      alertButton.className = "alert-button " + type;
+      
+      // Configurar icono según el tipo
+      let iconClass = "fas fa-check-circle";
+      if (type === "error") iconClass = "fas fa-times-circle";
+      if (type === "warning") iconClass = "fas fa-exclamation-triangle";
+      if (type === "info") iconClass = "fas fa-info-circle";
+      
+      alertIcon.innerHTML = `<i class="${iconClass}"></i>`;
+      
+      // Configurar contenido
+      alertTitle.textContent = title || type.charAt(0).toUpperCase() + type.slice(1);
+      alertMessage.textContent = message;
+      
+      // Mostrar alerta
+      alertOverlay.classList.add('show');
+      
+      // Configurar evento del botón
+      alertButton.onclick = function() {
+        alertOverlay.classList.remove('show');
+      };
+    }
+
+    // Formatear fecha
+    function formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'N/A';
+      
+      const options = {
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit',
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: true
+      };
+      return date.toLocaleString('es-ES', options).replace(',', '');
+    }
+
+    // Cargar todos los pedidos
+    async function loadAllOrders() {
+      showLoading("Cargando pedidos...");
+      
+      try {
+        const ordersQuery = await db.collection("orders").get();
+        allOrders = ordersQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        displayOrders();
+      } catch (error) {
+        console.error("Error al cargar pedidos:", error);
+        showAlert("Error al cargar los pedidos", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Mostrar pedidos
+    function displayOrders() {
+      const ordersContainer = document.getElementById('ordersContainer');
+      
+      if (allOrders.length === 0) {
+        ordersContainer.innerHTML = '<div class="no-results"><i class="fas fa-clipboard"></i><p>No hay pedidos registrados</p></div>';
+        return;
+      }
+      
+      // Ordenar por fecha más reciente
+      const sortedOrders = [...allOrders].sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+      
+      let html = '';
+      sortedOrders.forEach(order => {
+        // Filtrar pedidos sin datos válidos
+        if (!order.businessName || !order.orderDate || !order.products || order.products.length === 0) {
+          return; // Saltar este pedido si no tiene datos esenciales
+        }
+        
+        let statusClass = 'status-pending';
+        if (order.status === 'completed') {
+          statusClass = 'status-completed';
+        } else if (order.status === 'cancelled') {
+          statusClass = 'status-cancelled';
+        }
+        
+        let statusText = 'Pendiente';
+        if (order.status === 'completed') {
+          statusText = 'Completado';
+        } else if (order.status === 'cancelled') {
+          statusText = 'Cancelado';
+        }
+        
+        html += `
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Pedido #${order.orderNumber || order.id.slice(0, 8)}</div>
+              <div class="status-badge ${statusClass}">${statusText}</div>
+            </div>
+            <div class="card-body">
+              <div class="detail-row">
+                <span class="detail-label">Proveedor:</span>
+                <span class="detail-value">${order.businessName}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Fecha:</span>
+                <span class="detail-value">${formatDate(order.orderDate)}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Productos:</span>
+                <span class="detail-value">${order.products.length}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Total:</span>
+                <span class="detail-value">$${order.totalAmount?.toFixed(2) || '0.00'}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      ordersContainer.innerHTML = html || '<div class="no-results"><i class="fas fa-clipboard"></i><p>No hay pedidos válidos registrados</p></div>';
+    }
+
+    // Mostrar formulario para crear pedido
+    async function showAddOrderForm() {
+      showLoading("Cargando formulario...");
+      
+      try {
+        // Obtener lista de negocios
+        const businessesQuery = await db.collection("businesses").get();
+        let businessOptions = '';
+        
+        businessesQuery.forEach(doc => {
+          businessOptions += `<option value="${doc.data().name}" data-type="${doc.data().type || 'N/A'}">${doc.data().name}</option>`;
+        });
+        
+        if (!businessOptions) {
+          showAlert("No hay proveedores registrados", "error");
+          return;
+        }
+        
+        const formHTML = `
+          <div class="form-group">
+            <label for="orderBusiness">Proveedor:</label>
+            <select id="orderBusiness" required>
+              <option value="">Seleccione un proveedor</option>
+              ${businessOptions}
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="orderType">Tipo de Mercancía:</label>
+            <input type="text" id="orderType" readonly>
+          </div>
+          
+          <div class="form-group">
+            <label for="orderDate">Fecha de Pedido:</label>
+            <input type="date" id="orderDate" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="orderDeliveryDate">Fecha de Entrega:</label>
+            <input type="date" id="orderDeliveryDate">
+          </div>
+          
+          <div class="form-group">
+            <label for="orderNotes">Notas:</label>
+            <textarea id="orderNotes" rows="3"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label>Productos:</label>
+            <div id="orderProductsList" style="margin-top: 10px;">
+              <p>Seleccione un proveedor para cargar sus productos</p>
+            </div>
+            <button type="button" class="btn btn-secondary" id="addProductToOrder" style="margin-top: 10px; width: 100%;" onclick="loadBusinessProducts(document.getElementById('orderBusiness').value)">
+              <i class="fas fa-plus"></i> Agregar Productos
+            </button>
+          </div>
+          
+          <div class="form-group">
+            <label for="orderTotal">Total:</label>
+            <input type="text" id="orderTotal" value="$0.00" readonly>
+          </div>
+          
+          <div class="form-actions">
+            <button class="btn btn-secondary" onclick="closeModal('addOrderModal')">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button class="btn" onclick="createNewOrder()">
+              <i class="fas fa-check-circle"></i> Crear Pedido
+            </button>
+          </div>
+        `;
+        
+        document.getElementById('addOrderForm').innerHTML = formHTML;
+        
+        // Establecer fecha actual como predeterminada
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('orderDate').value = today;
+        
+        // Event listener para cambiar el tipo cuando se selecciona un proveedor
+        document.getElementById('orderBusiness').addEventListener('change', function() {
+          const selectedOption = this.options[this.selectedIndex];
+          const businessType = selectedOption.getAttribute('data-type');
+          document.getElementById('orderType').value = businessType;
+          
+          // Cargar productos del proveedor seleccionado
+          loadBusinessProducts(selectedOption.value);
+        });
+        
+        showModal('addOrderModal');
+      } catch (error) {
+        console.error("Error al cargar formulario:", error);
+        showAlert("Error al cargar el formulario de pedido", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Cargar productos de un negocio específico
+    async function loadBusinessProducts(businessName) {
+      showLoading("Cargando productos...");
+      
+      try {
+        const productsQuery = await db.collection("businesses").doc(businessName).collection("products").get();
+        const productsList = document.getElementById('orderProductsList');
+        
+        if (productsQuery.empty) {
+          productsList.innerHTML = '<p>Este proveedor no tiene productos registrados</p>';
+          return;
+        }
+        
+        let html = '<div style="display: grid; gap: 10px;">';
+        productsQuery.forEach(doc => {
+          const product = doc.data();
+          html += `
+            <div style="display: flex; align-items: center; gap: 10px; background-color: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: var(--border-radius);">
+              <input type="checkbox" id="product-${doc.id}" value="${doc.id}" data-price="${product.pricePerUnit || 0}">
+              <label for="product-${doc.id}" style="flex: 1;">
+                ${product.name} - $${(product.pricePerUnit || 0).toFixed(2)}
+              </label>
+              <input type="number" id="qty-${doc.id}" min="1" value="1" style="width: 60px;">
+            </div>
+          `;
+        });
+        html += '</div>';
+        
+        productsList.innerHTML = html;
+        
+        // Event listener para calcular el total cuando cambian las cantidades
+        document.querySelectorAll('#orderProductsList input[type="number"]').forEach(input => {
+          input.addEventListener('change', calculateOrderTotal);
+        });
+        
+        // Event listener para calcular el total cuando se seleccionan productos
+        document.querySelectorAll('#orderProductsList input[type="checkbox"]').forEach(checkbox => {
+          checkbox.addEventListener('change', calculateOrderTotal);
+        });
+        
+      } catch (error) {
+        console.error("Error al cargar productos:", error);
+        showAlert("Error al cargar los productos del proveedor", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Calcular total del pedido
+    function calculateOrderTotal() {
+      let total = 0;
+      
+      document.querySelectorAll('#orderProductsList input[type="checkbox"]:checked').forEach(checkbox => {
+        const productId = checkbox.value;
+        const price = parseFloat(checkbox.getAttribute('data-price'));
+        const quantity = parseInt(document.getElementById(`qty-${productId}`).value) || 0;
+        
+        total += price * quantity;
+      });
+      
+      document.getElementById('orderTotal').value = `$${total.toFixed(2)}`;
+    }
+
+    // Crear nuevo pedido
+    async function createNewOrder() {
+      showLoading("Creando pedido...");
+      
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          showAlert("Debes iniciar sesión para crear pedidos", "error");
+          return;
+        }
+        
+        const businessName = document.getElementById("orderBusiness").value;
+        const businessType = document.getElementById("orderType").value;
+        const orderDate = document.getElementById("orderDate").value;
+        const deliveryDate = document.getElementById("orderDeliveryDate").value;
+        const notes = document.getElementById("orderNotes").value;
+        
+        if (!businessName || !orderDate) {
+          showAlert("Debe completar todos los campos requeridos", "error");
+          return;
+        }
+        
+        // Obtener productos seleccionados
+        const selectedProducts = [];
+        document.querySelectorAll('#orderProductsList input[type="checkbox"]:checked').forEach(checkbox => {
+          const productId = checkbox.value;
+          const quantity = parseInt(document.getElementById(`qty-${productId}`).value) || 1;
+          
+          selectedProducts.push({
+            productId: productId,
+            quantity: quantity
+          });
+        });
+        
+        if (selectedProducts.length === 0) {
+          showAlert("Debe seleccionar al menos un producto", "error");
+          return;
+        }
+        
+        // Calcular total
+        let total = 0;
+        selectedProducts.forEach(item => {
+          const price = parseFloat(document.querySelector(`#orderProductsList input[value="${item.productId}"]`).getAttribute('data-price'));
+          total += price * item.quantity;
+        });
+        
+        // Crear pedido en la base de datos
+        await db.collection("orders").add({
+          businessName: businessName,
+          businessType: businessType,
+          products: selectedProducts,
+          orderDate: orderDate,
+          deliveryDate: deliveryDate || null,
+          totalAmount: total,
+          notes: notes || null,
+          status: "pending",
+          createdBy: user.displayName || user.email || 'Usuario',
+          createdAt: new Date().toISOString()
+        });
+        
+        showAlert("Pedido creado correctamente", "success");
+        closeModal('addOrderModal');
+        loadAllOrders(); // Recargar todos los pedidos
+      } catch (error) {
+        console.error("Error al crear pedido:", error);
+        showAlert("Error al crear el pedido", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Inicializar la aplicación
+    function initApp() {
+      // Configurar botones
+      document.getElementById("createOrderBtn").addEventListener("click", showAddOrderForm);
+      
+      // Cerrar modales con botones de cerrar
+      document.getElementById("closeOrderModal").addEventListener("click", () => closeModal('addOrderModal'));
+      
+      // Cargar datos iniciales
+      loadAllOrders();
+    }
+
+    // Iniciar la aplicación cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
