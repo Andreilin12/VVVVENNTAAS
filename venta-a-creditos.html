@@ -1,0 +1,2185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Clientes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #15A086;
+            --primary-light: #15A086;
+            --primary-dark: #3a0ca3;
+            --secondary-color: #7209b7;
+            --accent-color: #4cc9f0;
+            --success-color: #4ade80;
+            --warning-color: #facc15;
+            --danger-color: #f87171;
+            --danger-dark: #2c3e50;
+            --light-bg: #f8fafc;
+            --dark-bg: #2c3e50;
+            --card-bg: #1e293b;
+            --text-light: #f1f5f9;
+            --text-gray: #94a3b8;
+            --border-color: #334155;
+            --border-radius: 12px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1e293b 100%);
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-gray);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .search-container input {
+            flex: 1;
+            min-width: 200px;
+            padding: 14px 20px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .search-container input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.2);
+        }
+
+        .search-container input::placeholder {
+            color: var(--text-gray);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(67, 97, 238, 0.25);
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 6px 12px rgba(248, 113, 113, 0.25);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color) 0%, #16a34a 100%);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 6px 12px rgba(74, 222, 128, 0.25);
+        }
+
+        .clients-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .client-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .client-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            border-color: var(--primary-light);
+        }
+
+        .client-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .client-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-color);
+            flex-shrink: 0;
+        }
+
+        .client-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .client-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .client-id {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+
+        .client-details {
+            margin-bottom: 15px;
+            flex: 1;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            width: 100px;
+            color: var(--text-gray);
+            flex-shrink: 0;
+        }
+
+        .detail-value {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .client-debt {
+            font-weight: 600;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .debt-active {
+            color: var(--danger-color);
+            background-color: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        .debt-paid {
+            color: var(--success-color);
+            background-color: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+        }
+
+        .client-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .client-actions .btn {
+            flex: 1;
+            min-width: 100px;
+            justify-content: center;
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            overflow: auto;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--text-light);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.2);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .client-avatar-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .client-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-color);
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .file-input-label {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(67, 97, 238, 0.25);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            backdrop-filter: blur(5px);
+        }
+
+        .loading.show {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .alert-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .alert-overlay.show {
+            display: flex;
+        }
+
+        .alert-box {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .alert-icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+
+        .alert-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-light);
+        }
+
+        .alert-message {
+            margin-bottom: 25px;
+            color: var(--text-gray);
+            line-height: 1.5;
+        }
+
+        .alert-button {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .alert-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(67, 97, 238, 0.25);
+        }
+
+        .alert-box.success .alert-icon {
+            color: var(--success-color);
+        }
+
+        .alert-box.error .alert-icon {
+            color: var(--danger-color);
+        }
+
+        .alert-box.warning .alert-icon {
+            color: var(--warning-color);
+        }
+
+        .alert-box.info .alert-icon {
+            color: var(--accent-color);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 50px 20px;
+            grid-column: 1 / -1;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+        }
+
+        .no-results i {
+            font-size: 3.5rem;
+            color: var(--text-gray);
+            margin-bottom: 20px;
+        }
+
+        .no-results p {
+            color: var(--text-gray);
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        /* Estilos para productos */
+        .product-search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .product-search-container input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+            transition: var(--transition);
+        }
+
+        .product-search-container input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.2);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.03);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .product-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .product-card:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary-light);
+        }
+
+        .product-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-light);
+        }
+
+        .product-details {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .product-price {
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .product-stock {
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            color: var(--text-gray);
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .product-quantity {
+            width: 70px;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .product-quantity:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.2);
+        }
+
+        .selected-products {
+            margin: 20px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: rgba(255, 255, 255, 0.03);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .selected-product {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            transition: var(--transition);
+        }
+
+        .selected-product:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .selected-product-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .selected-product-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .selected-product-details {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .selected-product-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .sale-summary {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .sale-total {
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-align: right;
+            color: var(--primary-light);
+        }
+
+        /* Estilos para historial de deudas */
+        .debt-history {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+
+        .debt-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            padding: 18px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .debt-item:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .debt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .debt-date {
+            font-weight: 600;
+            color: var(--primary-light);
+        }
+
+        .debt-amount {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .debt-type {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .debt-type-sale {
+            background-color: rgba(248, 113, 113, 0.2);
+            color: var(--danger-color);
+        }
+
+        .debt-type-payment {
+            background-color: rgba(74, 222, 128, 0.2);
+            color: var(--success-color);
+        }
+
+        .debt-products {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .debt-product {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .debt-status {
+            text-align: center;
+            padding: 25px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .debt-status-paid {
+            color: var(--success-color);
+            background-color: rgba(74, 222, 128, 0.1);
+            border-color: rgba(74, 222, 128, 0.2);
+        }
+
+        /* Personalización de la barra de desplazamiento */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-light);
+        }
+
+        /* Para Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) rgba(255, 255, 255, 0.05);
+        }
+
+        /* Responsividad mejorada */
+        @media (max-width: 1200px) {
+            .app-container {
+                padding: 15px;
+            }
+            
+            .clients-container {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            }
+        }
+
+        @media (max-width: 992px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .clients-container {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+            
+            .modal-content {
+                padding: 25px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 10px;
+            }
+            
+            header {
+                margin-bottom: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .search-container {
+                flex-direction: column;
+                padding: 15px;
+            }
+            
+            .clients-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .client-card {
+                padding: 15px;
+            }
+            
+            .client-actions .btn {
+                min-width: 100%;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal {
+                padding: 10px;
+            }
+            
+            .modal-content {
+                padding: 20px;
+                max-height: 95vh;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .form-actions .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .client-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .client-avatar {
+                margin-bottom: 10px;
+            }
+            
+            .modal-content {
+                padding: 15px;
+            }
+            
+            .alert-box {
+                padding: 20px;
+            }
+            
+            .alert-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Gestión de Clientes</h1>
+            <p class="subtitle">Administra los clientes y sus deudas de forma eficiente</p>
+        </header>
+        
+        <div class="search-container">
+            <input type="text" id="clientSearchInput" placeholder="Buscar cliente por nombre o cédula">
+            <button class="btn" onclick="showAddClientForm()">
+                <i class="fas fa-plus"></i> Agregar Cliente
+            </button>
+        </div>
+        
+        <div id="clientsContainer" class="clients-container">
+            <div class="no-results">
+                <i class="fas fa-users"></i>
+                <p>Cargando clientes...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para agregar/editar cliente -->
+    <div id="addClientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="addClientModalTitle">Agregar Cliente</h2>
+                <button class="close-modal" onclick="closeModal('addClientModal')">&times;</button>
+            </div>
+            <div id="addClientForm"></div>
+        </div>
+    </div>
+    
+    <!-- Modal para pagos -->
+    <div id="clientPaymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Registrar Pago</h2>
+                <button class="close-modal" onclick="closeModal('clientPaymentModal')">&times;</button>
+            </div>
+            <div id="clientPaymentContent"></div>
+        </div>
+    </div>
+    
+    <!-- Modal para deudas -->
+    <div id="clientDebtsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Historial de Deudas</h2>
+                <button class="close-modal" onclick="closeModal('clientDebtsModal')">&times;</button>
+            </div>
+            <div id="clientDebtsContent"></div>
+        </div>
+    </div>
+    
+    <!-- Modal para ventas a crédito -->
+    <div id="sellToClientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Vender a Crédito</h2>
+                <button class="close-modal" onclick="closeModal('sellToClientModal')">&times;</button>
+            </div>
+            <div id="sellToClientContent"></div>
+        </div>
+    </div>
+    
+    <!-- Loading overlay -->
+    <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+        <p id="loadingMessage">Procesando...</p>
+    </div>
+    
+    <!-- Alert overlay -->
+    <div id="alertOverlay" class="alert-overlay">
+        <div class="alert-box" id="alertBox">
+            <div class="alert-icon" id="alertIcon"></div>
+            <h3 class="alert-title" id="alertTitle"></h3>
+            <p class="alert-message" id="alertMessage"></p>
+            <button class="alert-button" id="alertButton">Aceptar</button>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+            authDomain: "inventario-35d6b.firebaseapp.com",
+            databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+            projectId: "inventario-35d6b",
+            storageBucket: "inventario-35d6b.appspot.com",
+            messagingSenderId: "266100399659",
+            appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        const storage = firebase.storage();
+
+        // Variables globales
+        let allClients = [];
+        let allProducts = [];
+        let allBusinesses = [];
+        let currentClient = null;
+        let selectedClientImageFile = null;
+        let selectedProductsForSale = [];
+
+        // Función para formatear números con separadores de miles y dos decimales
+        function formatCurrency(number) {
+            if (isNaN(number)) return '$0.00';
+            
+            // Redondear a dos decimales usando el método correcto
+            const roundedNumber = Math.round((number + Number.EPSILON) * 100) / 100;
+            
+            // Separar la parte entera y decimal
+            const parts = roundedNumber.toFixed(2).toString().split('.');
+            const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            const decimalPart = parts[1];
+            
+            return '$' + integerPart + '.' + decimalPart;
+        }
+
+        // Mostrar modal
+        function showModal(modalId, content = '', title = "") {
+            const modal = document.getElementById(modalId);
+            if (title && modal.querySelector('.modal-title')) {
+                modal.querySelector('.modal-title').textContent = title;
+            }
+            if (content) {
+                const body = modal.querySelector('.modal-content > div:last-child');
+                if (body) {
+                    body.innerHTML = content;
+                }
+            }
+            modal.classList.add('show');
+        }
+
+        // Cerrar modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        // Mostrar loading
+        function showLoading(message = "Procesando...") {
+            const loading = document.getElementById("loading");
+            document.getElementById("loadingMessage").textContent = message;
+            loading.classList.add('show');
+        }
+
+        // Ocultar loading
+        function hideLoading() {
+            document.getElementById("loading").classList.remove('show');
+        }
+
+        // Mostrar alerta elegante
+        function showAlert(message, type = "success", title = "") {
+            const alertOverlay = document.getElementById("alertOverlay");
+            const alertBox = document.getElementById("alertBox");
+            const alertIcon = document.getElementById("alertIcon");
+            const alertTitle = document.getElementById("alertTitle");
+            const alertMessage = document.getElementById("alertMessage");
+            const alertButton = document.getElementById("alertButton");
+            
+            // Configurar según el tipo
+            alertBox.className = "alert-box " + type;
+            alertIcon.className = "alert-icon " + type;
+            
+            // Configurar icono según el tipo
+            let iconClass = "fas fa-check-circle";
+            if (type === "error") iconClass = "fas fa-times-circle";
+            if (type === "warning") iconClass = "fas fa-exclamation-triangle";
+            if (type === "info") iconClass = "fas fa-info-circle";
+            
+            alertIcon.innerHTML = `<i class="${iconClass}"></i>`;
+            
+            // Configurar contenido
+            alertTitle.textContent = title || type.charAt(0).toUpperCase() + type.slice(1);
+            alertMessage.textContent = message;
+            
+            // Mostrar alerta
+            alertOverlay.classList.add('show');
+            
+            // Configurar evento del botón
+            alertButton.onclick = function() {
+                alertOverlay.classList.remove('show');
+            };
+        }
+
+        // Formatear fecha
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'N/A';
+            
+            const options = {
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit',
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: true
+            };
+            return date.toLocaleString('es-ES', options).replace(',', '');
+        }
+
+        // Mostrar formulario para agregar cliente
+        async function showAddClientForm() {
+            const formHTML = `
+                <div class="client-avatar-container">
+                    <img id="clientAvatarPreview" class="client-avatar-large" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" alt="Foto del cliente">
+                    <label for="clientImage" class="file-input-label">
+                        <i class="fas fa-camera"></i> Seleccionar Foto
+                    </label>
+                    <input type="file" id="clientImage" class="file-input" accept="image/*" onchange="handleClientImageSelect(event)">
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientName">Nombre completo:</label>
+                    <input type="text" id="clientName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientId">Cédula/Identificación:</label>
+                    <input type="text" id="clientId" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientPhone">Teléfono:</label>
+                    <input type="tel" id="clientPhone">
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientEmail">Email:</label>
+                    <input type="email" id="clientEmail">
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientAddress">Dirección:</label>
+                    <input type="text" id="clientAddress">
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientGuarantee">Garantía (opcional):</label>
+                    <input type="text" id="clientGuarantee">
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientOccupation">Ocupación:</label>
+                    <input type="text" id="clientOccupation">
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientNotes">Notas adicionales:</label>
+                    <textarea id="clientNotes" rows="3"></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="closeModal('addClientModal')">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button class="btn" onclick="addNewClient()">
+                        <i class="fas fa-plus-circle"></i> Agregar Cliente
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('addClientForm').innerHTML = formHTML;
+            document.getElementById('addClientModalTitle').textContent = 'Agregar Cliente';
+            showModal('addClientModal');
+        }
+
+        // Mostrar formulario para editar cliente
+        async function showEditClientForm(clientDocId) {
+            showLoading("Cargando datos del cliente...");
+            try {
+                // Buscar el cliente en la lista local
+                const client = allClients.find(c => c.docId === clientDocId);
+                if (!client) {
+                    showAlert("Cliente no encontrado", "error");
+                    return;
+                }
+
+                const formHTML = `
+                    <div class="client-avatar-container">
+                        <img id="clientAvatarPreview" class="client-avatar-large" src="${client.imageUrl || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'}" alt="Foto del cliente">
+                        <label for="clientImage" class="file-input-label">
+                            <i class="fas fa-camera"></i> Cambiar Foto
+                        </label>
+                        <input type="file" id="clientImage" class="file-input" accept="image/*" onchange="handleClientImageSelect(event)">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientName">Nombre completo:</label>
+                        <input type="text" id="clientName" value="${client.name}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientId">Cédula/Identificación:</label>
+                        <input type="text" id="clientId" value="${client.id}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientPhone">Teléfono:</label>
+                        <input type="tel" id="clientPhone" value="${client.phone || ''}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientEmail">Email:</label>
+                        <input type="email" id="clientEmail" value="${client.email || ''}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientAddress">Dirección:</label>
+                        <input type="text" id="clientAddress" value="${client.address || ''}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientGuarantee">Garantía (opcional):</label>
+                        <input type="text" id="clientGuarantee" value="${client.guarantee || ''}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientOccupation">Ocupación:</label>
+                        <input type="text" id="clientOccupation" value="${client.occupation || ''}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="clientNotes">Notas adicionales:</label>
+                        <textarea id="clientNotes" rows="3">${client.notes || ''}</textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button class="btn btn-secondary" onclick="closeModal('addClientModal')">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button class="btn" onclick="updateClient('${clientDocId}')">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById('addClientForm').innerHTML = formHTML;
+                document.getElementById('addClientModalTitle').textContent = 'Editar Cliente';
+                showModal('addClientModal');
+            } catch (error) {
+                console.error("Error al cargar formulario de edición:", error);
+                showAlert("Error al cargar el formulario de edición", "error");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Manejar selección de imagen de cliente
+        function handleClientImageSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            selectedClientImageFile = file;
+            const previewImage = document.getElementById("clientAvatarPreview");
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Subir imagen de cliente a Firebase Storage
+        async function uploadClientImage(file, clientId) {
+            if (!file) return null;
+            
+            try {
+                const storageRef = storage.ref(`client-images/${clientId}/${file.name}`);
+                await storageRef.put(file);
+                const downloadURL = await storageRef.getDownloadURL();
+                return downloadURL;
+            } catch (error) {
+                console.error("Error al subir imagen de cliente:", error);
+                return null;
+            }
+        }
+
+        // Agregar nuevo cliente
+        async function addNewClient() {
+            showLoading("Agregando cliente...");
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    showAlert("Debes iniciar sesión para agregar clientes", "error");
+                    return;
+                }
+                
+                const name = document.getElementById("clientName").value;
+                const id = document.getElementById("clientId").value;
+                const phone = document.getElementById("clientPhone").value;
+                const email = document.getElementById("clientEmail").value;
+                const address = document.getElementById("clientAddress").value;
+                const guarantee = document.getElementById("clientGuarantee").value;
+                const occupation = document.getElementById("clientOccupation").value;
+                const notes = document.getElementById("clientNotes").value;
+                
+                if (!name || !id) {
+                    showAlert("Debe completar todos los campos requeridos", "error");
+                    return;
+                }
+                
+                // Verificar si el cliente ya existe
+                const clientQuery = await db.collection("clients").where("id", "==", id).get();
+                if (!clientQuery.empty) {
+                    showAlert("Ya existe un cliente con esta cédula/identificación", "error");
+                    return;
+                }
+                
+                // Agregar cliente a la base de datos
+                const newClientRef = await db.collection("clients").add({
+                    name: name,
+                    id: id,
+                    phone: phone || null,
+                    email: email || null,
+                    address: address || null,
+                    guarantee: guarantee || null,
+                    occupation: occupation || null,
+                    notes: notes || null,
+                    addedDate: new Date().toISOString(),
+                    addedBy: user.displayName || user.email || 'Usuario',
+                    totalDebt: 0,
+                    debtHistory: []
+                });
+                
+                // Subir imagen si se seleccionó una
+                if (selectedClientImageFile) {
+                    const imageUrl = await uploadClientImage(selectedClientImageFile, newClientRef.id);
+                    if (imageUrl) {
+                        await db.collection("clients").doc(newClientRef.id).update({
+                            imageUrl: imageUrl
+                        });
+                    }
+                }
+                
+                showAlert("Cliente agregado correctamente", "success");
+                closeModal('addClientModal');
+                loadAllClients(); // Recargar todos los clientes
+            } catch (error) {
+                console.error("Error al agregar cliente:", error);
+                showAlert("Error al agregar el cliente", "error");
+            } finally {
+                hideLoading();
+                selectedClientImageFile = null;
+            }
+        }
+
+        // Actualizar cliente existente
+        async function updateClient(clientDocId) {
+            showLoading("Actualizando cliente...");
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    showAlert("Debes iniciar sesión para editar clientes", "error");
+                    return;
+                }
+                
+                const name = document.getElementById("clientName").value;
+                const id = document.getElementById("clientId").value;
+                const phone = document.getElementById("clientPhone").value;
+                const email = document.getElementById("clientEmail").value;
+                const address = document.getElementById("clientAddress").value;
+                const guarantee = document.getElementById("clientGuarantee").value;
+                const occupation = document.getElementById("clientOccupation").value;
+                const notes = document.getElementById("clientNotes").value;
+                
+                if (!name || !id) {
+                    showAlert("Debe completar todos los campos requeridos", "error");
+                    return;
+                }
+                
+                // Verificar que el cliente existe antes de actualizar
+                const clientDoc = await db.collection("clients").doc(clientDocId).get();
+                if (!clientDoc.exists) {
+                    showAlert("Error: El cliente no existe en la base de datos", "error");
+                    return;
+                }
+                
+                // Obtener datos actuales del cliente
+                const currentClientData = clientDoc.data();
+                
+                // Preparar datos de actualización
+                const updateData = {
+                    name: name,
+                    id: id,
+                    phone: phone || null,
+                    email: email || null,
+                    address: address || null,
+                    guarantee: guarantee || null,
+                    occupation: occupation || null,
+                    notes: notes || null,
+                    updatedDate: new Date().toISOString(),
+                    updatedBy: user.displayName || user.email || 'Usuario'
+                };
+                
+                // Subir nueva imagen si se seleccionó una
+                if (selectedClientImageFile) {
+                    const imageUrl = await uploadClientImage(selectedClientImageFile, clientDocId);
+                    if (imageUrl) {
+                        updateData.imageUrl = imageUrl;
+                    }
+                }
+                
+                // Preservar datos que no se están editando
+                updateData.totalDebt = currentClientData.totalDebt || 0;
+                updateData.debtHistory = currentClientData.debtHistory || [];
+                updateData.addedDate = currentClientData.addedDate;
+                updateData.addedBy = currentClientData.addedBy;
+                
+                // Actualizar cliente en la base de datos
+                await db.collection("clients").doc(clientDocId).update(updateData);
+                
+                showAlert("Cliente actualizado correctamente", "success");
+                closeModal('addClientModal');
+                loadAllClients(); // Recargar todos los clientes
+            } catch (error) {
+                console.error("Error al actualizar cliente:", error);
+                showAlert("Error al actualizar el cliente", "error");
+            } finally {
+                hideLoading();
+                selectedClientImageFile = null;
+            }
+        }
+
+        // Eliminar cliente
+        async function deleteClient(clientDocId) {
+            showAlert("¿Estás seguro de que deseas eliminar este cliente? Esta acción no se puede deshacer.", "warning", "Confirmar Eliminación");
+            const alertButton = document.getElementById("alertButton");
+            alertButton.onclick = async function() {
+                document.getElementById("alertOverlay").classList.remove('show');
+                showLoading("Eliminando cliente...");
+                
+                try {
+                    const user = auth.currentUser;
+                    if (!user) {
+                        showAlert("Debes iniciar sesión para eliminar clientes", "error");
+                    }
+                    
+                    await db.collection("clients").doc(clientDocId).delete();
+                    
+                    showAlert("Cliente eliminado correctamente", "success");
+                    loadAllClients(); // Recargar todos los clientes
+                } catch (error) {
+                    console.error("Error al eliminar cliente:", error);
+                    showAlert("Error al eliminar el cliente", "error");
+                } finally {
+                    hideLoading();
+                }
+            };
+        }
+
+        // Cargar todos los clientes
+        async function loadAllClients() {
+            showLoading("Cargando clientes...");
+            
+            try {
+                const clientsQuery = await db.collection("clients").get();
+                allClients = clientsQuery.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
+                
+                displayClients();
+            } catch (error) {
+                console.error("Error al cargar clientes:", error);
+                showAlert("Error al cargar los clientes", "error");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Mostrar clientes
+        function displayClients() {
+            const clientsContainer = document.getElementById('clientsContainer');
+            
+            if (allClients.length === 0) {
+                clientsContainer.innerHTML = '<div class="no-results"><p>No hay clientes registrados</p></div>';
+                return;
+            }
+            
+            // Filtrar según búsqueda
+            const searchTerm = document.getElementById('clientSearchInput').value.toLowerCase();
+            const filteredClients = allClients.filter(client => 
+                client.name.toLowerCase().includes(searchTerm) || 
+                client.id.toLowerCase().includes(searchTerm)
+            );
+            
+            if (filteredClients.length === 0) {
+                clientsContainer.innerHTML = '<div class="no-results"><p>No se encontraron clientes</p></div>';
+                return;
+            }
+            
+            let html = '';
+            filteredClients.forEach(client => {
+                // Obtener el último pago registrado
+                const debtHistory = client.debtHistory || [];
+                const lastPayment = debtHistory
+                    .filter(item => item.type === 'payment')
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                
+                html += `
+                    <div class="client-card">
+                        <div class="client-header">
+                            <img src="${client.imageUrl || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'}" 
+                                class="client-avatar" alt="Foto del cliente">
+                            <div class="client-info">
+                                <div class="client-name">${client.name}</div>
+                                <div class="client-id">Cédula: ${client.id}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="client-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Teléfono:</span>
+                                <span class="detail-value">${client.phone || 'N/A'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Email:</span>
+                                <span class="detail-value">${client.email || 'N/A'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Dirección:</span>
+                                <span class="detail-value">${client.address || 'N/A'}</span>
+                            </div>
+                            ${client.totalDebt > 0 ? `
+                                <div class="client-debt debt-active">
+                                    Deuda actual: ${formatCurrency(client.totalDebt)}
+                                </div>
+                            ` : `
+                                <div class="client-debt debt-paid">
+                                    ${lastPayment ? `Deuda saldada: ${formatCurrency(lastPayment.amount)} (${formatDate(lastPayment.date)})` : 'Sin deudas'}
+                                </div>
+                            `}
+                        </div>
+                        
+                        <div class="client-actions">
+                            <button class="btn" onclick="showClientPaymentForm('${client.docId}')" ${client.totalDebt <= 0 ? 'disabled' : ''}>
+                                <i class="fas fa-money-bill-wave"></i> Pagar
+                            </button>
+                            <button class="btn" onclick="showClientDebts('${client.docId}')">
+                                <i class="fas fa-file-invoice-dollar"></i> Deudas
+                            </button>
+                            <button class="btn" onclick="showSellToClientForm('${client.docId}')">
+                                <i class="fas fa-cart-plus"></i> Vender
+                            </button>
+                            <button class="btn" onclick="showEditClientForm('${client.docId}')">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteClient('${client.docId}')">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            clientsContainer.innerHTML = html;
+        }
+
+        // Cargar todos los productos y negocios
+        async function loadAllProductsAndBusinesses() {
+            showLoading("Cargando productos...");
+            
+            try {
+                const businessesQuery = await db.collection("businesses").get();
+                allBusinesses = businessesQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                allProducts = [];
+                for (const business of allBusinesses) {
+                    const productsQuery = await db.collection("businesses").doc(business.name).collection("products").get();
+                    productsQuery.forEach(doc => {
+                        allProducts.push({
+                            id: doc.id,
+                            businessName: business.name,
+                            ...doc.data()
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error("Error al cargar productos y negocios:", error);
+                showAlert("Error al cargar datos de productos", "error");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Mostrar formulario de pago para cliente
+        async function showClientPaymentForm(clientDocId) {
+            showLoading("Preparando formulario de pago...");
+            
+            try {
+                // Buscar el cliente en la lista local
+                const client = allClients.find(c => c.docId === clientDocId);
+                if (!client) {
+                    showAlert("Error al cargar datos del cliente", "error");
+                    return;
+                }
+                
+                currentClient = client;
+                
+                const paymentHTML = `
+                    <div>
+                        <h3>Registrar pago para ${client.name}</h3>
+                        <p>Deuda actual: <strong style="color: var(--danger-color);">${formatCurrency(client.totalDebt)}</strong></p>
+                        
+                        <div class="form-group">
+                            <label for="paymentAmount">Monto a pagar:</label>
+                            <input type="number" id="paymentAmount" min="0.01" max="${client.totalDebt}" step="0.01" value="${client.totalDebt}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="paymentMethod">Método de pago:</label>
+                            <select id="paymentMethod" required>
+                                <option value="Efectivo">Efectivo</option>
+                                <option value="Transferencia">Transferencia</option>
+                                <option value="Tarjeta">Tarjeta</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="paymentNotes">Notas:</label>
+                            <textarea id="paymentNotes" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-secondary" onclick="closeModal('clientPaymentModal')">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                            <button class="btn" onclick="registerClientPayment('${clientDocId}')">
+                                <i class="fas fa-check-circle"></i> Registrar Pago
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('clientPaymentContent').innerHTML = paymentHTML;
+                showModal('clientPaymentModal');
+            } catch (error) {
+                console.error("Error al cargar formulario de pago:", error);
+                showAlert("Error al cargar el formulario de pago", "error");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Registrar pago de cliente
+        async function registerClientPayment(clientDocId) {
+            showLoading("Registrando pago...");
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    showAlert("Debes iniciar sesión para registrar pagos", "error");
+                    return;
+                }
+                
+                const paymentAmount = parseFloat(document.getElementById("paymentAmount").value);
+                const paymentMethod = document.getElementById("paymentMethod").value;
+                const paymentNotes = document.getElementById("paymentNotes").value;
+                
+                if (!paymentAmount || paymentAmount <= 0) {
+                    showAlert("Debe ingresar un monto válido", "error");
+                    return;
+                }
+                
+                // Buscar el cliente en la lista local
+                const client = allClients.find(c => c.docId === clientDocId);
+                if (!client) {
+                    showAlert("Error al registrar el pago", "error");
+                    return;
+                }
+                
+                // Verificar que el cliente existe en la base de datos
+                const clientDoc = await db.collection("clients").doc(clientDocId).get();
+                if (!clientDoc.exists) {
+                    showAlert("Error: El cliente no existe en la base de datos", "error");
+                    return;
+                }
+                
+                const clientData = clientDoc.data();
+                const currentDebt = clientData.totalDebt || 0;
+                
+                if (paymentAmount > currentDebt) {
+                    showAlert("El monto no puede ser mayor a la deuda actual", "error");
+                    return;
+                }
+                
+                const newDebt = currentDebt - paymentAmount;
+                
+                // Registrar transacción en el historial
+                const paymentRecord = {
+                    type: 'payment',
+                    date: new Date().toISOString(),
+                    amount: paymentAmount,
+                    method: paymentMethod,
+                    notes: paymentNotes || null,
+                    processedBy: user.displayName || user.email || 'Usuario'
+                };
+                
+                // Actualizar datos del cliente preservando toda la información existente
+                await db.collection("clients").doc(clientDocId).update({
+                    totalDebt: newDebt,
+                    debtHistory: [...(clientData.debtHistory || []), paymentRecord],
+                    // Preservar todos los demás campos del cliente
+                    name: clientData.name,
+                    id: clientData.id,
+                    phone: clientData.phone,
+                    email: clientData.email,
+                    address: clientData.address,
+                    guarantee: clientData.guarantee,
+                    occupation: clientData.occupation,
+                    notes: clientData.notes,
+                    imageUrl: clientData.imageUrl,
+                    addedDate: clientData.addedDate,
+                    addedBy: clientData.addedBy,
+                    updatedDate: new Date().toISOString(),
+                    updatedBy: user.displayName || user.email || 'Usuario'
+                });
+                
+                showAlert(`Pago de ${formatCurrency(paymentAmount)} registrado correctamente`, "success");
+                closeModal('clientPaymentModal');
+                loadAllClients(); // Actualizar lista de clientes
+            } catch (error) {
+                console.error("Error al registrar pago:", error);
+                showAlert("Error al registrar el pago", "error");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Mostrar deudas del cliente
+        async function showClientDebts(clientDocId) {
+            showLoading("Cargando deudas...");
+            
+            try {
+                // Buscar el cliente en la lista local
+                const client = allClients.find(c => c.docId === clientDocId);
+                if (!client) {
+                    showAlert("Error al cargar las deudas", "error");
+                    return;
+                }
+                
+                const debtHistory = client.debtHistory || [];
+                
+                if (debtHistory.length === 0) {
+                    showModal('clientDebtsModal', `
+                        <h3>Historial de deudas para ${client.name}</h3>
+                        <div class="debt-status debt-status-paid">
+                            <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                            <h4>No hay deudas registradas</h4>
+                            <p>Este cliente no tiene historial de deudas</p>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-secondary" onclick="closeModal('clientDebtsModal')">
+                                <i class="fas fa-times"></i> Cerrar
+                            </button>
+                        </div>
+                    `);
+                    return;
+                }
+                
+                // Ordenar historial por fecha (más reciente primero)
+                const sortedHistory = [...debtHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                let html = `
+                    <h3>Historial de deudas para ${client.name}</h3>
+                    <p>Deuda actual: <strong style="color: ${client.totalDebt > 0 ? 'var(--danger-color)' : 'var(--success-color)'};">${formatCurrency(client.totalDebt)}</strong></p>
+                    
+                    ${client.totalDebt <= 0 ? `
+                        <div class="debt-status debt-status-paid">
+                            <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                            <h4>Deuda saldada completamente</h4>
+                            <p>El cliente no tiene deudas pendientes</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="debt-history">
+                `;
+                
+                sortedHistory.forEach(debt => {
+                    const isPayment = debt.type === 'payment';
+                    const amount = debt.amount || debt.totalAmount || 0;
+                    
+                    html += `
+                        <div class="debt-item">
+                            <div class="debt-header">
+                                <div class="debt-date">${formatDate(debt.date)}</div>
+                                <div>
+                                    <span class="debt-amount" style="color: ${isPayment ? 'var(--success-color)' : 'var(--danger-color)'};">
+                                        ${isPayment ? '-' : '+'}${formatCurrency(amount)}
+                                    </span>
+                                    <span class="debt-type debt-type-${isPayment ? 'payment' : 'sale'}">
+                                        ${isPayment ? 'PAGO' : 'VENTA'}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            ${isPayment ? `
+                                <div>
+                                    <p><strong>Método:</strong> ${debt.method || 'N/A'}</p>
+                                    <p><strong>Notas:</strong> ${debt.notes || 'Ninguna'}</p>
+                                    <p><strong>Registrado por:</strong> ${debt.processedBy || 'N/A'}</p>
+                                </div>
+                            ` : `
+                                <div class="debt-products">
+                                    ${debt.products ? debt.products.map(p => `
+                                        <div class="debt-product">
+                                            <span>${p.quantity} x ${p.name}</span>
+                                            <span>${formatCurrency(p.price * p.quantity)}</span>
+                                        </div>
+                                    `).join('') : 'N/A'}
+                                    <p><strong>Notas:</strong> ${debt.notes || 'Ninguna'}</p>
+                                    <p><strong>Registrado por:</strong> ${debt.processedBy || 'N/A'}</p>
+                                </div>
+                            `}
+                        </div>
+                    `;
+                });
+                
+                html += `
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button class="btn btn-secondary" onclick="closeModal('clientDebtsModal')">
+                            <i class="fas fa-times"></i> Cerrar
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById('clientDebtsContent').innerHTML = html;
+                showModal('clientDebtsModal');
+            } catch (error) {
+                console.error("Error al cargar deudas:", error);
+                showAlert("Error al cargar las deudas del cliente", "error");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Mostrar formulario para vender a crédito a un cliente
+        async function showSellToClientForm(clientDocId) {
+            showLoading("Preparando formulario...");
+            
+            try {
+                await loadAllProductsAndBusinesses();
+                
+                // Buscar el cliente en la lista local
+                const client = allClients.find(c => c.docId === clientDocId);
+                if (!client) {
+                    showAlert("Error al cargar datos del cliente", "error");
+                    return;
+                }
+                
+                currentClient = client;
+                selectedProductsForSale = []; // Resetear productos seleccionados
+                
+                const formHTML = `
+                    <div>
+                        <h3>Vender a crédito a ${client.name}</h3>
+                        <p>Deuda actual: <strong style="color: ${client.totalDebt > 0 ? 'var(--danger-color)' : 'var(--success-color)'};">${formatCurrency(client.totalDebt)}</strong></p>
+                        
+                        <div class="form-group">
+                            <label>Buscar producto:</label>
+                            <div class="product-search-container">
+                                <input type="text" id="productSearchInput" placeholder="Buscar por nombre o código" onkeyup="filterProducts()">
+                                <button class="btn" onclick="filterProducts()">
+                                    <i class="fas fa-search"></i> Buscar
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="products-grid" id="productsGrid">
+                            <p>Cargando productos...</p>
+                        </div>
+                        
+                        <div class="selected-products" id="selectedProductsContainer">
+                            <p>No hay productos seleccionados</p>
+                        </div>
+                        
+                        <div class="sale-summary">
+                            <div class="sale-total" id="saleTotal">Total: ${formatCurrency(0)}</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="saleNotes">Notas de la venta:</label>
+                            <textarea id="saleNotes" rows="3" placeholder="Notas adicionales sobre esta venta"></textarea>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-secondary" onclick="closeModal('sellToClientModal')">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                            <button class="btn" onclick="registerSaleToClient('${clientDocId}')">
+                                <i class="fas fa-check-circle"></i> Registrar Venta
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('sellToClientContent').innerHTML = formHTML;
+                displayProducts();
+                showModal('sellToClientModal');
+            } catch (error) {
+                console.error("Error al cargar formulario:", error);
+                showAlert("Error al cargar el formulario de venta", "error");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Mostrar productos disponibles
+        function displayProducts() {
+            const productsGrid = document.getElementById('productsGrid');
+            
+            if (allProducts.length === 0) {
+                productsGrid.innerHTML = '<p>No hay productos disponibles</p>';
+                return;
+            }
+            
+            let html = '';
+            allProducts.forEach(product => {
+                html += `
+                    <div class="product-card">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-details">
+                            Código: ${product.code || 'N/A'}<br>
+                            Proveedor: ${product.businessName}
+                        </div>
+                        <div class="product-price">Precio: ${formatCurrency(product.pricePerUnit)}</div>
+                        <div class="product-stock">Stock: ${product.quantity || 0}</div>
+                        <div class="product-actions">
+                            <input type="number" class="product-quantity" id="qty-${product.id}" value="1" min="1" max="${product.quantity || 1}">
+                            <button class="btn" onclick="addProductToSale('${product.id}', '${product.name}', ${product.pricePerUnit || 0})">
+                                <i class="fas fa-plus"></i> Agregar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            productsGrid.innerHTML = html;
+        }
+
+        // Filtrar productos
+        function filterProducts() {
+            const searchTerm = document.getElementById('productSearchInput').value.toLowerCase();
+            const productCards = document.querySelectorAll('.product-card');
+            
+            productCards.forEach(card => {
+                const productName = card.querySelector('.product-name').textContent.toLowerCase();
+                const productCode = card.querySelector('.product-details').textContent.toLowerCase();
+                
+                if (productName.includes(searchTerm) || productCode.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Agregar producto a la venta
+        function addProductToSale(productId, productName, price) {
+            const quantity = parseInt(document.getElementById(`qty-${productId}`).value) || 1;
+            
+            // Verificar si el producto ya está en la lista
+            const existingIndex = selectedProductsForSale.findIndex(p => p.id === productId);
+            if (existingIndex >= 0) {
+                // Actualizar cantidad si ya existe
+                selectedProductsForSale[existingIndex].quantity += quantity;
+            } else {
+                // Agregar nuevo producto
+                selectedProductsForSale.push({
+                    id: productId,
+                    name: productName,
+                    price: price,
+                    quantity: quantity
+                });
+            }
+            
+            updateSelectedProductsList();
+            updateSaleTotal();
+        }
+
+        // Actualizar lista de productos seleccionados
+        function updateSelectedProductsList() {
+            const container = document.getElementById('selectedProductsContainer');
+            
+            if (selectedProductsForSale.length === 0) {
+                container.innerHTML = '<p>No hay productos seleccionados</p>';
+                return;
+            }
+            
+            let html = '';
+            selectedProductsForSale.forEach((product, index) => {
+                const subtotal = product.price * product.quantity;
+                html += `
+                    <div class="selected-product">
+                        <div class="selected-product-info">
+                            <div class="selected-product-name">${product.name}</div>
+                            <div class="selected-product-details">
+                                ${product.quantity} x ${formatCurrency(product.price)} = ${formatCurrency(subtotal)}
+                            </div>
+                        </div>
+                        <div class="selected-product-actions">
+                            <button class="btn btn-danger" onclick="removeProductFromSale(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Eliminar producto de la venta
+        function removeProductFromSale(index) {
+            selectedProductsForSale.splice(index, 1);
+            updateSelectedProductsList();
+            updateSaleTotal();
+        }
+
+        // Actualizar total de la venta
+        function updateSaleTotal() {
+            let total = 0;
+            
+            selectedProductsForSale.forEach(product => {
+                total += product.price * product.quantity;
+            });
+            
+            document.getElementById('saleTotal').textContent = `Total: ${formatCurrency(total)}`;
+        }
+
+        // Registrar venta a crédito para un cliente
+        async function registerSaleToClient(clientDocId) {
+            showLoading("Registrando venta...");
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    showAlert("Debes iniciar sesión para registrar ventas", "error");
+                    return;
+                }
+                
+                if (selectedProductsForSale.length === 0) {
+                    showAlert("Debe seleccionar al menos un producto", "error");
+                    return;
+                }
+                
+                // Calcular total
+                let total = 0;
+                const saleProducts = [];
+                
+                selectedProductsForSale.forEach(product => {
+                    const subtotal = product.price * product.quantity;
+                    total += subtotal;
+                    
+                    saleProducts.push({
+                        productId: product.id,
+                        name: product.name,
+                        price: product.price,
+                        quantity: product.quantity,
+                        subtotal: subtotal
+                    });
+                });
+                
+                // Buscar el cliente en la lista local
+                const client = allClients.find(c => c.docId === clientDocId);
+                if (!client) {
+                    showAlert("Error al registrar la venta: Cliente no encontrado", "error");
+                    return;
+                }
+                
+                // Verificar que el cliente existe en la base de datos
+                const clientDoc = await db.collection("clients").doc(clientDocId).get();
+                if (!clientDoc.exists) {
+                    showAlert("Error: El cliente no existe en la base de datos", "error");
+                    return;
+                }
+                
+                const clientData = clientDoc.data();
+                const newDebt = (clientData.totalDebt || 0) + total;
+                const saleNotes = document.getElementById('saleNotes').value || '';
+                
+                // Registrar transacción en el historial
+                const saleRecord = {
+                    type: 'sale',
+                    date: new Date().toISOString(),
+                    products: saleProducts,
+                    totalAmount: total,
+                    notes: saleNotes,
+                    processedBy: user.displayName || user.email || 'Usuario'
+                };
+                
+                const currentDebtHistory = clientData.debtHistory || [];
+                
+                // Actualizar datos del cliente preservando toda la información existente
+                await db.collection("clients").doc(clientDocId).update({
+                    totalDebt: newDebt,
+                    debtHistory: [...currentDebtHistory, saleRecord],
+                    // Preservar todos los demás campos del cliente
+                    name: clientData.name,
+                    id: clientData.id,
+                    phone: clientData.phone,
+                    email: clientData.email,
+                    address: clientData.address,
+                    guarantee: clientData.guarantee,
+                    occupation: clientData.occupation,
+                    notes: clientData.notes,
+                    imageUrl: clientData.imageUrl,
+                    addedDate: clientData.addedDate,
+                    addedBy: clientData.addedBy,
+                    updatedDate: new Date().toISOString(),
+                    updatedBy: user.displayName || user.email || 'Usuario'
+                });
+                
+                showAlert(`Venta a crédito por ${formatCurrency(total)} registrada correctamente`, "success");
+                closeModal('sellToClientModal');
+                loadAllClients(); // Actualizar lista de clientes
+            } catch (error) {
+                console.error("Error al registrar venta:", error);
+                showAlert("Error al registrar la venta", "error");
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Inicializar la aplicación
+        function initApp() {
+            // Configurar búsqueda en tiempo real
+            document.getElementById("clientSearchInput").addEventListener("input", displayClients);
+            
+            // Cargar datos iniciales
+            loadAllClients();
+        }
+
+        // Iniciar la aplicación cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
