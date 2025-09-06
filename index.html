@@ -1,0 +1,4301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Inventario - Home</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+  <!-- Chart.js para gráficos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary-color: #16a085;
+      --primary-dark: #138a72;
+      --secondary-color: #2c3e50;
+      --secondary-light: #34495e;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --success-color: #2ecc71;
+      --info-color: #3498db;
+      --text-light: #ecf0f1;
+      --text-dark: #2c3e50;
+      --card-bg: #34495e;
+      --sidebar-bg: #2c3e50;
+      --sidebar-width: 250px;
+      --header-height: 70px;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--secondary-color);
+      color: var(--text-light);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+      font-size: 14px; /* Tamaño de fuente más pequeño */
+    }
+
+    /* Animaciones */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideInFromRight {
+      from { transform: translateX(50px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideInFromLeft {
+      from { transform: translateX(-50px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideInFromTop {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes slideInFromBottom {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .animate-fade {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .animate-slide-right {
+      animation: slideInFromRight 0.5s ease-out;
+    }
+
+    .animate-slide-left {
+      animation: slideInFromLeft 0.5s ease-out;
+    }
+
+    .animate-slide-top {
+      animation: slideInFromTop 0.5s ease-out;
+    }
+
+    .animate-slide-bottom {
+      animation: slideInFromBottom 0.5s ease-out;
+    }
+
+    .animate-pulse {
+      animation: pulse 1.5s infinite;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--sidebar-bg);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      padding-top: var(--header-height);
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+      z-index: 100;
+      overflow-y: auto;
+      transition: var(--transition);
+    }
+
+    .sidebar-logo {
+      text-align: center;
+      padding: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 20px;
+      transition: var(--transition);
+    }
+
+    .sidebar-logo:hover {
+      transform: scale(1.05);
+    }
+
+    .sidebar-logo img {
+      max-width: 80%;
+      height: auto;
+      transition: var(--transition);
+    }
+
+    .sidebar-logo .business-name {
+      font-size: 1rem;
+      margin-top: 8px;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .sidebar-menu {
+      list-style: none;
+    }
+
+    .sidebar-menu li {
+      margin-bottom: 5px;
+      transition: var(--transition);
+    }
+
+    .sidebar-menu li:hover {
+      transform: translateX(5px);
+    }
+
+    .sidebar-menu a {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      color: var(--text-light);
+      text-decoration: none;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar-menu a::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 0;
+      height: 2px;
+      background-color: var(--primary-color);
+      transition: var(--transition);
+    }
+
+    .sidebar-menu a:hover::after {
+      width: 100%;
+    }
+
+    .sidebar-menu a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--primary-color);
+    }
+
+    .sidebar-menu a i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+      transition: var(--transition);
+      font-size: 1.2rem;
+      z-index: 10;
+    }
+
+    .sidebar-menu a.active {
+      background-color: var(--primary-color);
+    }
+
+    .sidebar-menu a.active:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .sidebar-menu a span {
+      transition: var(--transition);
+      position: relative;
+      z-index: 5;
+    }
+
+    /* Header */
+    .header {
+      height: var(--header-height);
+      background-color: var(--secondary-color);
+      color: var(--text-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      z-index: 90;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      transition: var(--transition);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .header-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .header-title:hover {
+      color: var(--primary-color);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .search-icon {
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: var(--transition);
+    }
+
+    .search-icon:hover {
+      color: var(--primary-color);
+      transform: scale(1.1);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .user-info:hover {
+      transform: scale(1.05);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+      object-fit: cover;
+      transition: var(--transition);
+      border: 2px solid transparent;
+    }
+
+    .user-avatar:hover {
+      border-color: var(--primary-color);
+      transform: rotate(10deg);
+    }
+
+    .user-name {
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .user-name:hover {
+      color: var(--primary-color);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      padding: 15px; /* Padding reducido */
+      padding-top: calc(var(--header-height) + 15px); /* Padding reducido */
+      overflow-y: auto;
+      height: 100vh;
+      transition: var(--transition);
+    }
+
+    /* Search Section */
+    .search-section {
+      display: none;
+      background-color: var(--secondary-light);
+      padding: 15px; /* Padding reducido */
+      border-radius: var(--border-radius);
+      margin-bottom: 15px; /* Margen reducido */
+      box-shadow: var(--box-shadow);
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .search-section.active {
+      display: block;
+    }
+
+    .search-section h2 {
+      margin-bottom: 12px; /* Margen reducido */
+      color: var(--primary-color);
+      font-size: 1.3rem; /* Tamaño de fuente reducido */
+    }
+
+    .search-section input {
+      width: 100%;
+      padding: 10px 12px; /* Padding reducido */
+      border: 1px solid #3d566e;
+      border-radius: var(--border-radius);
+      background-color: #3d566e;
+      color: var(--text-light);
+      font-size: 0.9rem; /* Tamaño de fuente reducido */
+      margin-bottom: 12px; /* Margen reducido */
+      transition: var(--transition);
+    }
+
+    .search-section input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(22, 160, 133, 0.2);
+    }
+
+    .search-results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Tamaño reducido */
+      gap: 12px; /* Espacio reducido */
+    }
+
+    /* Product Card */
+    .product-card {
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 15px; /* Padding reducido */
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+      cursor: pointer;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .product-card:hover {
+      transform: translateY(-3px); /* Efecto reducido */
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra reducida */
+    }
+
+    .product-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px; /* Margen reducido */
+      padding-bottom: 12px; /* Padding reducido */
+      border-bottom: 1px solid #3d566e;
+    }
+
+    .product-image {
+      width: 50px; /* Tamaño reducido */
+      height: 50px; /* Tamaño reducido */
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary-color);
+      transition: var(--transition);
+    }
+
+    .product-image:hover {
+      transform: rotate(8deg); /* Rotación reducida */
+    }
+
+    .product-title {
+      flex: 1;
+      margin: 0 12px; /* Margen reducido */
+      font-size: 1rem; /* Tamaño de fuente reducido */
+      font-weight: 600;
+    }
+
+    .product-details {
+      margin-top: 8px; /* Margen reducido */
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px; /* Margen reducido */
+      font-size: 0.85rem; /* Tamaño de fuente reducido */
+    }
+
+    .detail-label {
+      color: #95a5a6;
+      font-weight: 500;
+    }
+
+    .detail-value {
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .stock-info {
+      display: inline-block;
+      padding: 3px 6px; /* Padding reducido */
+      border-radius: 4px;
+      font-size: 0.75rem; /* Tamaño de fuente reducido */
+      font-weight: bold;
+      margin-top: 4px; /* Margen reducido */
+      transition: var(--transition);
+    }
+
+    .stock-out {
+      background-color: var(--danger-color);
+      color: white;
+    }
+
+    .stock-low {
+      background-color: var(--warning-color);
+      color: var(--text-dark);
+    }
+
+    .stock-ok {
+      background-color: var(--success-color);
+      color: white;
+    }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal.show {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background-color: var(--secondary-light);
+      border-radius: var(--border-radius);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 20px; /* Padding reducido */
+      position: relative;
+      animation: slideInFromTop 0.3s ease-out;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px; /* Posición ajustada */
+      right: 12px; /* Posición ajustada */
+      background: none;
+      border: none;
+      color: #95a5a6;
+      cursor: pointer;
+      font-size: 1.3rem; /* Tamaño reducido */
+      transition: var(--transition);
+    }
+
+    .modal-close:hover {
+      color: var(--text-light);
+      transform: rotate(90deg);
+    }
+
+    .modal-title {
+      margin-bottom: 15px; /* Margen reducido */
+      color: var(--primary-color);
+      font-size: 1.3rem; /* Tamaño reducido */
+    }
+
+    .product-detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px; /* Espacio reducido */
+    }
+
+    /* Dashboard Widgets */
+    .dashboard-widgets {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Tamaño reducido */
+      gap: 15px; /* Espacio reducido */
+      margin-bottom: 15px; /* Margen reducido */
+    }
+
+    .widget {
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 15px; /* Padding reducido */
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .widget:hover {
+      transform: translateY(-2px); /* Efecto reducido */
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra reducida */
+    }
+
+    .widget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px; /* Margen reducido */
+      padding-bottom: 8px; /* Padding reducido */
+      border-bottom: 1px solid #3d566e;
+    }
+
+    .widget-title {
+      font-size: 1rem; /* Tamaño reducido */
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .widget-content {
+      min-height: 120px; /* Altura reducida */
+    }
+
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); /* Tamaño reducido */
+      gap: 12px; /* Espacio reducido */
+    }
+
+    .stat-card {
+      background-color: var(--secondary-light);
+      border-radius: var(--border-radius);
+      padding: 12px; /* Padding reducido */
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px); /* Efecto reducido */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra reducida */
+    }
+
+    .stat-value {
+      font-size: 1.5rem; /* Tamaño reducido */
+      font-weight: bold;
+      margin: 4px 0; /* Margen reducido */
+    }
+
+    .stat-label {
+      font-size: 0.85rem; /* Tamaño reducido */
+      color: #95a5a6;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px; /* Espacio reducido */
+    }
+
+    .quick-action-btn {
+      background-color: var(--secondary-light);
+      border: none;
+      border-radius: var(--border-radius);
+      padding: 10px; /* Padding reducido */
+      color: var(--text-light);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 0.85rem; /* Tamaño reducido */
+    }
+
+    .quick-action-btn i {
+      font-size: 1.3rem; /* Tamaño reducido */
+      margin-bottom: 6px; /* Margen reducido */
+      color: var(--primary-color);
+      transition: var(--transition);
+    }
+
+    .quick-action-btn:hover {
+      background-color: var(--primary-color);
+      color: white;
+      transform: translateY(-2px); /* Efecto reducido */
+    }
+
+    .quick-action-btn:hover i {
+      color: white;
+      transform: scale(1.1); /* Escala reducida */
+    }
+
+    /* Recent Activity */
+    .activity-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 0; /* Padding reducido */
+      border-bottom: 1px solid #3d566e;
+      transition: var(--transition);
+    }
+
+    .activity-item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      transform: translateX(3px); /* Efecto reducido */
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-icon {
+      width: 35px; /* Tamaño reducido */
+      height: 35px; /* Tamaño reducido */
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px; /* Margen reducido */
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+
+    .activity-icon:hover {
+      transform: rotate(12deg); /* Rotación reducida */
+    }
+
+    .activity-details {
+      flex: 1;
+    }
+
+    .activity-title {
+      font-weight: 600;
+      margin-bottom: 2px; /* Margen reducido */
+      font-size: 0.9rem; /* Tamaño reducido */
+    }
+
+    .activity-time {
+      font-size: 0.75rem; /* Tamaño reducido */
+      color: #95a5a6;
+    }
+
+    /* Notification Panel */
+    .notification-bell {
+      position: relative;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .notification-bell:hover {
+      transform: scale(1.05); /* Escala reducida */
+      color: var(--primary-color);
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: var(--danger-color);
+      color: white;
+      width: 18px; /* Tamaño reducido */
+      height: 18px; /* Tamaño reducido */
+      border-radius: 50%;
+      font-size: 0.65rem; /* Tamaño reducido */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .notification-bell:hover .notification-badge {
+      transform: scale(1.1); /* Escala reducida */
+    }
+
+    .notification-panel {
+      display: none;
+      position: fixed;
+      top: var(--header-height);
+      right: 20px;
+      width: 320px; /* Ancho reducido */
+      max-height: 400px; /* Altura reducida */
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .notification-panel.show {
+      display: block;
+      animation: slideInFromRight 0.3s ease-out;
+    }
+
+    .notification-header {
+      padding: 12px; /* Padding reducido */
+      border-bottom: 1px solid #3d566e;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .notification-title {
+      font-weight: 600;
+      font-size: 0.95rem; /* Tamaño reducido */
+    }
+
+    .notification-clear {
+      background: none;
+      border: none;
+      color: var(--primary-color);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .notification-clear:hover {
+      transform: scale(1.05); /* Escala reducida */
+    }
+
+    .notification-list {
+      list-style-type: none;
+    }
+
+    .notification-item {
+      padding: 12px; /* Padding reducido */
+      border-bottom: 1px solid #3d566e;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .notification-item:hover {
+      background-color: var(--secondary-light);
+    }
+
+    .notification-item.unread {
+      background-color: rgba(52, 152, 219, 0.1);
+    }
+
+    .notification-message {
+      margin-bottom: 4px; /* Margen reducido */
+      font-size: 0.9rem; /* Tamaño reducido */
+    }
+
+    .notification-time {
+      font-size: 0.75rem; /* Tamaño reducido */
+      color: #95a5a6;
+    }
+
+    /* Loading */
+    #loading {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      flex-direction: column;
+    }
+
+    #loading img {
+      width: 50px; /* Tamaño reducido */
+      height: 50px; /* Tamaño reducido */
+      animation: spin 1s linear infinite;
+      margin-bottom: 12px; /* Margen reducido */
+    }
+
+    #loading p {
+      color: var(--text-light);
+      font-size: 0.95rem; /* Tamaño reducido */
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* No Results */
+    .no-results {
+      text-align: center;
+      padding: 30px; /* Padding reducido */
+      color: #95a5a6;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .no-results i {
+      font-size: 2.5rem; /* Tamaño reducido */
+      margin-bottom: 15px; /* Margen reducido */
+      color: var(--primary-color);
+    }
+
+    /* Form Styles */
+    .add-product-form, .add-business-form, .add-order-form {
+      display: grid;
+      gap: 12px; /* Espacio reducido */
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px; /* Espacio reducido */
+    }
+
+    .form-group label {
+      font-weight: 500;
+      color: #95a5a6;
+      font-size: 0.9rem; /* Tamaño reducido */
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 8px 10px; /* Padding reducido */
+      border: 1px solid #3d566e;
+      border-radius: var(--border-radius);
+      background-color: var(--card-bg);
+      color: var(--text-light);
+      font-size: 0.9rem; /* Tamaño reducido */
+      transition: var(--transition);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(22, 160, 133, 0.2);
+    }
+
+    .file-input-container {
+      margin-top: 12px; /* Margen reducido */
+    }
+
+    .file-input-label {
+      display: inline-block;
+      padding: 8px 12px; /* Padding reducido */
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+      font-size: 0.9rem; /* Tamaño reducido */
+    }
+
+    .file-input-label:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px); /* Efecto reducido */
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .file-name {
+      margin-top: 4px; /* Margen reducido */
+      font-size: 0.85rem; /* Tamaño reducido */
+      color: #95a5a6;
+    }
+
+    .preview-container {
+      margin-top: 12px; /* Margen reducido */
+      display: none;
+    }
+
+    .preview-image {
+      max-width: 100%;
+      max-height: 180px; /* Altura reducida */
+      border-radius: var(--border-radius);
+      border: 2px solid var(--primary-color);
+      transition: var(--transition);
+    }
+
+    .preview-image:hover {
+      transform: scale(1.03); /* Escala reducida */
+    }
+
+    .form-actions {
+      margin-top: 15px; /* Margen reducido */
+      display: flex;
+      gap: 8px; /* Espacio reducido */
+    }
+
+    .btn {
+      padding: 10px 16px; /* Padding reducido */
+      border: none;
+      border-radius: var(--border-radius);
+      background-color: var(--primary-color);
+      color: white;
+      font-size: 0.9rem; /* Tamaño reducido */
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px; /* Espacio reducido */
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px); /* Efecto reducido */
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-light);
+    }
+
+    .btn-secondary:hover {
+      background-color: #3d566e;
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    /* Orders Section */
+    .orders-container {
+      display: grid;
+      gap: 12px; /* Espacio reducido */
+    }
+
+    .order-card {
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 12px; /* Padding reducido */
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .order-card:hover {
+      transform: translateY(-2px); /* Efecto reducido */
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Sombra reducida */
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px; /* Margen reducido */
+      padding-bottom: 8px; /* Padding reducido */
+      border-bottom: 1px solid #3d566e;
+    }
+
+    .order-title {
+      font-weight: 600;
+      color: var(--primary-color);
+      font-size: 0.95rem; /* Tamaño reducido */
+    }
+
+    .order-time {
+      font-size: 0.85rem; /* Tamaño reducido */
+      color: #95a5a6;
+    }
+
+    .order-details {
+      margin-top: 8px; /* Margen reducido */
+    }
+
+    .order-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px; /* Margen reducido */
+      font-size: 0.85rem; /* Tamaño reducido */
+    }
+
+    .order-label {
+      color: #95a5a6;
+      font-weight: 500;
+    }
+
+    .order-value {
+      font-weight: 600;
+    }
+
+    .order-status {
+      display: inline-block;
+      padding: 2px 6px; /* Padding reducido */
+      border-radius: 4px;
+      font-size: 0.75rem; /* Tamaño reducido */
+      font-weight: bold;
+      margin-top: 4px; /* Margen reducido */
+    }
+
+    .status-pending {
+      background-color: var(--warning-color);
+      color: var(--text-dark);
+    }
+
+    .status-completed {
+      background-color: var(--success-color);
+      color: white;
+    }
+
+    .status-cancelled {
+      background-color: var(--danger-color);
+      color: white;
+    }
+
+    /* Confirmation Modal */
+    .confirmation-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .confirmation-modal.show {
+      display: flex;
+      opacity: 1;
+    }
+
+    .confirmation-content {
+      background-color: var(--secondary-light);
+      border-radius: var(--border-radius);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      width: 90%;
+      max-width: 450px; /* Ancho reducido */
+      padding: 20px; /* Padding reducido */
+      position: relative;
+      animation: slideInFromBottom 0.3s ease-out;
+    }
+
+    .confirmation-title {
+      margin-bottom: 12px; /* Margen reducido */
+      color: var(--primary-color);
+      font-size: 1.1rem; /* Tamaño reducido */
+    }
+
+    .confirmation-message {
+      margin-bottom: 15px; /* Margen reducido */
+      line-height: 1.5;
+      font-size: 0.95rem; /* Tamaño reducido */
+    }
+
+    .confirmation-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px; /* Espacio reducido */
+    }
+
+    /* Client Modal Styles */
+    .client-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px; /* Espacio reducido */
+    }
+
+    .client-form .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    .client-avatar-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px; /* Espacio reducido */
+    }
+
+    .client-avatar {
+      width: 100px; /* Tamaño reducido */
+      height: 100px; /* Tamaño reducido */
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--primary-color);
+    }
+
+    .client-products-list {
+      max-height: 250px; /* Altura reducida */
+      overflow-y: auto;
+      margin: 12px 0; /* Margen reducido */
+      border: 1px solid #3d566e;
+      border-radius: var(--border-radius);
+      padding: 8px; /* Padding reducido */
+    }
+
+    .client-product-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px; /* Padding reducido */
+      border-bottom: 1px solid #3d566e;
+    }
+
+    .client-product-item:last-child {
+      border-bottom: none;
+    }
+
+    .client-product-actions {
+      display: flex;
+      gap: 4px; /* Espacio reducido */
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 70px;
+        overflow: hidden;
+      }
+      
+      .sidebar-logo {
+        padding: 10px 5px;
+      }
+      
+      .sidebar-menu a span {
+        display: none;
+      }
+      
+      .sidebar-menu a i {
+        margin-right: 0;
+        font-size: 1.2rem;
+      }
+      
+      .header {
+        left: 70px;
+      }
+      
+      .main-content {
+        margin-left: 70px;
+      }
+
+      .quick-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .client-form {
+        grid-template-columns: 1fr;
+      }
+
+      .client-form .form-group.full-width {
+        grid-column: span 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-widgets {
+        grid-template-columns: 1fr;
+      }
+      
+      .notification-panel {
+        width: 90%;
+        right: 5%;
+      }
+
+      .product-detail-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .header-title {
+        font-size: 1.3rem; /* Tamaño reducido */
+      }
+      
+      .user-name {
+        display: none;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .header {
+        padding: 0 10px; /* Padding reducido */
+      }
+      
+      .main-content {
+        padding: 10px; /* Padding reducido */
+        padding-top: calc(var(--header-height) + 10px); /* Padding reducido */
+      }
+      
+      .widget {
+        padding: 10px; /* Padding reducido */
+      }
+      
+      .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .modal-content {
+        padding: 15px; /* Padding reducido */
+      }
+    }
+
+    /* Tooltip para íconos en sidebar */
+    .sidebar-menu a .tooltip {
+      visibility: hidden;
+      width: 120px;
+      background-color: var(--secondary-light);
+      color: var(--text-light);
+      text-align: center;
+      border-radius: var(--border-radius);
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      box-shadow: var(--box-shadow);
+      font-size: 0.85rem; /* Tamaño reducido */
+    }
+
+    .sidebar-menu a:hover .tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Transiciones adicionales */
+    .transition-all {
+      transition: all 0.3s ease;
+    }
+
+    .transition-colors {
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .transition-transform {
+      transition: transform 0.3s ease;
+    }
+    
+    /* Estilos para deudas */
+    .debt-history {
+      max-height: 300px; /* Altura reducida */
+      overflow-y: auto;
+      margin: 15px 0; /* Margen reducido */
+    }
+    
+    .debt-item {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: var(--border-radius);
+      padding: 12px; /* Padding reducido */
+      margin-bottom: 10px; /* Margen reducido */
+      border: 1px solid var(--border-color);
+      transition: var(--transition);
+    }
+    
+    .debt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px; /* Margen reducido */
+      flex-wrap: wrap;
+    }
+    
+    .debt-date {
+      font-weight: 600;
+      color: var(--primary-light);
+      font-size: 0.9rem; /* Tamaño reducido */
+    }
+    
+    .debt-amount {
+      font-weight: 600;
+      font-size: 0.95rem; /* Tamaño reducido */
+    }
+    
+    .debt-type {
+      display: inline-block;
+      padding: 3px 8px; /* Padding reducido */
+      border-radius: 20px;
+      font-size: 0.75rem; /* Tamaño reducido */
+      font-weight: 600;
+      margin-left: 8px; /* Margen reducido */
+    }
+    
+    .debt-type-sale {
+      background-color: rgba(248, 113, 113, 0.2);
+      color: var(--danger-color);
+    }
+    
+    .debt-type-payment {
+      background-color: rgba(74, 222, 128, 0.2);
+      color: var(--success-color);
+    }
+    
+    .debt-products {
+      margin-top: 8px; /* Margen reducido */
+      padding-top: 8px; /* Padding reducido */
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .debt-product {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px; /* Margen reducido */
+      font-size: 0.85rem; /* Tamaño reducido */
+    }
+    
+    .debt-status {
+      text-align: center;
+      padding: 15px; /* Padding reducido */
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: var(--border-radius);
+      margin: 15px 0; /* Margen reducido */
+      border: 1px solid var(--border-color);
+    }
+    
+    .debt-status-paid {
+      color: var(--success-color);
+      background-color: rgba(74, 222, 128, 0.1);
+      border-color: rgba(74, 222, 128, 0.2);
+    }
+
+    /* Estilos para gráficos */
+    .charts-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .chart-card {
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 15px;
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+    }
+
+    .chart-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #3d566e;
+    }
+
+    .chart-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .chart-content {
+      position: relative;
+      height: 250px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo" id="sidebarLogo">
+      <!-- Logo y nombre de empresa se cargarán dinámicamente desde Firebase -->
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#" class="active" id="homeLink"><i class="fas fa-home"></i> <span>Inicio</span></a></li>
+      <li><a href="#"><i class="fas fa-boxes"></i> <span>Inventario</span></a></li>
+      <li><a href="#"><i class="fas fa-truck"></i> <span>Proveedores</span></a></li>
+      <li><a href="#" id="ordersLink"><i class="fas fa-clipboard-list"></i> <span>Pedidos</span></a></li>
+      <li><a href="#"><i class="fas fa-chart-line"></i> <span>Reportes</span></a></li>
+      <li><a href="#"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
+      <li><a href="#"><i class="fas fa-cog"></i> <span>Configuración</span></a></li>
+      <li><a href="#" id="logoutLink"><i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span></a></li>
+    </ul>
+  </aside>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <h1 class="header-title">Panel Principal</h1>
+    </div>
+    <div class="header-right">
+      <div class="search-icon" id="searchToggle">
+        <i class="fas fa-search"></i>
+      </div>
+      <div class="notification-bell" id="notificationBell">
+        <i class="fas fa-bell"></i>
+        <span class="notification-badge" id="notificationBadge">0</span>
+      </div>
+      <div class="user-info" id="userInfo">
+        <img id="userAvatar" src="https://randomuser.me/api/portraits/men/1.jpg" alt="Usuario" class="user-avatar">
+        <span class="user-name" id="currentUserName">Cargando...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Panel -->
+  <div class="notification-panel" id="notificationPanel">
+    <div class="notification-header">
+      <div class="notification-title">Notificaciones</div>
+      <button class="notification-clear" id="clearNotifications">Limpiar</button>
+    </div>
+    <ul class="notification-list" id="notificationList">
+      <li class="notification-item">
+        <div class="notification-message">No hay notificaciones nuevas</div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Search Section -->
+    <section class="search-section" id="searchSection">
+      <h2><i class="fas fa-search"></i> Buscar Productos</h2>
+      <input type="text" id="searchInput" placeholder="Buscar por nombre, código o EAN...">
+      <div class="search-results" id="searchResults">
+        <div class="no-results"><i class="fas fa-search"></i><p>Busque productos por nombre, código o EAN</p></div>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section class="dashboard" id="dashboardSection">
+      <!-- Gráficos de inventario -->
+      <div class="charts-container" id="inventoryCharts">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">Estado de Inventario</div>
+            <i class="fas fa-chart-pie"></i>
+          </div>
+          <div class="chart-content">
+            <canvas id="inventoryStatusChart"></canvas>
+          </div>
+        </div>
+        
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">Productos por Categoría</div>
+            <i class="fas fa-chart-bar"></i>
+          </div>
+          <div class="chart-content">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-widgets">
+        <div class="widget">
+          <div class="widget-header">
+            <div class="widget-title">Resumen</div>
+            <i class="fas fa-chart-pie"></i>
+          </div>
+          <div class="widget-content">
+            <div class="stats-container">
+              <div class="stat-card">
+                <div class="stat-value" id="totalProducts">0</div>
+                <div class="stat-label">Productos</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value" id="totalValue">$0.00</div>
+                <div class="stat-label">Valor Total</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value" id="outOfStock">0</div>
+                <div class="stat-label">Agotados</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value" id="nearExpiration">0</div>
+                <div class="stat-label">Por Vencer</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="widget">
+          <div class="widget-header">
+            <div class="widget-title">Acciones Rápidas</div>
+            <i class="fas fa-bolt"></i>
+          </div>
+          <div class="widget-content">
+            <div class="quick-actions">
+              <button class="quick-action-btn" id="addProductBtn">
+                <i class="fas fa-plus"></i>
+                <span>Agregar Producto</span>
+              </button>
+              <button class="quick-action-btn" id="addSupplierBtn">
+                <i class="fas fa-truck"></i>
+                <span>Agregar Proveedor</span>
+              </button>
+              <button class="quick-action-btn" id="createOrderBtn">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Crear Pedido</span>
+              </button>
+              <button class="quick-action-btn" id="generateReportBtn">
+                <i class="fas fa-file-excel"></i>
+                <span>Generar Reporte</span>
+              </button>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="widget">
+          <div class="widget-header">
+            <div class="widget-title">Actividad Reciente</div>
+            <i class="fas fa-history"></i>
+          </div>
+          <div class="widget-content">
+            <div class="activity-item">
+              <div class="activity-icon">
+                <i class="fas fa-spinner fa-spin"></i>
+              </div>
+              <div class="activity-details">
+                <div class="activity-title">Cargando actividad...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Orders Section (hidden by default) -->
+    <section class="orders-section" id="ordersSection" style="display: none;">
+      <h2><i class="fas fa-clipboard-list"></i> Pedidos Recientes</h2>
+      <div class="orders-container" id="ordersContainer">
+        <div class="no-results"><i class="fas fa-clipboard"></i><p>No hay pedidos registrados</p></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Product Detail Modal -->
+  <div class="modal" id="productModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeModal">&times;</button>
+      <h3 class="modal-title">Detalles del Producto</h3>
+      <div class="product-detail-grid" id="productDetailContent">
+        <!-- Product details will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Business/Supplier Modal -->
+  <div class="modal" id="addBusinessModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeBusinessModal">&times;</button>
+      <h3 class="modal-title">Agregar Nuevo Proveedor</h3>
+      <div class="add-business-form" id="addBusinessForm">
+        <!-- Form will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Order Modal -->
+  <div class="modal" id="addOrderModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeOrderModal">&times;</button>
+      <h3 class="modal-title">Crear Nuevo Pedido</h3>
+      <div class="add-order-form" id="addOrderForm">
+        <!-- Form will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Client Modal -->
+  <div class="modal" id="addClientModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeClientModal">&times;</button>
+      <h3 class="modal-title">Agregar Nuevo Cliente</h3>
+      <div class="client-form" id="addClientForm">
+        <!-- Form will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- View Clients Modal -->
+  <div class="modal" id="viewClientsModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeViewClientsModal">&times;</button>
+      <h3 class="modal-title">Lista de Clientes</h3>
+      <div class="form-group">
+        <input type="text" id="clientSearchInput" placeholder="Buscar cliente por nombre o cédula...">
+      </div>
+      <div id="clientsList" style="max-height: 400px; overflow-y: auto;">
+        <!-- Clients list will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Client Detail Modal -->
+  <div class="modal" id="clientDetailModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeClientDetailModal">&times;</button>
+      <h3 class="modal-title">Detalles del Cliente</h3>
+      <div id="clientDetailContent">
+        <!-- Client details will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Client Payment Modal -->
+  <div class="modal" id="clientPaymentModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeClientPaymentModal">&times;</button>
+      <h3 class="modal-title">Registrar Pago</h3>
+      <div id="clientPaymentContent">
+        <!-- Payment form will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Client Debts Modal -->
+  <div class="modal" id="clientDebtsModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeClientDebtsModal">&times;</button>
+      <h3 class="modal-title">Historial de Deudas</h3>
+      <div id="clientDebtsContent">
+        <!-- Debts content will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Sell to Client Modal -->
+  <div class="modal" id="sellToClientModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeSellToClientModal">&times;</button>
+      <h3 class="modal-title">Vender a Crédito</h3>
+      <div id="sellToClientContent">
+        <!-- Sell form will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="confirmation-modal" id="confirmationModal">
+    <div class="confirmation-content">
+      <h3 class="confirmation-title" id="confirmationTitle">Confirmación</h3>
+      <p class="confirmation-message" id="confirmationMessage">¿Estás seguro de que deseas realizar esta acción?</p>
+      <div class="confirmation-actions">
+        <button class="btn btn-secondary" id="cancelAction">Cancelar</button>
+        <button class="btn btn-danger" id="confirmAction">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div id="loading">
+    <img src="https://firebasestorage.googleapis.com/v0/b/inventario-35d6b.appspot.com/o/RETOM%20COMPLETO%20(2).png?alt=media&token=bcb475a5-edf6-494a-96e5-ca8f0a8ae005" alt="Cargando..." />
+    <p>Procesando...</p>
+  </div>
+
+  <script type="module">
+    // Importar Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      onSnapshot, 
+      doc, 
+      deleteDoc, 
+      updateDoc, 
+      getDocs, 
+      query,
+      where,
+      orderBy,
+      limit,
+      serverTimestamp,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
+
+    // Variables globales
+    let allProducts = [];
+    let allBusinesses = [];
+    let allOrders = [];
+    let allClients = [];
+    let stats = {
+      totalProducts: 0,
+      outOfStock: 0,
+      nearExpiration: 0,
+      expiredProducts: 0,
+      totalValue: 0
+    };
+    let notifications = [];
+    let selectedImageFile = null;
+    let selectedBusinessImageFile = null;
+    let selectedClientImageFile = null;
+    let currentUser = null;
+    let usedCodes = new Set();
+    let currentClient = null;
+    let inventoryStatusChart = null;
+    let categoryChart = null;
+
+    // Función para formatear números con separadores de miles y dos decimales
+    function formatCurrency(number) {
+      if (isNaN(number)) return '$0.00';
+      
+      // Redondear a dos decimales usando el método correcto
+      const roundedNumber = Math.round((number + Number.EPSILON) * 100) / 100;
+      
+      // Separar la parte entera y decimal
+      const parts = roundedNumber.toFixed(2).toString().split('.');
+      const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      const decimalPart = parts[1];
+      
+      return '$' + integerPart + '.' + decimalPart;
+    }
+
+    // Generar código único para productos
+    function generateUniqueProductCode() {
+      const prefix = 'PROD';
+      let code;
+      let attempts = 0;
+      const maxAttempts = 100;
+      
+      do {
+        // Generar un código aleatorio de 6 dígitos
+        const randomNum = Math.floor(100000 + Math.random() * 900000);
+        code = `${prefix}${randomNum}`;
+        attempts++;
+        
+        if (attempts >= maxAttempts) {
+          // Si no podemos generar un código único después de varios intentos, agregar timestamp
+          const timestamp = Date.now().toString().slice(-4);
+          code = `${prefix}${randomNum}${timestamp}`;
+          break;
+        }
+      } while (usedCodes.has(code));
+      
+      usedCodes.add(code);
+      return code;
+    }
+
+    // Formatear número con comas y puntos
+    function formatNumber(number) {
+      return number.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    }
+
+    // Formatear fecha
+    function formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'N/A';
+      
+      const options = {
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit',
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: true
+      };
+      return date.toLocaleString('es-ES', options).replace(',', '');
+    }
+
+    // Mostrar modal
+    function showModal(modalId, content = '', title = "Detalles") {
+      const modal = document.getElementById(modalId);
+      const modalContent = modal.querySelector('.modal-content');
+      
+      if (content) {
+        const contentContainer = modal.querySelector('.modal-content > div:not(.modal-close):not(.modal-title)');
+        if (contentContainer) {
+          contentContainer.innerHTML = content;
+        }
+      }
+      
+      if (title) {
+        const titleElement = modal.querySelector('.modal-title');
+        if (titleElement) {
+          titleElement.textContent = title;
+        }
+      }
+      
+      modal.classList.add('show');
+    }
+
+    // Cerrar modal
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('show');
+    }
+
+    // Mostrar loading
+    function showLoading(message = "Procesando...") {
+      const loading = document.getElementById("loading");
+      loading.querySelector("p").textContent = message;
+      loading.style.display = "flex";
+    }
+
+    // Ocultar loading
+    function hideLoading() {
+      const loading = document.getElementById("loading");
+      loading.style.display = "none";
+    }
+
+    // Mostrar alerta
+    function showAlert(message, type = "success", title = "Notificación") {
+      const notificationList = document.getElementById('notificationList');
+      
+      // Agregar notificación
+      const notificationItem = document.createElement('li');
+      notificationItem.className = `notification-item unread`;
+      
+      let icon = 'fa-info-circle';
+      let iconColor = 'var(--info-color)';
+      
+      if (type === 'alert') {
+        icon = 'fa-exclamation-triangle';
+        iconColor = 'var(--warning-color)';
+      } else if (type === 'error') {
+        icon = 'fa-times-circle';
+        iconColor = 'var(--danger-color)';
+      } else if (type === 'success') {
+        icon = 'fa-check-circle';
+        iconColor = 'var(--success-color)';
+      }
+      
+      notificationItem.innerHTML = `
+        <div class="notification-message">
+          <i class="fas ${icon}" style="color: ${iconColor}; margin-right: 8px;"></i>
+          ${message}
+        </div>
+        <div class="notification-time">${formatDate(new Date().toISOString())}</div>
+      `;
+      
+      notificationList.insertBefore(notificationItem, notificationList.firstChild);
+      
+      // Actualizar badge
+      const unreadCount = document.querySelectorAll('.notification-item.unread').length;
+      document.getElementById('notificationBadge').textContent = unreadCount;
+      
+      // Mostrar panel si no está visible
+      if (!document.getElementById('notificationPanel').classList.contains('show')) {
+        document.getElementById('notificationPanel').classList.add('show');
+        setTimeout(() => {
+          document.getElementById('notificationPanel').classList.remove('show');
+        }, 3000);
+      }
+    }
+
+    // Mostrar confirmación
+    function showConfirmation(message, title = "Confirmación", confirmCallback) {
+      document.getElementById('confirmationMessage').textContent = message;
+      document.getElementById('confirmationTitle').textContent = title;
+      
+      const confirmModal = document.getElementById('confirmationModal');
+      confirmModal.classList.add('show');
+      
+      document.getElementById('confirmAction').onclick = function() {
+        confirmCallback();
+        confirmModal.classList.remove('show');
+      };
+      
+      document.getElementById('cancelAction').onclick = function() {
+        confirmModal.classList.remove('show');
+      };
+    }
+
+    // Cargar logo y nombre de empresa desde Firebase
+    async function loadBusinessDetails() {
+      try {
+        const businessDoc = await getDoc(doc(db, "businessDetails", "info"));
+        
+        if (businessDoc.exists()) {
+          const businessData = businessDoc.data();
+          const logoContainer = document.getElementById('sidebarLogo');
+          
+          // Si hay logo en Firebase, usarlo, sino usar el predeterminado
+          const logoUrl = businessData.logoUrl || 'https://firebasestorage.googleapis.com/v0/b/inventario-35d6b.appspot.com/o/RETOM%20COMPLETO%20(2).png?alt=media&token=bcb475a5-edf6-494a-96e5-ca8f0a8ae005';
+          
+          logoContainer.innerHTML = `
+            <img src="${logoUrl}" alt="Logo">
+            <div class="business-name">${businessData.name || 'Mi Empresa'}</div>
+          `;
+        }
+      } catch (error) {
+        console.error("Error al cargar detalles del negocio:", error);
+      }
+    }
+
+    // Crear gráficos para el dashboard
+    function createCharts() {
+      // Destruir gráficos existentes si los hay
+      if (inventoryStatusChart) {
+        inventoryStatusChart.destroy();
+      }
+      if (categoryChart) {
+        categoryChart.destroy();
+      }
+      
+      // Datos para el gráfico de estado de inventario
+      const inventoryStatusData = {
+        labels: ['Disponible', 'Bajo Stock', 'Agotado'],
+        datasets: [{
+          data: [
+            stats.totalProducts - stats.outOfStock - (stats.nearExpiration || 0),
+            stats.nearExpiration || 0,
+            stats.outOfStock
+          ],
+          backgroundColor: [
+            'rgba(46, 204, 113, 0.7)',  // Verde para disponible
+            'rgba(243, 156, 18, 0.7)',  // Amarillo para bajo stock
+            'rgba(231, 76, 60, 0.7)'    // Rojo para agotado
+          ],
+          borderColor: [
+            'rgba(46, 204, 113, 1)',
+            'rgba(243, 156, 18, 1)',
+            'rgba(231, 76, 60, 1)'
+          ],
+          borderWidth: 1
+        }]
+      };
+      
+      // Crear gráfico circular
+      const inventoryStatusCtx = document.getElementById('inventoryStatusChart').getContext('2d');
+      inventoryStatusChart = new Chart(inventoryStatusCtx, {
+        type: 'doughnut',
+        data: inventoryStatusData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: '#ecf0f1'
+              }
+            }
+          }
+        }
+      });
+      
+      // Preparar datos para el gráfico de categorías
+      const categories = {};
+      allProducts.forEach(product => {
+        const category = product.type || 'Sin categoría';
+        categories[category] = (categories[category] || 0) + 1;
+      });
+      
+      const categoryLabels = Object.keys(categories);
+      const categoryData = Object.values(categories);
+      
+      const categoryColors = [
+        'rgba(52, 152, 219, 0.7)',   // Azul
+        'rgba(155, 89, 182, 0.7)',   // Púrpura
+        'rgba(241, 196, 15, 0.7)',   // Amarillo
+        'rgba(230, 126, 34, 0.7)',   // Naranja
+        'rgba(46, 204, 113, 0.7)',   // Verde
+        'rgba(231, 76, 60, 0.7)',    // Rojo
+        'rgba(149, 165, 166, 0.7)'   // Gris
+      ];
+      
+      const categoryChartData = {
+        labels: categoryLabels,
+        datasets: [{
+          label: 'Productos por Categoría',
+          data: categoryData,
+          backgroundColor: categoryColors.slice(0, categoryLabels.length),
+          borderColor: categoryColors.map(color => color.replace('0.7', '1')).slice(0, categoryLabels.length),
+          borderWidth: 1
+        }]
+      };
+      
+      // Crear gráfico de barras
+      const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+      categoryChart = new Chart(categoryCtx, {
+        type: 'bar',
+        data: categoryChartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: '#ecf0f1'
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              }
+            },
+            x: {
+              ticks: {
+                color: '#ecf0f1'
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    }
+
+    // Cargar estadísticas
+    function loadStatistics() {
+      stats = {
+        totalProducts: 0,
+        outOfStock: 0,
+        nearExpiration: 0,
+        expiredProducts: 0,
+        totalValue: 0
+      };
+
+      const currentDate = new Date();
+      
+      allProducts.forEach(product => {
+        stats.totalProducts++;
+        stats.totalValue += (product.pricePerUnit || 0) * (product.quantity || 0);
+        
+        if (product.quantity === 0) {
+          stats.outOfStock++;
+        }
+        
+        if (product.expirationDate) {
+          const expirationDate = new Date(product.expirationDate);
+          const daysUntilExpiration = Math.ceil((expirationDate - currentDate) / (1000 * 60 * 60 * 24));
+          
+          if (daysUntilExpiration < 0) {
+            stats.expiredProducts++;
+          } else if (daysUntilExpiration <= 30) {
+            stats.nearExpiration++;
+          }
+        }
+      });
+
+      // Actualizar UI
+      document.getElementById("totalProducts").textContent = stats.totalProducts.toLocaleString();
+      document.getElementById("outOfStock").textContent = stats.outOfStock.toLocaleString();
+      document.getElementById("nearExpiration").textContent = stats.nearExpiration.toLocaleString();
+      document.getElementById("totalValue").textContent = `$${formatNumber(stats.totalValue)}`;
+      
+      // Actualizar gráficos
+      createCharts();
+    }
+
+    // Mostrar detalles del producto
+    async function showProductDetails(productId, businessName) {
+      showLoading("Cargando detalles...");
+      
+      try {
+        const productDoc = await getDoc(doc(db, "businesses", businessName, "products", productId));
+        
+        if (!productDoc.exists()) {
+          showAlert("El producto no existe", "error");
+          return;
+        }
+        
+        const productData = productDoc.data();
+        const currentDate = new Date();
+        const expirationDate = productData.expirationDate ? new Date(productData.expirationDate) : null;
+        const daysUntilExpiration = expirationDate ? Math.ceil((expirationDate - currentDate) / (1000 * 60 * 60 * 24)) : null;
+        
+        let stockClass = 'stock-ok';
+        if (productData.quantity === 0) {
+          stockClass = 'stock-out';
+        } else if (productData.quantity <= (productData.lowStockThreshold || 10)) {
+          stockClass = 'stock-low';
+        }
+        
+        let expirationStatus = '';
+        if (daysUntilExpiration !== null) {
+          if (daysUntilExpiration < 0) {
+            expirationStatus = `<span class="stock-info stock-out">VENCIDO</span>`;
+          } else if (daysUntilExpiration <= 30) {
+            expirationStatus = `<span class="stock-info stock-low">VENCE EN ${daysUntilExpiration} DÍAS</span>`;
+          } else {
+            expirationStatus = `<span class="stock-info stock-ok">VENCE EN ${daysUntilExpiration} DÍAS</span>`;
+          }
+        }
+        
+        // Calcular margen de ganancia
+        const profit = productData.pricePerUnit - (productData.originalPrice || 0);
+        const profitPercentage = productData.originalPrice ? (profit / productData.originalPrice * 100).toFixed(1) : 0;
+        
+        const detailsHTML = `
+          <div>
+            ${productData.imageUrl ? `
+              <img src="${productData.imageUrl}" style="max-width: 100%; border-radius: var(--border-radius); border: 2px solid var(--primary-color);">
+            ` : '<div style="height: 150px; display: flex; align-items: center; justify-content: center; background-color: var(--secondary-light); border-radius: var(--border-radius);"><i class="fas fa-box" style="font-size: 3rem; color: var(--primary-color);"></i></div>'}
+            <h3 style="margin-top: 15px;">${productData.name}</h3>
+            <p><strong>Negocio:</strong> ${businessName}</p>
+            <p><strong>Categoría:</strong> ${productData.type || 'N/A'}</p>
+            <p><strong>Almacén:</strong> ${productData.warehouse || 'N/A'}</p>
+            <p><strong>Estado:</strong> <span class="stock-info ${stockClass}" style="margin-left: 5px;">${
+              productData.quantity === 0 ? 'AGOTADO' : 
+              productData.quantity <= (productData.lowStockThreshold || 10) ? 'BAJO STOCK' : 'DISPONIBLE'
+            }</span> ${expirationStatus}</p>
+          </div>
+          <div>
+            <div class="detail-row">
+              <span class="detail-label">Código:</span>
+              <span class="detail-value">${productData.code || 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">EAN/UPC:</span>
+              <span class="detail-value">${productData.eanUpcCode || 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Precio:</span>
+              <span class="detail-value">$${(productData.pricePerUnit || 0).toFixed(2)}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Precio original:</span>
+              <span class="detail-value">$${(productData.originalPrice || 0).toFixed(2)}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">% Ganancia:</span>
+              <span class="detail-value">${profitPercentage}%</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">% Descuento:</span>
+              <span class="detail-value">${productData.discount || 0}%</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Stock:</span>
+              <span class="detail-value">${productData.quantity} ${productData.unit || ''}</span>
+            </div>
+            ${expirationDate ? `
+            <div class="detail-row">
+              <span class="detail-label">Vencimiento:</span>
+              <span class="detail-value">${expirationDate.toLocaleDateString()}</span>
+            </div>
+            ` : ''}
+            <div class="detail-row">
+              <span class="detail-label">Valor total:</span>
+              <span class="detail-value">$${(productData.quantity * (productData.pricePerUnit || 0)).toFixed(2)}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Agregado por:</span>
+              <span class="detail-value">${productData.userName || 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Fecha agregado:</span>
+              <span class="detail-value">${formatDate(productData.addedDate)}</span>
+            </div>
+          </div>
+        `;
+        
+        showModal('productModal', detailsHTML, "Detalles del Producto");
+      } catch (error) {
+        console.error("Error al cargar detalles:", error);
+        showAlert("Error al cargar los detalles del producto", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Buscar productos
+    function filterProducts() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const resultsContainer = document.getElementById('searchResults');
+      
+      if (searchTerm.length < 2) {
+        resultsContainer.innerHTML = '<div class="no-results"><p>Ingrese al menos 2 caracteres</p></div>';
+        return;
+      }
+      
+      // Usar un Set para evitar duplicados
+      const uniqueProductIds = new Set();
+      const filteredProducts = [];
+      
+      allProducts.forEach(product => {
+        const matchesSearch = 
+          product.name.toLowerCase().includes(searchTerm) || 
+          (product.code && product.code.toLowerCase().includes(searchTerm)) || 
+          (product.eanUpcCode && product.eanUpcCode.includes(searchTerm));
+        
+        if (matchesSearch && !uniqueProductIds.has(product.id)) {
+          uniqueProductIds.add(product.id);
+          filteredProducts.push(product);
+        }
+      });
+      
+      if (filteredProducts.length === 0) {
+        resultsContainer.innerHTML = '<div class="no-results"><i class="fas fa-search"></i><p>No se encontraron productos</p></div>';
+        return;
+      }
+      
+      let html = '';
+      filteredProducts.forEach(product => {
+        const currentDate = new Date();
+        const expirationDate = product.expirationDate ? new Date(product.expirationDate) : null;
+        const daysUntilExpiration = expirationDate ? Math.ceil((expirationDate - currentDate) / (1000 * 60 * 60 * 24)) : null;
+        
+        let stockClass = 'stock-ok';
+        if (product.quantity === 0) {
+          stockClass = 'stock-out';
+        } else if (product.quantity <= (product.lowStockThreshold || 10)) {
+          stockClass = 'stock-low';
+        }
+        
+        let expirationStatus = '';
+        if (daysUntilExpiration !== null) {
+          if (daysUntilExpiration < 0) {
+            expirationStatus = '<span class="stock-info stock-out">VENCIDO</span>';
+          } else if (daysUntilExpiration <= 30) {
+            expirationStatus = `<span class="stock-info stock-low">VENCE EN ${daysUntilExpiration} DÍAS</span>`;
+          }
+        }
+        
+        html += `
+          <div class="product-card" data-id="${product.id}" data-business="${product.businessName}">
+            <div class="product-header">
+              ${product.imageUrl ? `<img src="${product.imageUrl}" class="product-image" alt="${product.name}">` : '<div class="product-image"><i class="fas fa-box"></i></div>'}
+              <div class="product-title">${product.name}</div>
+            </div>
+            <div class="product-details">
+              <div class="detail-row">
+                <span class="detail-label">Código:</span>
+                <span class="detail-value">${product.code || 'N/A'}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">EAN/UPC:</span>
+                <span class="detail-value">${product.eanUpcCode || 'N/A'}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Precio:</span>
+                <span class="detail-value">$${(product.pricePerUnit || 0).toFixed(2)}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Stock:</span>
+                <span class="detail-value">
+                  ${product.quantity} ${product.unit || ''}
+                  <span class="stock-info ${stockClass}">${
+                    product.quantity === 0 ? 'AGOTADO' : 
+                    product.quantity <= (product.lowStockThreshold || 10) ? 'BAJO STOCK' : 'DISPONIBLE'
+                  }</span>
+                  ${expirationStatus}
+                </span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      resultsContainer.innerHTML = html;
+      
+      // Agregar event listeners a las tarjetas de producto
+      document.querySelectorAll('.product-card').forEach(card => {
+        card.addEventListener('click', function() {
+          const productId = this.getAttribute('data-id');
+          const businessName = this.getAttribute('data-business');
+          showProductDetails(productId, businessName);
+        });
+      });
+    }
+
+    // Cargar todos los productos
+    async function loadAllProducts() {
+      showLoading("Cargando productos...");
+      
+      try {
+        allProducts = [];
+        usedCodes.clear();
+        
+        const businessesQuerySnapshot = await getDocs(collection(db, "businesses"));
+        allBusinesses = businessesQuerySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        for (const businessDoc of businessesQuerySnapshot.docs) {
+          const businessName = businessDoc.data().name;
+          const productsQuerySnapshot = await getDocs(collection(db, "businesses", businessName, "products"));
+          
+          productsQuerySnapshot.forEach(productDoc => {
+            const productData = productDoc.data();
+            allProducts.push({
+              id: productDoc.id,
+              businessName: businessName,
+              ...productData
+            });
+            
+            // Agregar códigos existentes al conjunto
+            if (productData.code) {
+              usedCodes.add(productData.code);
+            }
+          });
+        }
+        
+        // Actualizar estadísticas
+        loadStatistics();
+        
+        // Cargar actividad reciente
+        loadRecentActivity();
+        
+        // Mostrar mensaje inicial en búsqueda
+        document.getElementById('searchResults').innerHTML = '<div class="no-results"><i class="fas fa-search"></i><p>Busque productos por nombre, código o EAN</p></div>';
+        
+      } catch (error) {
+        console.error("Error al cargar productos:", error);
+        showAlert("Error al cargar los productos", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Cargar todos los pedidos
+    async function loadAllOrders() {
+      showLoading("Cargando pedidos...");
+      
+      try {
+        const ordersQuery = await getDocs(collection(db, "orders"));
+        allOrders = ordersQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        displayOrders();
+      } catch (error) {
+        console.error("Error al cargar pedidos:", error);
+        showAlert("Error al cargar los pedidos", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Mostrar pedidos
+    function displayOrders() {
+      const ordersContainer = document.getElementById('ordersContainer');
+      
+      if (allOrders.length === 0) {
+        ordersContainer.innerHTML = '<div class="no-results"><i class="fas fa-clipboard"></i><p>No hay pedidos registrados</p></div>';
+        return;
+      }
+      
+      // Ordenar por fecha más reciente
+      const sortedOrders = [...allOrders].sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+      
+      let html = '';
+      sortedOrders.forEach(order => {
+        let statusClass = 'status-pending';
+        if (order.status === 'completed') {
+          statusClass = 'status-completed';
+        } else if (order.status === 'cancelled') {
+          statusClass = 'status-cancelled';
+        }
+        
+        let statusText = 'Pendiente';
+        if (order.status === 'completed') {
+          statusText = 'Completado';
+        } else if (order.status === 'cancelled') {
+          statusText = 'Cancelado';
+        }
+        
+        html += `
+          <div class="order-card">
+            <div class="order-header">
+              <div class="order-title">Pedido #${order.orderNumber || order.id.slice(0, 8)}</div>
+              <div class="order-time">${formatDate(order.orderDate)}</div>
+            </div>
+            <div class="order-details">
+              <div class="order-row">
+                <span class="order-label">Proveedor:</span>
+                <span class="order-value">${order.businessName || 'N/A'}</span>
+              </div>
+              <div class="order-row">
+                <span class="order-label">Categoría:</span>
+                <span class="order-value">${order.businessType || 'N/A'}</span>
+              </div>
+              <div class="order-row">
+                <span class="order-label">Productos:</span>
+                <span class="order-value">${order.products ? order.products.length : 0}</span>
+              </div>
+              <div class="order-row">
+                <span class="order-label">Total:</span>
+                <span class="order-value">$${order.totalAmount?.toFixed(2) || '0.00'}</span>
+              </div>
+              <div class="order-row">
+                <span class="order-label">Estado:</span>
+                <span class="order-value"><span class="order-status ${statusClass}">${statusText}</span></span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      ordersContainer.innerHTML = html;
+    }
+
+    // Cargar actividad reciente
+    async function loadRecentActivity() {
+      try {
+        const activityQuery = query(
+          collection(db, "productsHistory"),
+          orderBy("editDate", "desc"),
+          limit(5) // Mostrar solo las 5 últimas actividades
+        );
+        
+        const querySnapshot = await getDocs(activityQuery);
+        const activityContainer = document.querySelector('.widget-content .activity-item').parentNode;
+        
+        if (querySnapshot.empty) {
+          activityContainer.innerHTML = `
+            <div class="activity-item">
+              <div class="activity-icon">
+                <i class="fas fa-info-circle"></i>
+              </div>
+              <div class="activity-details">
+                <div class="activity-title">No hay actividad reciente</div>
+              </div>
+            </div>
+          `;
+          return;
+        }
+        
+        let activityHTML = '';
+        querySnapshot.forEach(doc => {
+          const activityData = doc.data();
+          
+          let icon = 'fa-edit';
+          let iconColor = 'var(--warning-color)';
+          
+          if (activityData.action === 'Creación') {
+            icon = 'fa-plus';
+            iconColor = 'var(--success-color)';
+          } else if (activityData.action === 'Eliminación') {
+            icon = 'fa-trash';
+            iconColor = 'var(--danger-color)';
+          }
+          
+          activityHTML += `
+            <div class="activity-item">
+              <div class="activity-icon" style="background-color: ${iconColor}">
+                <i class="fas ${icon}"></i>
+              </div>
+              <div class="activity-details">
+                <div class="activity-title">${activityData.action || 'Modificación'} de ${activityData.productName}</div>
+                <div class="activity-time">${formatDate(activityData.editDate)}</div>
+              </div>
+            </div>
+          `;
+        });
+        
+        activityContainer.innerHTML = activityHTML;
+      } catch (error) {
+        console.error("Error al cargar actividad reciente:", error);
+      }
+    }
+
+    // Mostrar formulario para agregar proveedor/negocio
+    async function showAddBusinessForm() {
+      const formHTML = `
+        <div class="add-business-form">
+          <h3>Agregar Nuevo Proveedor</h3>
+          
+          <div class="form-group">
+            <label for="businessName">Nombre del Proveedor:</label>
+            <input type="text" id="businessName" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="businessType">Tipo de Mercancía:</label>
+            <select id="businessType" required>
+              <option value="">Seleccione tipo</option>
+              <option value="Bebidas alcohólicas">Bebidas alcohólicas</option>
+              <option value="Bebidas no alcohólicas">Bebidas no alcohólicas</option>
+              <option value="Embutidos">Embutidos</option>
+              <option value="Alimentos">Alimentos</option>
+              <option value="Electrodomésticos">Electrodomésticos</option>
+              <option value="Electrónica">Electrónica</option>
+              <option value="Limpieza">Limpieza</option>
+              <option value="Mercado">Mercado</option>
+              <option value="Otros">Otros</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="businessContact">Contacto:</label>
+            <input type="text" id="businessContact">
+          </div>
+          
+          <div class="form-group">
+            <label for="businessPhone">Teléfono:</label>
+            <input type="tel" id="businessPhone">
+          </div>
+          
+          <div class="form-group">
+            <label for="businessEmail">Email:</label>
+            <input type="email" id="businessEmail">
+          </div>
+          
+          <div class="form-group">
+            <label for="businessAddress">Dirección:</label>
+            <textarea id="businessAddress" rows="2"></textarea>
+          </div>
+          
+          <div class="file-input-container">
+            <label for="businessImage" class="file-input-label">
+              <i class="fas fa-camera"></i> Seleccionar Imagen del Negocio
+            </label>
+            <input type="file" id="businessImage" class="file-input" accept="image/*" onchange="handleBusinessImageSelect(event)">
+            <div id="businessFileName" class="file-name"></div>
+            <div id="businessImagePreviewContainer" class="preview-container">
+              <img id="businessImagePreview" class="preview-image" src="#" alt="Vista previa de la imagen">
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button class="btn btn-secondary" onclick="closeModal('addBusinessModal')">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button class="btn" onclick="addNewBusiness()">
+              <i class="fas fa-plus-circle"></i> Agregar Proveedor
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('addBusinessForm').innerHTML = formHTML;
+      document.getElementById("businessImagePreviewContainer").style.display = "none";
+      showModal('addBusinessModal');
+    }
+
+    // Manejar selección de imagen de negocio
+    function handleBusinessImageSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      selectedBusinessImageFile = file;
+      
+      const previewContainer = document.getElementById("businessImagePreviewContainer");
+      const previewImage = document.getElementById("businessImagePreview");
+      const fileNameDisplay = document.getElementById("businessFileName");
+      
+      previewContainer.style.display = "block";
+      fileNameDisplay.textContent = file.name;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        previewImage.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Subir imagen de negocio a Firebase Storage
+    async function uploadBusinessImage(file, businessId) {
+      if (!file) return null;
+      
+      try {
+        const storageRef = ref(storage, `business-images/${businessId}/${file.name}`);
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+        return downloadURL;
+      } catch (error) {
+        console.error("Error al subir imagen de negocio:", error);
+        return null;
+      }
+    }
+
+    // Agregar nuevo proveedor/negocio
+    async function addNewBusiness() {
+      showLoading("Agregando proveedor...");
+      
+      try {
+        if (!currentUser) {
+          showAlert("Debes iniciar sesión para agregar proveedores", "error");
+          return;
+        }
+        
+        const name = document.getElementById("businessName").value;
+        const type = document.getElementById("businessType").value;
+        const contact = document.getElementById("businessContact").value;
+        const phone = document.getElementById("businessPhone").value;
+        const email = document.getElementById("businessEmail").value;
+        const address = document.getElementById("businessAddress").value;
+        
+        if (!name || !type) {
+          showAlert("Debe completar todos los campos requeridos", "error");
+          return;
+        }
+        
+        // Agregar negocio a la base de datos
+        const newBusinessRef = await addDoc(collection(db, "businesses"), {
+          name: name,
+          type: type,
+          contact: contact || null,
+          phone: phone || null,
+          email: email || null,
+          address: address || null,
+          addedDate: new Date().toISOString(),
+          addedBy: currentUser.displayName || currentUser.email || 'Usuario'
+        });
+        
+        // Subir imagen si se seleccionó una
+        if (selectedBusinessImageFile) {
+          const imageUrl = await uploadBusinessImage(selectedBusinessImageFile, newBusinessRef.id);
+          if (imageUrl) {
+            await updateDoc(doc(db, "businesses", newBusinessRef.id), {
+              imageUrl: imageUrl
+            });
+          }
+        }
+        
+        showAlert("Proveedor agregado correctamente", "success");
+        closeModal('addBusinessModal');
+        loadAllProducts(); // Recargar todos los productos (que incluye negocios)
+      } catch (error) {
+        console.error("Error al agregar proveedor:", error);
+        showAlert("Error al agregar el proveedor", "error");
+      } finally {
+        hideLoading();
+        selectedBusinessImageFile = null;
+      }
+    }
+
+    // Mostrar formulario para agregar producto
+    async function showAddProductForm() {
+      showLoading("Cargando negocios...");
+      
+      try {
+        // Obtener lista de negocios
+        const businessesQuery = await getDocs(collection(db, "businesses"));
+        let businessOptions = '';
+        
+        businessesQuery.forEach(doc => {
+          businessOptions += `<option value="${doc.data().name}">${doc.data().name}</option>`;
+        });
+        
+        if (!businessOptions) {
+          showAlert("No hay negocios registrados", "error");
+          return;
+        }
+        
+        // Generar código único para el nuevo producto
+        const newProductCode = generateUniqueProductCode();
+        
+        const formHTML = `
+          <div class="add-product-form">
+            <h3>Agregar Nuevo Producto</h3>
+            
+            <div class="form-group">
+              <label for="addBusiness">Negocio:</label>
+              <select id="addBusiness" required>
+                <option value="">Seleccione un negocio</option>
+                ${businessOptions}
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="addName">Nombre del Producto:</label>
+              <input type="text" id="addName" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="addCode">Código:</label>
+              <input type="text" id="addCode" value="${newProductCode}" readonly>
+            </div>
+            
+            <div class="form-group">
+              <label for="addEAN">Código EAN/UPC:</label>
+              <input type="text" id="addEAN">
+            </div>
+            
+            <div class="form-group">
+              <label for="addType">Categoría:</label>
+              <select id="addType">
+                <option value="">Seleccione categoría</option>
+                <option value="Alimentos">Alimentos</option>
+                <option value="Bebidas">Bebidas</option>
+                <option value="Limpieza">Limpieza</option>
+                <option value="Electrónica">Electrónica</option>
+                <option value="Otros">Otros</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="addQuantity">Cantidad:</label>
+              <input type="number" id="addQuantity" min="0" value="0" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="addInitialQuantity">Cantidad Inicial (Estocolmo):</label>
+              <input type="number" id="addInitialQuantity" min="0" value="0" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="addUnit">Unidad:</label>
+              <select id="addUnit" required>
+                <option value="Unidad">Unidad</option>
+                <option value="Paquete">Paquete</option>
+                <option value="Fardo">Fardo</option>
+                <option value="Libras">Libras</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="addOriginalPrice">Precio Original ($):</label>
+              <input type="number" id="addOriginalPrice" min="0" step="0.01" value="0" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="addProfitPercentage">% Ganancia:</label>
+              <input type="number" id="addProfitPercentage" min="0" step="0.1" value="0" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="addDiscount">% Descuento:</label>
+              <input type="number" id="addDiscount" min="0, 100" step="1" value="0" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="addExpiration">Fecha vencimiento:</label>
+              <input type="date" id="addExpiration">
+            </div>
+            
+            <div class="form-group">
+              <label for="addLowStock">Alerta bajo stock:</label>
+              <input type="number" id="addLowStock" min="1" value="10" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="addWarehouse">Almacén:</label>
+              <select id="addWarehouse">
+                <option value="Principal">Principal</option>
+              </select>
+            </div>
+            
+            <div class="file-input-container">
+              <label for="productImage" class="file-input-label">
+                <i class="fas fa-camera"></i> Seleccionar Imagen del Producto
+              </label>
+              <input type="file" id="productImage" class="file-input" accept="image/*" onchange="handleImageSelect(event)">
+              <div id="fileName" class="file-name"></div>
+              <div id="imagePreviewContainer" class="preview-container">
+                <img id="imagePreview" class="preview-image" src="#" alt="Vista previa de la imagen">
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button class="btn btn-secondary" onclick="closeModal('productModal')">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button class="btn" onclick="addNewProduct()">
+              <i class="fas fa-plus-circle"></i> Agregar Producto
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('productDetailContent').innerHTML = formHTML;
+      document.getElementById("imagePreviewContainer").style.display = "none";
+      showModal('productModal', '', "Agregar Producto");
+    } catch (error) {
+      console.error("Error al cargar formulario:", error);
+      showAlert("Error al cargar el formulario", "error");
+    } finally {
+      hideLoading();
+    }
+  }
+
+    // Mostrar formulario para crear pedido
+    async function showAddOrderForm() {
+      showLoading("Cargando formulario...");
+      
+      try {
+        // Obtener lista de negocios
+        const businessesQuery = await getDocs(collection(db, "businesses"));
+        let businessOptions = '';
+        
+        businessesQuery.forEach(doc => {
+          businessOptions += `<option value="${doc.data().name}" data-type="${doc.data().type || 'N/A'}">${doc.data().name}</option>`;
+        });
+        
+        if (!businessOptions) {
+          showAlert("No hay proveedores registrados", "error");
+          return;
+        }
+        
+        const formHTML = `
+          <div class="add-order-form">
+            <h3>Crear Nuevo Pedido</h3>
+            
+            <div class="form-group">
+              <label for="orderBusiness">Proveedor:</label>
+              <select id="orderBusiness" required>
+                <option value="">Seleccione un proveedor</option>
+                ${businessOptions}
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="orderType">Tipo de Mercancía:</label>
+              <input type="text" id="orderType" readonly>
+            </div>
+            
+            <div class="form-group">
+              <label for="orderDate">Fecha de Pedido:</label>
+              <input type="date" id="orderDate" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="orderDeliveryDate">Fecha de Entrega:</label>
+              <input type="date" id="orderDeliveryDate">
+            </div>
+            
+            <div class="form-group">
+              <label for="orderNotes">Notas:</label>
+              <textarea id="orderNotes" rows="3"></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label>Productos:</label>
+              <div id="orderProductsList" style="margin-top: 10px;">
+                <p>Seleccione un proveedor para cargar sus productos</p>
+              </div>
+              <button type="button" class="btn btn-secondary" id="addProductToOrder" style="margin-top: 10px; width: 100%;" onclick="loadBusinessProducts(document.getElementById('orderBusiness').value)">
+                <i class="fas fa-plus"></i> Agregar Producto
+              </button>
+            </div>
+            
+            <div class="form-actions">
+              <button class="btn btn-secondary" onclick="closeModal('addOrderModal')">
+                <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button class="btn" onclick="createNewOrder()">
+              <i class="fas fa-check-circle"></i> Crear Pedido
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('addOrderForm').innerHTML = formHTML;
+      
+      // Establecer fecha actual como predeterminada
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('orderDate').value = today;
+      
+      // Event listener para cambiar el tipo cuando se selecciona un proveedor
+      document.getElementById('orderBusiness').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const businessType = selectedOption.getAttribute('data-type');
+        document.getElementById('orderType').value = businessType;
+        
+        // Cargar productos del proveedor seleccionado
+        loadBusinessProducts(selectedOption.value);
+      });
+      
+      showModal('addOrderModal');
+    } catch (error) {
+      console.error("Error al cargar formulario:", error);
+      showAlert("Error al cargar el formulario de pedido", "error");
+    } finally {
+      hideLoading();
+    }
+  }
+
+    // Cargar productos de un negocio específico
+    async function loadBusinessProducts(businessName) {
+      showLoading("Cargando productos...");
+      
+      try {
+        const productsQuery = await getDocs(collection(db, "businesses", businessName, "products"));
+        const productsList = document.getElementById('orderProductsList');
+        
+        if (productsQuery.empty) {
+          productsList.innerHTML = '<p>Este proveedor no tiene productos registrados</p>';
+          return;
+        }
+        
+        let html = '<div style="display: grid; gap: 10px;">';
+        productsQuery.forEach(doc => {
+          const product = doc.data();
+          html += `
+            <div style="display: flex; align-items: center; gap: 10px; background-color: var(--card-bg); padding: 10px; border-radius: var(--border-radius);">
+              <input type="checkbox" id="product-${doc.id}" value="${doc.id}" data-price="${product.pricePerUnit || 0}">
+              <label for="product-${doc.id}" style="flex: 1;">
+                ${product.name} - $${(product.pricePerUnit || 0).toFixed(2)}
+              </label>
+              <input type="number" id="qty-${doc.id}" min="1" value="1" style="width: 60px;">
+            </div>
+          `;
+        });
+        html += '</div>';
+        
+        productsList.innerHTML = html;
+        
+        // Event listener para calcular el total cuando cambian las cantidades
+        document.querySelectorAll('#orderProductsList input[type="number"]').forEach(input => {
+          input.addEventListener('change', calculateOrderTotal);
+        });
+        
+        // Event listener para calcular el total cuando se seleccionan productos
+        document.querySelectorAll('#orderProductsList input[type="checkbox"]').forEach(checkbox => {
+          checkbox.addEventListener('change', calculateOrderTotal);
+        });
+        
+      } catch (error) {
+        console.error("Error al cargar productos:", error);
+        showAlert("Error al cargar los productos del proveedor", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Calcular total del pedido
+    function calculateOrderTotal() {
+      let total = 0;
+      
+      document.querySelectorAll('#orderProductsList input[type="checkbox"]:checked').forEach(checkbox => {
+        const productId = checkbox.value;
+        const price = parseFloat(checkbox.getAttribute('data-price'));
+        const quantity = parseInt(document.getElementById(`qty-${productId}`).value) || 0;
+        
+        total += price * quantity;
+      });
+      
+      document.getElementById('orderTotal').value = `$${total.toFixed(2)}`;
+    }
+
+    // Crear nuevo pedido
+    async function createNewOrder() {
+      showLoading("Creando pedido...");
+      
+      try {
+        if (!currentUser) {
+          showAlert("Debes iniciar sesión para crear pedidos", "error");
+          return;
+        }
+        
+        const businessName = document.getElementById("orderBusiness").value;
+        const businessType = document.getElementById("orderType").value;
+        const orderDate = document.getElementById("orderDate").value;
+        const deliveryDate = document.getElementById("orderDeliveryDate").value;
+        const notes = document.getElementById("orderNotes").value;
+        
+        if (!businessName || !orderDate) {
+          showAlert("Debe completar todos los campos requeridos", "error");
+          return;
+        }
+        
+        // Obtener productos seleccionados
+        const selectedProducts = [];
+        document.querySelectorAll('#orderProductsList input[type="checkbox"]:checked').forEach(checkbox => {
+          const productId = checkbox.value;
+          const quantity = parseInt(document.getElementById(`qty-${productId}`).value) || 1;
+          
+          selectedProducts.push({
+            productId: productId,
+            quantity: quantity
+          });
+        });
+        
+        if (selectedProducts.length === 0) {
+          showAlert("Debe seleccionar al menos un producto", "error");
+          return;
+        }
+        
+        // Calcular total
+        let total = 0;
+        selectedProducts.forEach(item => {
+          const price = parseFloat(document.querySelector(`#orderProductsList input[value="${item.productId}"]`).getAttribute('data-price'));
+          total += price * item.quantity;
+        });
+        
+        // Crear pedido en la base de datos
+        const newOrderRef = await addDoc(collection(db, "orders"), {
+          businessName: businessName,
+          businessType: businessType,
+          products: selectedProducts,
+          orderDate: orderDate,
+          deliveryDate: deliveryDate || null,
+          totalAmount: total,
+          notes: notes || null,
+          status: "pending",
+          createdBy: currentUser.displayName || currentUser.email || 'Usuario',
+          createdAt: new Date().toISOString()
+        });
+        
+        showAlert("Pedido creado correctamente", "success");
+        closeModal('addOrderModal');
+        loadAllOrders(); // Recargar todos los pedidos
+      } catch (error) {
+        console.error("Error al crear pedido:", error);
+        showAlert("Error al crear el pedido", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Manejar selección de imagen
+    function handleImageSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      selectedImageFile = file;
+      
+      const previewContainer = document.getElementById("imagePreviewContainer");
+      const previewImage = document.getElementById("imagePreview");
+      const fileNameDisplay = document.getElementById("fileName");
+      
+      previewContainer.style.display = "block";
+      fileNameDisplay.textContent = file.name;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        previewImage.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Subir imagen a Firebase Storage
+    async function uploadProductImage(file, productId) {
+      if (!file) return null;
+      
+      try {
+        const storageRef = ref(storage, `product-images/${productId}/${file.name}`);
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+        return downloadURL;
+      } catch (error) {
+        console.error("Error al subir imagen:", error);
+        return null;
+      }
+    }
+
+    // Agregar nuevo producto
+    async function addNewProduct() {
+      showLoading("Agregando producto...");
+      
+      try {
+        if (!currentUser) {
+          showAlert("Debes iniciar sesión para agregar productos", "error");
+          return;
+        }
+        
+        const businessName = document.getElementById("addBusiness").value;
+        const name = document.getElementById("addName").value;
+        const code = document.getElementById("addCode").value;
+        const eanUpcCode = document.getElementById("addEAN").value;
+        const type = document.getElementById("addType").value;
+        const quantity = parseInt(document.getElementById("addQuantity").value);
+        const initialQuantity = parseInt(document.getElementById("addInitialQuantity").value);
+        const unit = document.getElementById("addUnit").value;
+        const originalPrice = parseFloat(document.getElementById("addOriginalPrice").value);
+        const profitPercentage = parseFloat(document.getElementById("addProfitPercentage").value);
+        const discount = parseFloat(document.getElementById("addDiscount").value);
+        const expirationDate = document.getElementById("addExpiration").value;
+        const lowStockThreshold = parseInt(document.getElementById("addLowStock").value);
+        const warehouse = document.getElementById("addWarehouse").value;
+        
+        if (!businessName || !name) {
+          showAlert("Debe completar todos los campos requeridos", "error");
+          return;
+        }
+        
+        // Calcular precio con ganancia y descuento
+        const profitAmount = originalPrice * (profitPercentage / 100);
+        const totalPrice = originalPrice + profitAmount;
+        const discountedPrice = totalPrice * (1 - (discount / 100));
+        
+        // Determinar categoría si no se especificó
+        let finalType = type;
+        if (!finalType) {
+          // Intento de auto-detección de categoría basado en el nombre
+          const nameLower = name.toLowerCase();
+          if (nameLower.includes('bebida') || nameLower.includes('refresco') || nameLower.includes('jugo') || nameLower.includes('agua')) {
+            finalType = 'Bebidas';
+          } else if (nameLower.includes('comida') || nameLower.includes('alimento') || nameLower.includes('snack') || nameLower.includes('dulce')) {
+            finalType = 'Alimentos';
+          } else if (nameLower.includes('limpieza') || nameLower.includes('jabón') || nameLower.includes('detergente') || nameLower.includes('limpia')) {
+            finalType = 'Limpieza';
+          } else if (nameLower.includes('electrónic') || nameLower.includes('cable') || nameLower.includes('batería') || nameLower.includes('cargador')) {
+            finalType = 'Electrónica';
+          } else {
+            finalType = 'Otros';
+          }
+        }
+        
+        // Agregar producto a la base de datos
+        const newProductRef = await addDoc(collection(db, "businesses", businessName, "products"), {
+          name: name,
+          code: code,
+          eanUpcCode: eanUpcCode,
+          type: finalType,
+          quantity: quantity,
+          initialQuantity: initialQuantity,
+          unit: unit,
+          originalPrice: originalPrice,
+          profitPercentage: profitPercentage,
+          discount: discount,
+          pricePerUnit: discountedPrice,
+          expirationDate: expirationDate,
+          lowStockThreshold: lowStockThreshold,
+          warehouse: warehouse,
+          addedDate: new Date().toISOString(),
+          lastEditedDate: new Date().toISOString(),
+          userName: currentUser.displayName || currentUser.email || 'Usuario',
+          lastEditedBy: currentUser.displayName || currentUser.email || 'Usuario',
+          lastEditedProfileImage: currentUser.photoURL || 'default-user.jpg',
+          lastQuantityChange: new Date().toISOString()
+        });
+        
+        // Subir imagen si se seleccionó una
+        if (selectedImageFile) {
+          const imageUrl = await uploadProductImage(selectedImageFile, newProductRef.id);
+          if (imageUrl) {
+            await updateDoc(doc(db, "businesses", businessName, "products", newProductRef.id), {
+              imageUrl: imageUrl
+            });
+          }
+        }
+        
+        // Registrar en historial
+        await addDoc(collection(db, "productsHistory"), {
+          businessName: businessName,
+          productName: name,
+          productId: newProductRef.id,
+          editedBy: currentUser.displayName || currentUser.email || 'Usuario',
+          editDate: new Date().toISOString(),
+          action: "Creación",
+          changes: {
+            name: { oldValue: 'N/A', newValue: name },
+            quantity: { oldValue: 0, newValue: quantity },
+            pricePerUnit: { oldValue: 0, newValue: discountedPrice }
+          },
+          userName: currentUser.email || 'N/A',
+          lastEditedProfileImage: currentUser.photoURL || 'default-user.jpg'
+        });
+        
+        showAlert("Producto agregado correctamente", "success");
+        closeModal('productModal');
+        loadAllProducts(); // Recargar todos los productos
+      } catch (error) {
+        console.error("Error al agregar producto:", error);
+        showAlert("Error al agregar el producto", "error");
+      } finally {
+        hideLoading();
+        selectedImageFile = null;
+      }
+    }
+
+    // Generar reporte Excel
+    async function generateExcelReport() {
+      showLoading("Generando reporte...");
+      
+      try {
+        // Crear un libro de trabajo
+        const wb = XLSX.utils.book_new();
+        
+        // Crear una hoja de cálculo con los datos
+        const wsData = [
+          // Encabezados
+          [
+            "Negocio", "Nombre", "Código", "EAN/UPC", "Categoría", 
+            "Cantidad", "Unidad", "Precio", "Precio Original", 
+            "% Ganancia", "% Descuento", "Fecha Vencimiento", "Almacén", "Estado"
+          ],
+          // Datos
+          ...allProducts.map(product => {
+            const currentDate = new Date();
+            const expirationDate = product.expirationDate ? new Date(product.expirationDate) : null;
+            const daysUntilExpiration = expirationDate ? Math.ceil((expirationDate - currentDate) / (1000 * 60 * 60 * 24)) : null;
+            
+            let status = '';
+            if (product.quantity === 0) {
+              status = 'AGOTADO';
+            } else if (product.quantity <= (product.lowStockThreshold || 10)) {
+              status = 'BAJO STOCK';
+            } else {
+              status = 'DISPONIBLE';
+            }
+            
+            if (daysUntilExpiration !== null) {
+              if (daysUntilExpiration < 0) {
+                status += ', VENCIDO';
+              } else if (daysUntilExpiration <= 30) {
+                status += `, VENCE EN ${daysUntilExpiration} DÍAS`;
+              }
+            }
+            
+            return [
+              product.businessName || 'N/A',
+              product.name || 'N/A',
+              product.code || 'N/A',
+              product.eanUpcCode || 'N/A',
+              product.type || 'N/A',
+              product.quantity || 0,
+              product.unit || 'N/A',
+              product.pricePerUnit?.toFixed(2) || '0.00',
+              product.originalPrice?.toFixed(2) || '0.00',
+              product.profitPercentage || '0',
+              product.discount || '0',
+              expirationDate?.toLocaleDateString() || 'N/A',
+              product.warehouse || 'N/A',
+              status
+            ];
+          })
+        ];
+        
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        
+        // Agregar la hoja al libro de trabajo
+        XLSX.utils.book_append_sheet(wb, ws, "Inventario");
+        
+        // Generar el archivo Excel y descargarlo
+        const today = new Date();
+        const dateStr = today.toISOString().split('T')[0];
+        XLSX.writeFile(wb, `inventario_${dateStr}.xlsx`);
+        
+      } catch (error) {
+        console.error("Error al generar Excel:", error);
+        showAlert("Error al generar el reporte Excel", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Mostrar formulario para agregar cliente (con campos adicionales)
+    async function showAddClientForm() {
+      const formHTML = `
+        <div class="client-form">
+          <div class="client-avatar-container">
+            <img id="clientAvatarPreview" class="client-avatar" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" alt="Foto del cliente">
+            <label for="clientImage" class="file-input-label">
+              <i class="fas fa-camera"></i> Seleccionar Foto
+            </label>
+            <input type="file" id="clientImage" class="file-input" accept="image/*" onchange="handleClientImageSelect(event)">
+          </div>
+          
+          <div class="form-group">
+            <label for="clientName">Nombre completo:</label>
+            <input type="text" id="clientName" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="clientId">Cédula/Identificación:</label>
+            <input type="text" id="clientId" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="clientPhone">Teléfono:</label>
+            <input type="tel" id="clientPhone">
+          </div>
+          
+          <div class="form-group">
+            <label for="clientEmail">Email:</label>
+            <input type="email" id="clientEmail">
+          </div>
+          
+          <div class="form-group">
+            <label for="clientAddress">Dirección:</label>
+            <input type="text" id="clientAddress">
+          </div>
+          
+          <div class="form-group">
+            <label for="clientGuarantee">Garantía (opcional):</label>
+            <input type="text" id="clientGuarantee">
+          </div>
+          
+          <div class="form-group">
+            <label for="clientOccupation">Ocupación:</label>
+            <input type="text" id="clientOccupation">
+          </div>
+          
+          <div class="form-group full-width">
+            <label for="clientNotes">Notas adicionales:</label>
+            <textarea id="clientNotes" rows="3"></textarea>
+          </div>
+          
+          <div class="form-actions">
+            <button class="btn btn-secondary" onclick="closeModal('addClientModal')">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button class="btn" onclick="addNewClient()">
+              <i class="fas fa-plus-circle"></i> Agregar Cliente
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('addClientForm').innerHTML = formHTML;
+      showModal('addClientModal');
+    }
+
+    // Manejar selección de imagen de cliente
+    function handleClientImageSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      selectedClientImageFile = file;
+      const previewImage = document.getElementById("clientAvatarPreview");
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        previewImage.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Subir imagen de cliente a Firebase Storage
+    async function uploadClientImage(file, clientId) {
+      if (!file) return null;
+      
+      try {
+        const storageRef = ref(storage, `client-images/${clientId}/${file.name}`);
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+        return downloadURL;
+      } catch (error) {
+        console.error("Error al subir imagen de cliente:", error);
+        return null;
+      }
+    }
+
+    // Agregar nuevo cliente
+    async function addNewClient() {
+      showLoading("Agregando cliente...");
+      
+      try {
+        if (!currentUser) {
+          showAlert("Debes iniciar sesión para agregar clientes", "error");
+          return;
+        }
+        
+        const name = document.getElementById("clientName").value;
+        const id = document.getElementById("clientId").value;
+        const phone = document.getElementById("clientPhone").value;
+        const email = document.getElementById("clientEmail").value;
+        const address = document.getElementById("clientAddress").value;
+        const guarantee = document.getElementById("clientGuarantee").value;
+        const occupation = document.getElementById("clientOccupation").value;
+        const notes = document.getElementById("clientNotes").value;
+        
+        if (!name || !id) {
+          showAlert("Debe completar todos los campos requeridos", "error");
+          return;
+        }
+        
+        // Agregar cliente a la base de datos
+        const newClientRef = await addDoc(collection(db, "clients"), {
+          name: name,
+          id: id,
+          phone: phone || null,
+          email: email || null,
+          address: address || null,
+          guarantee: guarantee || null,
+          occupation: occupation || null,
+          notes: notes || null,
+          addedDate: new Date().toISOString(),
+          addedBy: currentUser.displayName || currentUser.email || 'Usuario',
+          totalDebt: 0,
+          debtHistory: []
+        });
+        
+        // Subir imagen si se seleccionó una
+        if (selectedClientImageFile) {
+          const imageUrl = await uploadClientImage(selectedClientImageFile, newClientRef.id);
+          if (imageUrl) {
+            await updateDoc(doc(db, "clients", newClientRef.id), {
+              imageUrl: imageUrl
+            });
+          }
+        }
+        
+        showAlert("Cliente agregado correctamente", "success");
+        closeModal('addClientModal');
+        loadAllClients(); // Recargar todos los clientes
+      } catch (error) {
+        console.error("Error al agregar cliente:", error);
+        showAlert("Error al agregar el cliente", "error");
+      } finally {
+        hideLoading();
+        selectedClientImageFile = null;
+      }
+    }
+
+    // Cargar todos los clientes
+    async function loadAllClients() {
+      showLoading("Cargando clientes...");
+      
+      try {
+        const clientsQuery = await getDocs(collection(db, "clients"));
+        allClients = clientsQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      } catch (error) {
+        console.error("Error al cargar clientes:", error);
+        showAlert("Error al cargar los clientes", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Mostrar lista de clientes
+    async function showClientsList() {
+      showLoading("Cargando clientes...");
+      
+      try {
+        await loadAllClients();
+        
+        if (allClients.length === 0) {
+          document.getElementById('clientsList').innerHTML = '<div class="no-results"><p>No hay clientes registrados</p></div>';
+          return;
+        }
+        
+        let html = '<div style="display: grid; gap: 10px;">';
+        allClients.forEach(client => {
+          html += `
+            <div class="client-card" style="display: flex; align-items: center; gap: 15px; padding: 10px; background-color: var(--card-bg); border-radius: var(--border-radius); cursor: pointer;" data-id="${client.id}">
+              <img src="${client.imageUrl || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'}" 
+                   style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">
+              <div>
+                <div style="font-weight: 600;">${client.name}</div>
+                <div style="font-size: 0.9rem; color: #95a5a6;">Cédula: ${client.id}</div>
+                ${client.totalDebt > 0 ? `<div style="font-size: 0.9rem; color: var(--danger-color);">Deuda: ${formatCurrency(client.totalDebt)}</div>` : ''}
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+        
+        document.getElementById('clientsList').innerHTML = html;
+        
+        // Agregar event listeners a las tarjetas de cliente
+        document.querySelectorAll('.client-card').forEach(card => {
+          card.addEventListener('click', function() {
+            const clientId = this.getAttribute('data-id');
+            showClientDetails(clientId);
+          });
+        });
+        
+        // Event listener para búsqueda
+        document.getElementById('clientSearchInput').addEventListener('input', function() {
+          const searchTerm = this.value.toLowerCase();
+          const clientCards = document.querySelectorAll('.client-card');
+          
+          clientCards.forEach(card => {
+            const clientName = card.querySelector('div > div:first-child').textContent.toLowerCase();
+            const clientId = card.querySelector('div > div:nth-child(2)').textContent.toLowerCase();
+            
+            if (clientName.includes(searchTerm) || clientId.includes(searchTerm)) {
+              card.style.display = 'flex';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+        
+        showModal('viewClientsModal');
+      } catch (error) {
+        console.error("Error al cargar clientes:", error);
+        showAlert("Error al cargar los clientes", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Mostrar detalles del cliente
+    async function showClientDetails(clientId) {
+      showLoading("Cargando detalles del cliente...");
+      
+      try {
+        const clientDoc = await getDoc(doc(db, "clients", clientId));
+        
+        if (!clientDoc.exists()) {
+          showAlert("El cliente no existe", "error");
+          return;
+        }
+        
+        const clientData = clientDoc.data();
+        currentClient = { id: clientId, ...clientData };
+        
+        const detailsHTML = `
+          <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
+            <div class="client-avatar-container">
+              <img src="${clientData.imageUrl || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'}" 
+                   class="client-avatar" alt="Foto del cliente">
+            </div>
+            <div>
+              <h3>${clientData.name}</h3>
+              <div class="detail-row">
+                <span class="detail-label">Cédula:</span>
+                <span class="detail-value">${clientData.id || 'N/A'}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Teléfono:</span>
+                <span class="detail-value">${clientData.phone || 'N/A'}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Email:</span>
+                <span class="detail-value">${clientData.email || 'N/A'}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Dirección:</span>
+                <span class="detail-value">${clientData.address || 'N/A'}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Garantía:</span>
+                <span class="detail-value">${clientData.guarantee || 'N/A'}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Ocupación:</span>
+                <span class="detail-value">${clientData.occupation || 'N/A'}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Deuda total:</span>
+                <span class="detail-value" style="color: ${clientData.totalDebt > 0 ? 'var(--danger-color)' : 'var(--success-color)'}; font-weight: bold;">
+                  ${formatCurrency(clientData.totalDebt || 0)}
+                </span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Agregado por:</span>
+                <span class="detail-value">${clientData.addedBy || 'N/A'}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Fecha registro:</span>
+                <span class="detail-value">${formatDate(clientData.addedDate)}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div style="margin-top: 20px;">
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+              <button class="btn" onclick="showClientPaymentForm('${clientId})" ${clientData.totalDebt <= 0 ? 'disabled' : ''}>
+                <i class="fas fa-money-bill-wave"></i> Registrar Pago
+              </button>
+              <button class="btn" onclick="showClientDebts('${clientId}')">
+                <i class="fas fa-file-invoice-dollar"></i> Ver Deudas
+              </button>
+              <button class="btn" onclick="showSellToClientForm('${clientId}')">
+                <i class="fas fa-cart-plus"></i> Vender a Crédito
+              </button>
+            </div>
+            
+            <div class="form-group">
+              <label>Notas:</label>
+              <div style="background-color: var(--card-bg); padding: 10px; border-radius: var(--border-radius);">
+                ${clientData.notes || 'No hay notas adicionales'}
+              </div>
+            </div>
+          </div>
+        `;
+        
+        showModal('clientDetailModal', detailsHTML, "Detalles del Cliente");
+      } catch (error) {
+        console.error("Error al cargar detalles del cliente:", error);
+        showAlert("Error al cargar los detalles del cliente", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Mostrar formulario de pago para cliente
+    async function showClientPaymentForm(clientId) {
+      const clientDoc = await getDoc(doc(db, "clients", clientId));
+      if (!clientDoc.exists()) return;
+      
+      const clientData = clientDoc.data();
+      
+      const paymentHTML = `
+        <div>
+          <h4>Registrar pago para ${clientData.name}</h4>
+          <p>Deuda actual: <strong style="color: var(--danger-color);">${formatCurrency(clientData.totalDebt || 0)}</strong></p>
+          
+          <div class="form-group">
+            <label for="paymentAmount">Monto a pagar:</label>
+            <input type="number" id="paymentAmount" min="0.01" max="${clientData.totalDebt}" step="0.01" value="${clientData.totalDebt}" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="paymentMethod">Método de pago:</label>
+            <select id="paymentMethod" required>
+              <option value="Efectivo">Efectivo</option>
+              <option value="Transferencia">Transferencia</option>
+              <option value="Tarjeta">Tarjeta</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="paymentNotes">Notas:</label>
+            <textarea id="paymentNotes" rows="2"></textarea>
+          </div>
+          
+          <div class="form-actions">
+            <button class="btn btn-secondary" onclick="closeModal('clientPaymentModal')">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button class="btn" onclick="registerClientPayment('${clientId}')">
+              <i class="fas fa-check-circle"></i> Registrar Pago
+            </button>
+          </div>
+        </div>
+      `;
+      
+      showModal('clientPaymentModal', paymentHTML, "Registrar Pago");
+    }
+
+    // Registrar pago de cliente
+    async function registerClientPayment(clientId) {
+      showLoading("Registrando pago...");
+      
+      try {
+        if (!currentUser) {
+          showAlert("Debes iniciar sesión para registrar pagos", "error");
+          return;
+        }
+        
+        const paymentAmount = parseFloat(document.getElementById("paymentAmount").value);
+        const paymentMethod = document.getElementById("paymentMethod").value;
+        const paymentNotes = document.getElementById("paymentNotes").value;
+        
+        if (!paymentAmount || paymentAmount <= 0) {
+          showAlert("Debe ingresar un monto válido", "error");
+          return;
+        }
+        
+        // Obtener datos actuales del cliente
+        const clientDoc = await getDoc(doc(db, "clients", clientId));
+        if (!clientDoc.exists()) {
+          showAlert("El cliente no existe", "error");
+          return;
+        }
+        
+        const clientData = clientDoc.data();
+        const currentDebt = clientData.totalDebt || 0;
+        
+        if (paymentAmount > currentDebt) {
+          showAlert("El monto no puede ser mayor a la deuda actual", "error");
+          return;
+        }
+        
+        const newDebt = currentDebt - paymentAmount;
+        
+        // Registrar transacción en el historial
+        const paymentRecord = {
+          type: 'payment',
+          date: new Date().toISOString(),
+          amount: paymentAmount,
+          method: paymentMethod,
+          notes: paymentNotes || null,
+          processedBy: currentUser.displayName || currentUser.email || 'Usuario'
+        };
+        
+        // Actualizar datos del cliente
+        await updateDoc(doc(db, "clients", clientId), {
+          totalDebt: newDebt,
+          debtHistory: [...(clientData.debtHistory || []), paymentRecord]
+        });
+        
+        showAlert(`Pago de ${formatCurrency(paymentAmount)} registrado correctamente`, "success");
+        closeModal('clientPaymentModal');
+        showClientDetails(clientId); // Actualizar vista de detalles
+      } catch (error) {
+        console.error("Error al registrar pago:", error);
+        showAlert("Error al registrar el pago", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Mostrar deudas del cliente
+    async function showClientDebts(clientId) {
+      showLoading("Cargando deudas...");
+      
+      try {
+        const clientDoc = await getDoc(doc(db, "clients", clientId));
+        if (!clientDoc.exists()) {
+          showAlert("El cliente no existe", "error");
+          return;
+        }
+        
+        const clientData = clientDoc.data();
+        const debtHistory = clientData.debtHistory || [];
+        
+        if (debtHistory.length === 0) {
+          showModal('clientDebtsModal', `
+            <h3>Historial de deudas para ${clientData.name}</h3>
+            <div class="debt-status debt-status-paid">
+              <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
+              <h4>No hay deudas registradas</h4>
+              <p>Este cliente no tiene historial de deudas</p>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-secondary" onclick="closeModal('clientDebtsModal')">
+                <i class="fas fa-times"></i> Cerrar
+            </button>
+            </div>
+          `);
+          return;
+        }
+        
+        // Ordenar historial por fecha (más reciente primero)
+        const sortedHistory = [...debtHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        let html = `
+          <h3>Historial de deudas para ${clientData.name}</h3>
+          <p>Deuda actual: <strong style="color: ${clientData.totalDebt > 0 ? 'var(--danger-color)' : 'var(--success-color)'};">${formatCurrency(clientData.totalDebt || 0)}</strong></p>
+          
+          ${clientData.totalDebt <= 0 ? `
+            <div class="debt-status debt-status-paid">
+              <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>
+              <h4>Deuda saldada completamente</h4>
+              <p>El cliente no tiene deudas pendientes</p>
+            </div>
+          ` : ''}
+          
+          <div class="debt-history">
+        `;
+        
+        sortedHistory.forEach(debt => {
+          const isPayment = debt.type === 'payment';
+          const amount = debt.amount || debt.totalAmount || 0;
+          
+          html += `
+            <div class="debt-item">
+              <div class="debt-header">
+                <div class="debt-date">${formatDate(debt.date)}</div>
+                <div>
+                  <span class="debt-amount" style="color: ${isPayment ? 'var(--success-color)' : 'var(--danger-color)'};">
+                    ${isPayment ? '-' : '+'}${formatCurrency(amount)}
+                  </span>
+                  <span class="debt-type debt-type-${isPayment ? 'payment' : 'sale'}">
+                    ${isPayment ? 'PAGO' : 'VENTA'}
+                  </span>
+                </div>
+              </div>
+              
+              ${isPayment ? `
+                <div>
+                  <p><strong>Método:</strong> ${debt.method || 'N/A'}</p>
+                  <p><strong>Notas:</strong> ${debt.notes || 'Ninguna'}</p>
+                  <p><strong>Registrado por:</strong> ${debt.processedBy || 'N/A'}</p>
+                </div>
+              ` : `
+                <div class="debt-products">
+                  ${debt.products ? debt.products.map(p => `
+                    <div class="debt-product">
+                      <span>${p.quantity} x ${p.name}</span>
+                      <span>${formatCurrency(p.price * p.quantity)}</span>
+                    </div>
+                  `).join('') : 'N/A'}
+                  <p><strong>Notas:</strong> ${debt.notes || 'Ninguna'}</p>
+                  <p><strong>Registrado por:</strong> ${debt.processedBy || 'N/A'}</p>
+                </div>
+              `}
+            </div>
+          `;
+        });
+        
+        html += `
+          </div>
+          
+          <div class="form-actions">
+            <button class="btn btn-secondary" onclick="closeModal('clientDebtsModal')">
+              <i class="fas fa-times"></i> Cerrar
+            </button>
+          </div>
+        `;
+        
+        showModal('clientDebtsModal', html, "Historial de Deudas");
+      } catch (error) {
+        console.error("Error al cargar deudas:", error);
+        showAlert("Error al cargar las deudas del cliente", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Mostrar formulario para vender a crédito a un cliente
+    async function showSellToClientForm(clientId) {
+      showLoading("Preparando formulario...");
+      
+      try {
+        const clientDoc = await getDoc(doc(db, "clients", clientId));
+        if (!clientDoc.exists()) {
+          showAlert("El cliente no existe", "error");
+          return;
+        }
+        
+        const clientData = clientDoc.data();
+        
+        const formHTML = `
+          <div>
+            <h4>Vender a crédito a ${clientData.name}</h4>
+            <p>Deuda actual: <strong style="color: ${clientData.totalDebt > 0 ? 'var(--danger-color)' : 'var(--success-color)'};">${formatCurrency(clientData.totalDebt || 0)}</strong></p>
+            
+            <div class="form-group">
+              <label>Buscar producto:</label>
+              <div style="display: flex; gap: 10px;">
+                <input type="text" id="productSearchEAN" placeholder="Código EAN/UPC" style="flex: 1;">
+                <input type="text" id="productSearchName" placeholder="Nombre del producto" style="flex: 2;">
+                <button class="btn" onclick="searchProductForSale()" style="flex: 0;">
+                  <i class="fas fa-search"></i> Buscar
+                </button>
+              </div>
+            </div>
+            
+            <div id="productSearchResults" style="margin: 15px 0;">
+              <p>Busque productos por código EAN o nombre</p>
+            </div>
+            
+            <div class="form-group">
+              <label>Productos seleccionados:</label>
+              <div id="selectedProductsList" class="client-products-list">
+                <p>No hay productos seleccionados</p>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="saleNotes">Notas:</label>
+              <textarea id="saleNotes" rows="3"></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label>Total:</label>
+              <input type="text" id="saleTotal" value="${formatCurrency(0)}" readonly style="font-size: 1.2rem; font-weight: bold; text-align: right;">
+            </div>
+            
+            <div class="form-actions">
+              <button class="btn btn-secondary" onclick="closeModal('sellToClientModal')">
+                <i class="fas fa-times"></i> Cancelar
+              </button>
+              <button class="btn" onclick="registerSaleToClient('${clientId}')">
+                <i class="fas fa-check-circle"></i> Registrar Venta
+              </button>
+            </div>
+          </div>
+        `;
+        
+        document.getElementById('sellToClientContent').innerHTML = formHTML;
+        
+        // Event listeners para búsqueda con Enter
+        document.getElementById('productSearchEAN').addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') searchProductForSale();
+        });
+        
+        document.getElementById('productSearchName').addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') searchProductForSale();
+        });
+        
+        showModal('sellToClientModal');
+      } catch (error) {
+        console.error("Error al cargar formulario:", error);
+        showAlert("Error al cargar el formulario de venta", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Buscar producto para venta a crédito
+    async function searchProductForSale() {
+      showLoading("Buscando producto...");
+      
+      try {
+        const eanSearch = document.getElementById('productSearchEAN').value.trim();
+        const nameSearch = document.getElementById('productSearchName').value.trim().toLowerCase();
+        
+        if (!eanSearch && !nameSearch) {
+          showAlert("Ingrese un código EAN o nombre para buscar", "error");
+          return;
+        }
+        
+        let matchingProducts = [];
+        
+        // Buscar en todos los productos
+        for (const business of allBusinesses) {
+          const productsQuery = await getDocs(collection(db, "businesses", business.name, "products"));
+          
+          productsQuery.forEach(doc => {
+            const product = doc.data();
+            const matchesEAN = eanSearch && product.eanUpcCode && product.eanUpcCode.includes(eanSearch);
+            const matchesName = nameSearch && product.name.toLowerCase().includes(nameSearch);
+            
+            if (matchesEAN || matchesName) {
+              matchingProducts.push({
+                id: doc.id,
+                businessName: business.name,
+                ...product
+              });
+            }
+          });
+        }
+        
+        const resultsContainer = document.getElementById('productSearchResults');
+        
+        if (matchingProducts.length === 0) {
+          resultsContainer.innerHTML = '<p>No se encontraron productos</p>';
+          return;
+        }
+        
+        let html = '<div style="display: grid; gap: 10px;">';
+        matchingProducts.forEach(product => {
+          html += `
+            <div style="display: flex; align-items: center; gap: 10px; background-color: var(--card-bg); padding: 10px; border-radius: var(--border-radius);">
+              <div style="flex: 1;">
+                <div style="font-weight: 600;">${product.name}</div>
+                <div style="font-size: 0.9rem;">Código: ${product.code || 'N/A'} | EAN: ${product.eanUpcCode || 'N/A'}</div>
+                <div style="font-size: 0.9rem;">Precio: ${formatCurrency(product.pricePerUnit || 0)} | Stock: ${product.quantity}</div>
+              </div>
+              <input type="number" id="productQty-${product.id}" min="1" max="${product.quantity}" value="1" style="width: 60px;">
+              <button class="btn" onclick="addProductToSale('${product.id}', '${product.businessName}', '${product.name}', ${product.pricePerUnit || 0})" style="padding: 8px;">
+                <i class="fas fa-plus"></i> Agregar
+              </button>
+            </div>
+          `;
+        });
+        html += '</div>';
+        
+        resultsContainer.innerHTML = html;
+      } catch (error) {
+        console.error("Error al buscar productos:", error);
+        showAlert("Error al buscar productos", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Agregar producto a la lista de venta
+    function addProductToSale(productId, businessName, productName, price) {
+      const quantity = parseInt(document.getElementById(`productQty-${productId}`).value) || 1;
+      const productsList = document.getElementById('selectedProductsList');
+      
+      // Verificar si el producto ya está en la lista
+      const existingItem = document.getElementById(`selectedProduct-${productId}`);
+      if (existingItem) {
+        showAlert("Este producto ya está en la lista", "info");
+        return;
+      }
+      
+      // Crear elemento de producto
+      const productItem = document.createElement('div');
+      productItem.className = 'client-product-item';
+      productItem.id = `selectedProduct-${productId}`;
+      productItem.innerHTML = `
+        <div>
+          <div>${productName}</div>
+          <div style="font-size: 0.8rem; color: #95a5a6;">${quantity} x ${formatCurrency(price)} = ${formatCurrency(quantity * price)}</div>
+        </div>
+        <div class="client-product-actions">
+          <button class="btn btn-secondary" style="padding: 5px;" onclick="updateProductQuantity('${productId}', ${price})">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="btn btn-danger" style="padding: 5px;" onclick="removeProductFromSale('${productId}')">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      `;
+      
+      // Agregar a la lista
+      if (productsList.querySelector('p')) {
+        productsList.innerHTML = '';
+      }
+      productsList.appendChild(productItem);
+      
+      // Actualizar total
+      updateSaleTotal();
+    }
+
+    // Actualizar cantidad de producto en la venta
+    function updateProductQuantity(productId, price) {
+      const newQuantity = prompt("Ingrese la nueva cantidad:", "1");
+      if (!newQuantity || isNaN(newQuantity) || parseInt(newQuantity) <= 0) return;
+      
+      const quantity = parseInt(newQuantity);
+      const productItem = document.getElementById(`selectedProduct-${productId}`);
+      if (!productItem) return;
+      
+      productItem.querySelector('div > div:nth-child(2)').textContent = 
+        `${quantity} x ${formatCurrency(price)} = ${formatCurrency(quantity * price)}`;
+      
+      // Actualizar total
+      updateSaleTotal();
+    }
+
+    // Eliminar producto de la lista de venta
+    function removeProductFromSale(productId) {
+      const productItem = document.getElementById(`selectedProduct-${productId}`);
+      if (!productItem) return;
+      
+      productItem.remove();
+      
+      // Si no quedan productos, mostrar mensaje
+      const productsList = document.getElementById('selectedProductsList');
+      if (productsList.children.length === 0) {
+        productsList.innerHTML = '<p>No hay productos seleccionados</p>';
+      }
+      
+      // Actualizar total
+      updateSaleTotal();
+    }
+
+    // Actualizar total de la venta
+    function updateSaleTotal() {
+      let total = 0;
+      const productItems = document.querySelectorAll('#selectedProductsList > div[id^="selectedProduct-"]');
+      
+      productItems.forEach(item => {
+        const priceText = item.querySelector('div > div:nth-child(2)').textContent;
+        const subtotal = parseFloat(priceText.split('= $')[1].replace(/,/g, ''));
+        total += subtotal;
+      });
+      
+      document.getElementById('saleTotal').value = formatCurrency(total);
+    }
+
+    // Registrar venta a crédito para un cliente
+    async function registerSaleToClient(clientId) {
+      showLoading("Registrando venta...");
+      
+      try {
+        if (!currentUser) {
+          showAlert("Debes iniciar sesión para registrar ventas", "error");
+          return;
+        }
+        
+        // Obtener productos seleccionados
+        const selectedProducts = [];
+        const productItems = document.querySelectorAll('#selectedProductsList > div[id^="selectedProduct-"]');
+        
+        if (productItems.length === 0) {
+          showAlert("Debe seleccionar al menos un producto", "error");
+          return;
+        }
+        
+        // Calcular total
+        let total = 0;
+        productItems.forEach(item => {
+          const productId = item.id.replace('selectedProduct-', '');
+          const priceText = item.querySelector('div > div:nth-child(2)').textContent;
+          const [quantity, price] = priceText.split(' x $');
+          const subtotal = parseFloat(quantity) * parseFloat(price.split(' = ')[0].replace(/,/g, ''));
+          
+          selectedProducts.push({
+            productId: productId,
+            name: item.querySelector('div > div:first-child').textContent,
+            price: parseFloat(price.split(' = ')[0].replace(/,/g, '')),
+            quantity: parseInt(quantity),
+            subtotal: subtotal
+          });
+          
+          total += subtotal;
+        });
+        
+        // Obtener datos actuales del cliente
+        const clientDoc = await getDoc(doc(db, "clients", clientId));
+        if (!clientDoc.exists()) {
+          showAlert("El cliente no existe", "error");
+          return;
+        }
+        
+        const clientData = clientDoc.data();
+        const newDebt = (clientData.totalDebt || 0) + total;
+        
+        // Registrar transacción en el historial
+        const saleRecord = {
+          type: 'sale',
+          date: new Date().toISOString(),
+          products: selectedProducts,
+          totalAmount: total,
+          notes: document.getElementById('saleNotes').value || null,
+          processedBy: currentUser.displayName || currentUser.email || 'Usuario'
+        };
+        
+        // Actualizar datos del cliente
+        await updateDoc(doc(db, "clients", clientId), {
+          totalDebt: newDebt,
+          debtHistory: [...(clientData.debtHistory || []), saleRecord]
+        });
+        
+        // Actualizar stock de productos
+        for (const product of selectedProducts) {
+          // Buscar el negocio que tiene este producto
+          for (const business of allBusinesses) {
+            const productDoc = await getDoc(doc(db, "businesses", business.name, "products", product.productId));
+            if (productDoc.exists()) {
+              const productData = productDoc.data();
+              const newQuantity = productData.quantity - product.quantity;
+              
+              await updateDoc(doc(db, "businesses", business.name, "products", product.productId), {
+                quantity: newQuantity,
+                lastEditedDate: new Date().toISOString(),
+                lastEditedBy: currentUser.displayName || currentUser.email || 'Usuario'
+              });
+              
+              // Registrar en historial
+              await addDoc(collection(db, "productsHistory"), {
+                businessName: business.name,
+                productName: productData.name,
+                productId: product.productId,
+                editedBy: currentUser.displayName || currentUser.email || 'Usuario',
+                editDate: new Date().toISOString(),
+                action: "Venta a crédito",
+                changes: {
+                  quantity: { oldValue: productData.quantity, newValue: newQuantity }
+                },
+                userName: currentUser.email || 'N/A',
+                lastEditedProfileImage: currentUser.photoURL || 'default-user.jpg'
+              });
+              
+              break;
+            }
+          }
+        }
+        
+        showAlert(`Venta a crédito por ${formatCurrency(total)} registrada correctamente`, "success");
+        closeModal('sellToClientModal');
+        showClientDetails(clientId); // Actualizar vista de detalles
+        loadAllProducts(); // Actualizar inventario
+      } catch (error) {
+        console.error("Error al registrar venta:", error);
+        showAlert("Error al registrar la venta", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Cerrar sesión
+    function logout() {
+      showConfirmation("¿Estás seguro de que deseas cerrar sesión?", "Cerrar Sesión", async () => {
+        showLoading("Cerrando sesión...");
+        try {
+          await signOut(auth);
+          window.location.reload();
+        } catch (error) {
+          console.error("Error al cerrar sesión:", error);
+          showAlert("Error al cerrar sesión", "error");
+        } finally {
+          hideLoading();
+        }
+      });
+    }
+
+    // Inicializar la aplicación
+    function initApp() {
+      // Configurar eventos
+      document.getElementById("searchToggle").addEventListener("click", function() {
+        const searchSection = document.getElementById("searchSection");
+        searchSection.classList.toggle("active");
+        
+        if (searchSection.classList.contains("active")) {
+          document.getElementById("searchInput").focus();
+        }
+      });
+
+      document.getElementById("searchInput").addEventListener("input", filterProducts);
+      document.getElementById("closeModal").addEventListener("click", () => closeModal('productModal'));
+      document.getElementById("closeBusinessModal").addEventListener("click", () => closeModal('addBusinessModal'));
+      document.getElementById("closeOrderModal").addEventListener("click", () => closeModal('addOrderModal'));
+      document.getElementById("closeClientModal").addEventListener("click", () => closeModal('addClientModal'));
+      document.getElementById("closeViewClientsModal").addEventListener("click", () => closeModal('viewClientsModal'));
+      document.getElementById("closeClientDetailModal").addEventListener("click", () => closeModal('clientDetailModal'));
+      document.getElementById("closeClientPaymentModal").addEventListener("click", () => closeModal('clientPaymentModal'));
+      document.getElementById("closeClientDebtsModal").addEventListener("click", () => closeModal('clientDebtsModal'));
+      document.getElementById("closeSellToClientModal").addEventListener("click", () => closeModal('sellToClientModal'));
+      
+      document.getElementById("notificationBell").addEventListener("click", function(e) {
+        e.stopPropagation();
+        document.getElementById("notificationPanel").classList.toggle("show");
+      });
+      document.getElementById("clearNotifications").addEventListener("click", function(e) {
+        e.stopPropagation();
+        document.getElementById("notificationBadge").textContent = '0';
+        document.getElementById("notificationList").querySelectorAll('.unread').forEach(item => {
+          item.classList.remove('unread');
+        });
+      });
+      
+      document.getElementById("addProductBtn").addEventListener("click", showAddProductForm);
+      document.getElementById("addSupplierBtn").addEventListener("click", showAddBusinessForm);
+      document.getElementById("createOrderBtn").addEventListener("click", showAddOrderForm);
+      document.getElementById("generateReportBtn").addEventListener("click", generateExcelReport);
+      document.getElementById("addClientBtn").addEventListener("click", showAddClientForm);
+      
+      document.getElementById("homeLink").addEventListener("click", function(e) {
+        e.preventDefault();
+        document.getElementById("dashboardSection").style.display = "block";
+        document.getElementById("ordersSection").style.display = "none";
+      });
+      
+      document.getElementById("ordersLink").addEventListener("click", function(e) {
+        e.preventDefault();
+        document.getElementById("dashboardSection").style.display = "none";
+        document.getElementById("ordersSection").style.display = "block";
+        loadAllOrders();
+      });
+      
+      document.getElementById("logoutLink").addEventListener("click", function(e) {
+        e.preventDefault();
+        logout();
+      });
+
+      // Cerrar paneles al hacer clic fuera de ellos
+      document.addEventListener("click", function(e) {
+        if (!e.target.closest(".notification-panel") && !e.target.closest(".notification-bell")) {
+          document.getElementById("notificationPanel").classList.remove("show");
+        }
+      });
+
+      // Mostrar nombres de íconos al pasar el mouse en sidebar
+      const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
+      sidebarLinks.forEach(link => {
+        const icon = link.querySelector('i');
+        const text = link.querySelector('span').textContent;
+        
+        const tooltip = document.createElement('span');
+        tooltip.className = 'tooltip';
+        tooltip.textContent = text;
+        link.appendChild(tooltip);
+      });
+    }
+
+    // Funciones globales para llamadas desde HTML
+    window.handleImageSelect = handleImageSelect;
+    window.handleBusinessImageSelect = handleBusinessImageSelect;
+    window.handleClientImageSelect = handleClientImageSelect;
+    window.addNewProduct = addNewProduct;
+    window.addNewBusiness = addNewBusiness;
+    window.createNewOrder = createNewOrder;
+    window.addNewClient = addNewClient;
+    window.showClientsList = showClientsList;
+    window.showClientDetails = showClientDetails;
+    window.showClientPaymentForm = showClientPaymentForm;
+    window.showClientDebts = showClientDebts;
+    window.showSellToClientForm = showSellToClientForm;
+    window.searchProductForSale = searchProductForSale;
+    window.addProductToSale = addProductToSale;
+    window.updateProductQuantity = updateProductQuantity;
+    window.removeProductFromSale = removeProductFromSale;
+    window.registerSaleToClient = registerSaleToClient;
+    window.registerClientPayment = registerClientPayment;
+    window.formatCurrency = formatCurrency;
+
+    // Escuchar cambios en la autenticación
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('currentUserName').textContent = user.displayName || user.email || 'Usuario';
+        
+        // Actualizar foto de perfil
+        if (user.photoURL) {
+          document.getElementById('userAvatar').src = user.photoURL;
+        }
+        
+        // Cargar datos iniciales
+        loadBusinessDetails(); // Cargar logo y nombre de empresa
+        loadAllProducts();
+        loadAllClients();
+      } else {
+        // Usuario no autenticado
+        document.getElementById('currentUserName').textContent = 'Invitado';
+      }
+    });
+
+    // Iniciar la aplicación cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
