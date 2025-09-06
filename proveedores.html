@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Proveedores</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #16a085;
+      --primary-dark: #138a72;
+      --secondary-color: #2c3e50;
+      --secondary-light: #34495e;
+      --danger-color: #e74c3c;
+      --warning-color: #f39c12;
+      --success-color: #2ecc71;
+      --info-color: #3498db;
+      --text-light: #ecf0f1;
+      --text-dark: #2c3e50;
+      --card-bg: #34495e;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--secondary-color);
+      color: var(--text-light);
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: var(--border-radius);
+      background-color: var(--primary-color);
+      color: white;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-light);
+    }
+
+    .btn-secondary:hover {
+      background-color: #3d566e;
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+    }
+
+    .btn-success:hover {
+      background-color: #27ae60;
+    }
+
+    /* Filtros y búsqueda */
+    .filters-container {
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: var(--box-shadow);
+    }
+
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-group label {
+      font-weight: 500;
+      color: #95a5a6;
+      font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 8px 10px;
+      border: 1px solid #3d566e;
+      border-radius: var(--border-radius);
+      background-color: var(--secondary-light);
+      color: var(--text-light);
+      font-size: 0.9rem;
+      transition: var(--transition);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(22, 160, 133, 0.2);
+    }
+
+    /* Selectores personalizados */
+    .file-input-container {
+      margin-top: 12px;
+    }
+
+    .file-input-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 15px;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .file-input-label:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .file-name {
+      margin-top: 4px;
+      font-size: 0.85rem;
+      color: #95a5a6;
+    }
+
+    /* Tabla de proveedores horizontal */
+    .suppliers-table-container {
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--box-shadow);
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+
+    .suppliers-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1000px;
+    }
+
+    .suppliers-table th {
+      background-color: var(--primary-color);
+      color: white;
+      text-align: left;
+      padding: 12px 15px;
+      font-weight: 600;
+    }
+
+    .suppliers-table td {
+      padding: 10px 15px;
+      border-bottom: 1px solid #3d566e;
+    }
+
+    .suppliers-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .suppliers-table tr:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .supplier-image {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary-color);
+    }
+
+    .supplier-type {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background-color: var(--primary-color);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-active {
+      background-color: rgba(46, 204, 113, 0.2);
+      color: var(--success-color);
+    }
+
+    .status-inactive {
+      background-color: rgba(231, 76, 60, 0.2);
+      color: var(--danger-color);
+    }
+
+    .action-btn {
+      padding: 5px 8px;
+      border-radius: var(--border-radius);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.8rem;
+      margin-right: 5px;
+    }
+
+    .action-btn-edit {
+      color: var(--info-color);
+      border: 1px solid var(--info-color);
+    }
+
+    .action-btn-edit:hover {
+      background-color: var(--info-color);
+      color: white;
+    }
+
+    .action-btn-delete {
+      color: var(--danger-color);
+      border: 1px solid var(--danger-color);
+    }
+
+    .action-btn-delete:hover {
+      background-color: var(--danger-color);
+      color: white;
+    }
+
+    .action-btn-products {
+      color: var(--success-color);
+      border: 1px solid var(--success-color);
+    }
+
+    .action-btn-products:hover {
+      background-color: var(--success-color);
+      color: white;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal.show {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background-color: var(--secondary-light);
+      border-radius: var(--border-radius);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      width: 90%;
+      max-width: 700px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 20px;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: none;
+      border: none;
+      color: #95a5a6;
+      cursor: pointer;
+      font-size: 1.3rem;
+      transition: var(--transition);
+    }
+
+    .modal-close:hover {
+      color: var(--text-light);
+      transform: rotate(90deg);
+    }
+
+    .modal-title {
+      margin-bottom: 15px;
+      color: var(--primary-color);
+      font-size: 1.3rem;
+    }
+
+    /* Formulario horizontal */
+    .form-horizontal {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+    }
+
+    .form-horizontal .form-group {
+      grid-column: span 1;
+    }
+
+    .form-horizontal .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    /* Loading */
+    #loading {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      flex-direction: column;
+    }
+
+    #loading img {
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 12px;
+    }
+
+    #loading p {
+      color: var(--text-light);
+      font-size: 0.95rem;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1100;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      padding: 12px 16px;
+      border-radius: var(--border-radius);
+      background-color: var(--card-bg);
+      color: var(--text-light);
+      box-shadow: var(--box-shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideInRight 0.3s ease-out;
+      max-width: 350px;
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--success-color);
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--danger-color);
+    }
+
+    .toast.warning {
+      border-left: 4px solid var(--warning-color);
+    }
+
+    .toast.info {
+      border-left: 4px solid var(--info-color);
+    }
+
+    .toast-icon {
+      font-size: 1.2rem;
+    }
+
+    .toast.success .toast-icon {
+      color: var(--success-color);
+    }
+
+    .toast.error .toast-icon {
+      color: var(--danger-color);
+    }
+
+    .toast.warning .toast-icon {
+      color: var(--warning-color);
+    }
+
+    .toast.info .toast-icon {
+      color: var(--info-color);
+    }
+
+    .toast-message {
+      flex: 1;
+      font-size: 0.9rem;
+    }
+
+    .toast-close {
+      background: none;
+      border: none;
+      color: #95a5a6;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 8px;
+    }
+
+    .pagination-btn {
+      padding: 8px 12px;
+      border-radius: var(--border-radius);
+      background-color: var(--secondary-light);
+      color: var(--text-light);
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .pagination-btn.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .pagination-btn:hover:not(.active) {
+      background-color: #3d566e;
+    }
+
+    /* Search box */
+    .search-box {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 40px 10px 15px;
+      border: 1px solid #3d566e;
+      border-radius: var(--border-radius);
+      background-color: var(--secondary-light);
+      color: var(--text-light);
+      font-size: 0.9rem;
+      transition: var(--transition);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(22, 160, 133, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #95a5a6;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .form-horizontal {
+        grid-template-columns: 1fr;
+      }
+      
+      .filters-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+        width: 100%;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="page-header">
+      <h2 class="page-title"><i class="fas fa-truck"></i> Proveedores Registrados</h2>
+      <div class="action-buttons">
+        <button class="btn" id="addSupplierBtn">
+          <i class="fas fa-plus"></i> Agregar Proveedor
+        </button>
+        <button class="btn btn-secondary" id="exportBtn">
+          <i class="fas fa-file-export"></i> Exportar
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-container">
+      <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar proveedores...">
+        <i class="fas fa-search search-icon"></i>
+      </div>
+      <div class="filters-grid">
+        <div class="form-group">
+          <label for="categoryFilter">Filtrar por categoría</label>
+          <select id="categoryFilter">
+            <option value="">Todas las categorías</option>
+            <!-- Las opciones se llenarán dinámicamente -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="statusFilter">Filtrar por estado</label>
+          <select id="statusFilter">
+            <option value="">Todos los estados</option>
+            <option value="active">Activo</option>
+            <option value="inactive">Inactivo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="sortBy">Ordenar por</label>
+          <select id="sortBy">
+            <option value="name">Nombre (A-Z)</option>
+            <option value="nameDesc">Nombre (Z-A)</option>
+            <option value="recent">Más recientes</option>
+            <option value="oldest">Más antiguos</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Suppliers Table -->
+    <div class="suppliers-table-container">
+      <table class="suppliers-table">
+        <thead>
+          <tr>
+            <th>Imagen</th>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Contacto</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+            <th>Productos</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="suppliersTableBody">
+          <!-- Los proveedores se cargarán dinámicamente -->
+          <tr>
+            <td colspan="9" style="text-align: center; padding: 20px;">
+              <i class="fas fa-truck-loading" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 10px; display: block;"></i>
+              <p>Cargando proveedores...</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" id="paginationContainer" style="display: none;">
+      <!-- La paginación se generará dinámicamente -->
+    </div>
+  </div>
+
+  <!-- Add/Edit Supplier Modal -->
+  <div class="modal" id="supplierModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeSupplierModal">&times;</button>
+      <h3 class="modal-title" id="supplierModalTitle">Agregar Nuevo Proveedor</h3>
+      <form id="supplierForm" class="form-horizontal">
+        <div class="form-group">
+          <label for="supplierName">Nombre del Proveedor *</label>
+          <input type="text" id="supplierName" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="supplierType">Tipo de Mercancía *</label>
+          <select id="supplierType" required>
+            <option value="">Seleccione tipo</option>
+            <option value="Bebidas alcohólicas">Bebidas alcohólicas</option>
+            <option value="Bebidas no alcohólicas">Bebidas no alcohólicas</option>
+            <option value="Embutidos">Embutidos</option>
+            <option value="Alimentos">Alimentos</option>
+            <option value="Electrodomésticos">Electrodomésticos</option>
+            <option value="Electrónica">Electrónica</option>
+            <option value="Limpieza">Limpieza</option>
+            <option value="Mercado">Mercado</option>
+            <option value="Otros">Otros</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="supplierContact">Persona de Contacto</label>
+          <input type="text" id="supplierContact">
+        </div>
+        
+        <div class="form-group">
+          <label for="supplierPhone">Teléfono</label>
+          <input type="tel" id="supplierPhone">
+        </div>
+        
+        <div class="form-group">
+          <label for="supplierEmail">Email</label>
+          <input type="email" id="supplierEmail">
+        </div>
+        
+        <div class="form-group">
+          <label for="supplierAddress">Dirección</label>
+          <textarea id="supplierAddress" rows="2"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="supplierWebsite">Sitio Web</label>
+          <input type="url" id="supplierWebsite" placeholder="https://...">
+        </div>
+        
+        <div class="form-group">
+          <label for="supplierStatus">Estado</label>
+          <select id="supplierStatus">
+            <option value="active">Activo</option>
+            <option value="inactive">Inactivo</option>
+          </select>
+        </div>
+        
+        <div class="form-group full-width">
+          <label for="supplierNotes">Notas Adicionales</label>
+          <textarea id="supplierNotes" rows="3"></textarea>
+        </div>
+        
+        <div class="form-group full-width">
+          <div class="file-input-container">
+            <label for="supplierImage" class="file-input-label">
+              <i class="fas fa-camera"></i> Seleccionar Imagen del Proveedor
+            </label>
+            <input type="file" id="supplierImage" class="file-input" accept="image/*">
+            <div id="supplierFileName" class="file-name"></div>
+            <div id="supplierImagePreviewContainer" class="preview-container" style="display: none; margin-top: 10px;">
+              <img id="supplierImagePreview" class="preview-image" src="#" alt="Vista previa de la imagen" style="max-width: 150px; border-radius: var(--border-radius);">
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('supplierModal')">
+            <i class="fas fa-times"></i> Cancelar
+          </button>
+          <button type="submit" class="btn">
+            <i class="fas fa-save"></i> Guardar Proveedor
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal" id="confirmationModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeConfirmationModal">&times;</button>
+      <h3 class="modal-title">Confirmar Eliminación</h3>
+      <p class="confirmation-message" id="confirmationMessage">¿Estás seguro de que deseas eliminar este proveedor? Esta acción no se puede deshacer.</p>
+      <div class="form-actions">
+        <button class="btn btn-secondary" id="cancelAction">Cancelar</button>
+        <button class="btn btn-danger" id="confirmAction">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Loading Indicator -->
+  <div id="loading">
+    <img src="https://firebasestorage.googleapis.com/v0/b/inventario-35d6b.appspot.com/o/RETOM%20COMPLETO%20(2).png?alt=media&token=bcb475a5-edf6-494a-96e5-ca8f0a8ae005" alt="Cargando..." />
+    <p>Procesando...</p>
+  </div>
+
+  <script type="module">
+    // Importar Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      onSnapshot, 
+      doc, 
+      deleteDoc, 
+      updateDoc, 
+      getDocs, 
+      query,
+      where,
+      orderBy,
+      getDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      databaseURL: "https://inventario-35d6b-default-rtdb.firebaseio.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    // Variables globales
+    let allSuppliers = [];
+    let currentEditingSupplierId = null;
+    let selectedSupplierImageFile = null;
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let filteredSuppliers = [];
+
+    // Función para mostrar notificaciones toast
+    function showToast(message, type = "info") {
+      const toastContainer = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      
+      let icon = "fa-info-circle";
+      if (type === "success") icon = "fa-check-circle";
+      if (type === "error") icon = "fa-exclamation-circle";
+      if (type === "warning") icon = "fa-exclamation-triangle";
+      
+      toast.innerHTML = `
+        <i class="fas ${icon} toast-icon"></i>
+        <div class="toast-message">${message}</div>
+        <button class="toast-close">&times;</button>
+      `;
+      
+      toastContainer.appendChild(toast);
+      
+      // Event listener para cerrar el toast
+      toast.querySelector(".toast-close").addEventListener("click", () => {
+        toast.remove();
+      });
+      
+      // Auto-remove después de 5 segundos
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.remove();
+        }
+      }, 5000);
+    }
+
+    // Mostrar loading
+    function showLoading(message = "Procesando...") {
+      const loading = document.getElementById("loading");
+      loading.querySelector("p").textContent = message;
+      loading.style.display = "flex";
+    }
+
+    // Ocultar loading
+    function hideLoading() {
+      const loading = document.getElementById("loading");
+      loading.style.display = "none";
+    }
+
+    // Mostrar modal
+    function showModal(modalId) {
+      document.getElementById(modalId).classList.add("show");
+    }
+
+    // Cerrar modal
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove("show");
+      resetForm();
+    }
+
+    // Resetear formulario
+    function resetForm() {
+      document.getElementById("supplierForm").reset();
+      document.getElementById("supplierImagePreviewContainer").style.display = "none";
+      selectedSupplierImageFile = null;
+      currentEditingSupplierId = null;
+      document.getElementById("supplierModalTitle").textContent = "Agregar Nuevo Proveedor";
+    }
+
+    // Formatear número de teléfono
+    function formatPhoneNumber(phone) {
+      if (!phone) return "N/A";
+      // Formato simple: (XXX) XXX-XXXX
+      const cleaned = phone.replace(/\D/g, "");
+      const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+      if (match) {
+        return `(${match[1]}) ${match[2]}-${match[3]}`;
+      }
+      return phone;
+    }
+
+    // Cargar todos los proveedores
+    async function loadAllSuppliers() {
+      showLoading("Cargando proveedores...");
+      
+      try {
+        const suppliersQuery = await getDocs(collection(db, "businesses"));
+        allSuppliers = suppliersQuery.docs.map(doc => ({ 
+          id: doc.id, 
+          ...doc.data(),
+          productCount: 0 // Inicializar contador de productos
+        }));
+        
+        // Cargar productos para cada proveedor
+        for (let supplier of allSuppliers) {
+          const productsQuery = await getDocs(collection(db, "businesses", supplier.id, "products"));
+          supplier.productCount = productsQuery.size;
+        }
+        
+        filteredSuppliers = [...allSuppliers];
+        renderSuppliers();
+        populateCategoryFilter();
+      } catch (error) {
+        console.error("Error al cargar proveedores:", error);
+        showToast("Error al cargar los proveedores", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Llenar filtro de categorías
+    function populateCategoryFilter() {
+      const categoryFilter = document.getElementById("categoryFilter");
+      const categories = new Set(allSuppliers.map(s => s.type).filter(Boolean));
+      
+      // Limpiar opciones existentes (excepto la primera)
+      while (categoryFilter.options.length > 1) {
+        categoryFilter.remove(1);
+      }
+      
+      // Agregar categorías
+      categories.forEach(category => {
+        const option = document.createElement("option");
+        option.value = category;
+        option.textContent = category;
+        categoryFilter.appendChild(option);
+      });
+    }
+
+    // Filtrar proveedores
+    function filterSuppliers() {
+      const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+      const categoryFilter = document.getElementById("categoryFilter").value;
+      const statusFilter = document.getElementById("statusFilter").value;
+      const sortBy = document.getElementById("sortBy").value;
+      
+      filteredSuppliers = allSuppliers.filter(supplier => {
+        // Filtrar por búsqueda
+        const matchesSearch = 
+          supplier.name.toLowerCase().includes(searchTerm) ||
+          (supplier.contact && supplier.contact.toLowerCase().includes(searchTerm)) ||
+          (supplier.email && supplier.email.toLowerCase().includes(searchTerm));
+        
+        // Filtrar por categoría
+        const matchesCategory = !categoryFilter || supplier.type === categoryFilter;
+        
+        // Filtrar por estado
+        const matchesStatus = !statusFilter || 
+          (statusFilter === "active" && supplier.status !== "inactive") ||
+          (statusFilter === "inactive" && supplier.status === "inactive");
+        
+        return matchesSearch && matchesCategory && matchesStatus;
+      });
+      
+      // Ordenar proveedores
+      switch(sortBy) {
+        case "name":
+          filteredSuppliers.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case "nameDesc":
+          filteredSuppliers.sort((a, b) => b.name.localeCompare(a.name));
+          break;
+        case "recent":
+          filteredSuppliers.sort((a, b) => new Date(b.addedDate || 0) - new Date(a.addedDate || 0));
+          break;
+        case "oldest":
+          filteredSuppliers.sort((a, b) => new Date(a.addedDate || 0) - new Date(b.addedDate || 0));
+          break;
+      }
+      
+      currentPage = 1;
+      renderSuppliers();
+    }
+
+    // Renderizar proveedores en la tabla
+    function renderSuppliers() {
+      const tableBody = document.getElementById("suppliersTableBody");
+      const paginationContainer = document.getElementById("paginationContainer");
+      
+      if (filteredSuppliers.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="9" style="text-align: center; padding: 20px;">
+              <i class="fas fa-truck-loading" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 10px; display: block;"></i>
+              <p>No se encontraron proveedores</p>
+              <p>Intenta ajustar los filtros de búsqueda</p>
+            </td>
+          </tr>
+        `;
+        paginationContainer.style.display = "none";
+        return;
+      }
+      
+      // Calcular paginación
+      const totalPages = Math.ceil(filteredSuppliers.length / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = Math.min(startIndex + itemsPerPage, filteredSuppliers.length);
+      const currentSuppliers = filteredSuppliers.slice(startIndex, endIndex);
+      
+      // Generar HTML para los proveedores
+      let html = "";
+      currentSuppliers.forEach(supplier => {
+        html += `
+          <tr>
+            <td>
+              <img src="${supplier.imageUrl || 'https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png'}" 
+                   class="supplier-image" alt="${supplier.name}">
+            </td>
+            <td>${supplier.name}</td>
+            <td><span class="supplier-type">${supplier.type || "Sin categoría"}</span></td>
+            <td>${supplier.contact || "N/A"}</td>
+            <td>${formatPhoneNumber(supplier.phone)}</td>
+            <td>${supplier.email || "N/A"}</td>
+            <td>${supplier.productCount || 0}</td>
+            <td>
+              <span class="status-badge ${supplier.status === "inactive" ? "status-inactive" : "status-active"}">
+                ${supplier.status === "inactive" ? "Inactivo" : "Activo"}
+              </span>
+            </td>
+            <td>
+              <button class="action-btn action-btn-edit" onclick="editSupplier('${supplier.id}')">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn action-btn-delete" onclick="confirmDeleteSupplier('${supplier.id}', '${supplier.name}')">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+      
+      tableBody.innerHTML = html;
+      
+      // Generar paginación
+      if (totalPages > 1) {
+        let paginationHtml = "";
+        
+        // Botón anterior
+        if (currentPage > 1) {
+          paginationHtml += `<button class="pagination-btn" onclick="goToPage(${currentPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
+        }
+        
+        // Páginas
+        for (let i = 1; i <= totalPages; i++) {
+          if (i === currentPage) {
+            paginationHtml += `<button class="pagination-btn active">${i}</button>`;
+          } else if (
+            i === 1 || 
+            i === totalPages || 
+            (i >= currentPage - 1 && i <= currentPage + 1)
+          ) {
+            paginationHtml += `<button class="pagination-btn" onclick="goToPage(${i})">${i}</button>`;
+          } else if (
+            i === currentPage - 2 || 
+            i === currentPage + 2
+          ) {
+            paginationHtml += `<button class="pagination-btn" disabled>...</button>`;
+          }
+        }
+        
+        // Botón siguiente
+        if (currentPage < totalPages) {
+          paginationHtml += `<button class="pagination-btn" onclick="goToPage(${currentPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
+        }
+        
+        paginationContainer.innerHTML = paginationHtml;
+        paginationContainer.style.display = "flex";
+      } else {
+        paginationContainer.style.display = "none";
+      }
+    }
+
+    // Ir a página específica
+    function goToPage(page) {
+      currentPage = page;
+      renderSuppliers();
+      window.scrollTo(0, 0);
+    }
+
+    // Editar proveedor
+    async function editSupplier(supplierId) {
+      showLoading("Cargando información...");
+      
+      try {
+        const supplierDoc = await getDoc(doc(db, "businesses", supplierId));
+        
+        if (!supplierDoc.exists()) {
+          showToast("El proveedor no existe", "error");
+          return;
+        }
+        
+        const supplierData = supplierDoc.data();
+        currentEditingSupplierId = supplierId;
+        
+        // Llenar el formulario con los datos del proveedor
+        document.getElementById("supplierName").value = supplierData.name || "";
+        document.getElementById("supplierType").value = supplierData.type || "";
+        document.getElementById("supplierContact").value = supplierData.contact || "";
+        document.getElementById("supplierPhone").value = supplierData.phone || "";
+        document.getElementById("supplierEmail").value = supplierData.email || "";
+        document.getElementById("supplierAddress").value = supplierData.address || "";
+        document.getElementById("supplierWebsite").value = supplierData.website || "";
+        document.getElementById("supplierStatus").value = supplierData.status || "active";
+        document.getElementById("supplierNotes").value = supplierData.notes || "";
+        
+        // Mostrar imagen si existe
+        if (supplierData.imageUrl) {
+          document.getElementById("supplierImagePreview").src = supplierData.imageUrl;
+          document.getElementById("supplierImagePreviewContainer").style.display = "block";
+        }
+        
+        document.getElementById("supplierModalTitle").textContent = "Editar Proveedor";
+        showModal("supplierModal");
+      } catch (error) {
+        console.error("Error al cargar proveedor:", error);
+        showToast("Error al cargar la información del proveedor", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Confirmar eliminación de proveedor
+    function confirmDeleteSupplier(supplierId, supplierName) {
+      document.getElementById("confirmationMessage").textContent = 
+        `¿Estás seguro de que deseas eliminar el proveedor "${supplierName}"? Esta acción no se puede deshacer.`;
+      
+      document.getElementById("confirmAction").onclick = function() {
+        deleteSupplier(supplierId);
+        closeModal("confirmationModal");
+      };
+      
+      showModal("confirmationModal");
+    }
+
+    // Eliminar proveedor
+    async function deleteSupplier(supplierId) {
+      showLoading("Eliminando proveedor...");
+      
+      try {
+        // Primero eliminar todos los productos del proveedor
+        const productsQuery = await getDocs(collection(db, "businesses", supplierId, "products"));
+        const deleteProductPromises = [];
+        
+        productsQuery.forEach(productDoc => {
+          deleteProductPromises.push(deleteDoc(doc(db, "businesses", supplierId, "products", productDoc.id)));
+        });
+        
+        await Promise.all(deleteProductPromises);
+        
+        // Eliminar la imagen del almacenamiento si existe
+        const supplierDoc = await getDoc(doc(db, "businesses", supplierId));
+        if (supplierDoc.exists()) {
+          const supplierData = supplierDoc.data();
+          if (supplierData.imageUrl) {
+            try {
+              const imageRef = ref(storage, supplierData.imageUrl);
+              await deleteObject(imageRef);
+            } catch (error) {
+              console.error("Error al eliminar imagen:", error);
+              // No mostrar error al usuario si falla la eliminación de la imagen
+            }
+          }
+        }
+        
+        // Finalmente eliminar el proveedor
+        await deleteDoc(doc(db, "businesses", supplierId));
+        
+        showToast("Proveedor eliminado correctamente", "success");
+        loadAllSuppliers(); // Recargar la lista
+      } catch (error) {
+        console.error("Error al eliminar proveedor:", error);
+        showToast("Error al eliminar el proveedor", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Manejar selección de imagen
+    document.getElementById("supplierImage").addEventListener("change", function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      selectedSupplierImageFile = file;
+      
+      const previewContainer = document.getElementById("supplierImagePreviewContainer");
+      const previewImage = document.getElementById("supplierImagePreview");
+      const fileNameDisplay = document.getElementById("supplierFileName");
+      
+      previewContainer.style.display = "block";
+      fileNameDisplay.textContent = file.name;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        previewImage.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Subir imagen a Firebase Storage
+    async function uploadSupplierImage(file, supplierId) {
+      if (!file) return null;
+      
+      try {
+        const storageRef = ref(storage, `supplier-images/${supplierId}/${file.name}`);
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+        return downloadURL;
+      } catch (error) {
+        console.error("Error al subir imagen:", error);
+        throw new Error("Error al subir la imagen");
+      }
+    }
+
+    // Guardar proveedor (crear o actualizar)
+    async function saveSupplier(supplierData) {
+      showLoading("Guardando proveedor...");
+      
+      try {
+        let imageUrl = supplierData.imageUrl;
+        
+        // Subir nueva imagen si se seleccionó una
+        if (selectedSupplierImageFile) {
+          imageUrl = await uploadSupplierImage(selectedSupplierImageFile, currentEditingSupplierId || supplierData.name);
+        }
+        
+        // Preparar datos para guardar
+        const supplierToSave = {
+          name: supplierData.name,
+          type: supplierData.type,
+          contact: supplierData.contact || null,
+          phone: supplierData.phone || null,
+          email: supplierData.email || null,
+          address: supplierData.address || null,
+          website: supplierData.website || null,
+          status: supplierData.status || "active",
+          notes: supplierData.notes || null,
+          imageUrl: imageUrl || null,
+          lastUpdated: serverTimestamp()
+        };
+        
+        if (currentEditingSupplierId) {
+          // Actualizar proveedor existente
+          await updateDoc(doc(db, "businesses", currentEditingSupplierId), supplierToSave);
+          showToast("Proveedor actualizado correctamente", "success");
+        } else {
+          // Crear nuevo proveedor
+          supplierToSave.addedDate = serverTimestamp();
+          supplierToSave.addedBy = "Usuario"; // En una app real, usaríamos el usuario autenticado
+          
+          await addDoc(collection(db, "businesses"), supplierToSave);
+          showToast("Proveedor creado correctamente", "success");
+        }
+        
+        closeModal("supplierModal");
+        loadAllSuppliers(); // Recargar la lista
+      } catch (error) {
+        console.error("Error al guardar proveedor:", error);
+        showToast("Error al guardar el proveedor", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Manejar envío del formulario
+    document.getElementById("supplierForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+      
+      const supplierData = {
+        name: document.getElementById("supplierName").value,
+        type: document.getElementById("supplierType").value,
+        contact: document.getElementById("supplierContact").value,
+        phone: document.getElementById("supplierPhone").value,
+        email: document.getElementById("supplierEmail").value,
+        address: document.getElementById("supplierAddress").value,
+        website: document.getElementById("supplierWebsite").value,
+        status: document.getElementById("supplierStatus").value,
+        notes: document.getElementById("supplierNotes").value,
+        imageUrl: document.getElementById("supplierImagePreview").src || null
+      };
+      
+      // Validaciones básicas
+      if (!supplierData.name.trim()) {
+        showToast("El nombre del proveedor es requerido", "error");
+        return;
+      }
+      
+      if (!supplierData.type) {
+        showToast("Debe seleccionar un tipo de mercancía", "error");
+        return;
+      }
+      
+      saveSupplier(supplierData);
+    });
+
+    // Exportar proveedores a Excel
+    async function exportToExcel() {
+      showLoading("Generando reporte...");
+      
+      try {
+        // Crear un libro de trabajo
+        const wb = XLSX.utils.book_new();
+        
+        // Crear una hoja de cálculo con los datos
+        const wsData = [
+          // Encabezados
+          ["Nombre", "Tipo", "Contacto", "Teléfono", "Email", "Dirección", "Sitio Web", "Estado", "Productos", "Fecha Registro"],
+          // Datos
+          ...filteredSuppliers.map(supplier => [
+            supplier.name,
+            supplier.type,
+            supplier.contact || "N/A",
+            supplier.phone || "N/A",
+            supplier.email || "N/A",
+            supplier.address || "N/A",
+            supplier.website || "N/A",
+            supplier.status === "inactive" ? "Inactivo" : "Activo",
+            supplier.productCount,
+            supplier.addedDate ? new Date(supplier.addedDate).toLocaleDateString() : "N/A"
+          ])
+        ];
+        
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        
+        // Agregar la hoja al libro de trabajo
+        XLSX.utils.book_append_sheet(wb, ws, "Proveedores");
+        
+        // Generar el archivo Excel y descargarlo
+        const today = new Date();
+        const dateStr = today.toISOString().split('T')[0];
+        XLSX.writeFile(wb, `proveedores_${dateStr}.xlsx`);
+        
+        showToast("Reporte exportado correctamente", "success");
+      } catch (error) {
+        console.error("Error al exportar Excel:", error);
+        showToast("Error al generar el reporte Excel", "error");
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // Inicializar la aplicación
+    function initApp() {
+      // Configurar eventos
+      document.getElementById("addSupplierBtn").addEventListener("click", function() {
+        resetForm();
+        showModal("supplierModal");
+      });
+      
+      document.getElementById("exportBtn").addEventListener("click", exportToExcel);
+      
+      document.getElementById("closeSupplierModal").addEventListener("click", () => closeModal("supplierModal"));
+      document.getElementById("closeConfirmationModal").addEventListener("click", () => closeModal("confirmationModal"));
+      document.getElementById("cancelAction").addEventListener("click", () => closeModal("confirmationModal"));
+      
+      document.getElementById("searchInput").addEventListener("input", filterSuppliers);
+      document.getElementById("categoryFilter").addEventListener("change", filterSuppliers);
+      document.getElementById("statusFilter").addEventListener("change", filterSuppliers);
+      document.getElementById("sortBy").addEventListener("change", filterSuppliers);
+      
+      // Cerrar modales al hacer clic fuera de ellos
+      document.addEventListener("click", function(event) {
+        const modals = document.querySelectorAll(".modal.show");
+        modals.forEach(modal => {
+          if (event.target === modal) {
+            closeModal(modal.id);
+          }
+        });
+      });
+
+      // Cargar datos iniciales
+      loadAllSuppliers();
+    }
+
+    // Hacer funciones globales para llamadas desde HTML
+    window.editSupplier = editSupplier;
+    window.confirmDeleteSupplier = confirmDeleteSupplier;
+    window.goToPage = goToPage;
+    window.closeModal = closeModal;
+
+    // Iniciar la aplicación cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
