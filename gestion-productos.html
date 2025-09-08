@@ -1951,7 +1951,7 @@
                      onclick="showImageModal('${productData.imageUrl}')">
               ` : '<div class="image-preview"><i class="fas fa-box"></i></div>'}
               <h3>${productData.name} ${stockStatus} ${expirationStatus}</h3>
-              <p><strong>Negocio:</strong> ${businessName}</p>
+              <p><strong>Proveedor:</strong> ${businessName}</p>
               ${isLowSales ? `
                 <p class="badge badge-info">
                   <i class="fas fa-info-circle"></i> Poco movimiento (${daysSinceChange} días sin cambios)
@@ -2272,7 +2272,7 @@
 
     // Mostrar formulario para agregar producto
     async function showAddProductForm() {
-      showLoading("Cargando negocios...");
+      showLoading("Cargando Proveedores...");
       
       try {
         // Obtener lista de negocios
@@ -2284,7 +2284,7 @@
         });
         
         if (!businessOptions) {
-          showAlert("No hay negocios registrados", "error");
+          showAlert("No hay Proveedores registrados", "error");
           return;
         }
         
@@ -2293,9 +2293,9 @@
             <h3>Agregar Nuevo Producto</h3>
             
             <div class="form-group">
-              <label for="addBusiness">Negocio:</label>
+              <label for="addBusiness">Proveedor:</label>
               <select id="addBusiness" required>
-                <option value="">Seleccione un negocio</option>
+                <option value="">Seleccione un Proveedor</option>
                 ${businessOptions}
               </select>
             </div>
@@ -2580,7 +2580,7 @@
       }
     }
 
-    // Descargar Excel
+    // Descargar Excel  
     async function downloadExcel() {
       showLoading("Generando reporte...");
       
@@ -2592,7 +2592,7 @@
         const wsData = [
           // Encabezados
           [
-            "Negocio", "Nombre", "Código", "EAN/UPC", "Categoría", 
+            "Proveedor", "Nombre", "Código", "EAN/UPC", "Categoría", 
             "Cantidad", "Unidad", "Precio", "Precio Original", 
             "% Ganancia", "% Descuento", "Fecha Vencimiento", "Estado"
           ],
