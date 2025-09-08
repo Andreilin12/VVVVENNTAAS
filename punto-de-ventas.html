@@ -1559,22 +1559,6 @@
       display: block;
     }
 
-    /* Oculta las barras de desplazamiento pero mantiene la funcionalidad */
-::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-    display: none;
-}
-
-/* Para Firefox */
-html {
-    scrollbar-width: none;
-}
-
-/* Para Internet Explorer y Edge */
-body {
-    -ms-overflow-style: none;
-}
 
 /* Nuevos estilos para el modal de acceso rápido */
 .quick-access-modal {
@@ -1623,7 +1607,39 @@ body {
 .quick-access-btn i {
   font-size: 1.2em;
 }
-    
+
+
+     /* Estilos para navegadores Webkit (Chrome, Safari, Edge) */
+
+/* El fondo del deslizador, transparente como pediste */
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* La barra del deslizador (el pulgar) - TRANSPARENTE POR DEFECTO */
+::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 10px;
+  /* Altura fija para que siempre sea pequeña */
+  height: 10px;
+  /* Transición suave para el efecto hover */
+  transition: background-color 0.3s ease;
+}
+
+/* El deslizador en general */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+/* Cuando el mouse pasa sobre el pulgar - COLOR AL HOVER */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #15a086;
+}
+
+/* Color cuando está activo (opcional) */
+::-webkit-scrollbar-thumb:active {
+  background-color: #0d705c;
+}
   </style>
 </head>
 <body>
@@ -4792,35 +4808,44 @@ body {
       buttonContainer.style.gap = '15px';
       
       // Botón de permisos
-      const permissionsButton = document.createElement('a');
-      permissionsButton.href = 'dar-permisos.html';
-      permissionsButton.innerHTML = '<i class="fas fa-user-lock"></i> Gestión de Permisos';
-      permissionsButton.style.padding = '15px 20px';
-      permissionsButton.style.backgroundColor = '#34495e';
-      permissionsButton.style.color = 'white';
-      permissionsButton.style.borderRadius = '8px';
-      permissionsButton.style.textDecoration = 'none';
-      permissionsButton.style.display = 'flex';
-      permissionsButton.style.alignItems = 'center';
-      permissionsButton.style.gap = '10px';
-      permissionsButton.style.transition = 'all 0.3s';
-      permissionsButton.style.fontWeight = 'bold';
-      
-      permissionsButton.addEventListener('mouseover', () => {
-        permissionsButton.style.backgroundColor = '#16e086';
-        permissionsButton.style.transform = 'translateY(-2px)';
-      });
-      
-      permissionsButton.addEventListener('mouseout', () => {
-        permissionsButton.style.backgroundColor = '#34495e';
-        permissionsButton.style.transform = 'translateY(0)';
-      });
-      
-      permissionsButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        document.body.removeChild(quickAccessModal);
-        showAlert('info', 'Funcionalidad de permisos en desarrollo');
-      });
+const permissionsButton = document.createElement('a');
+permissionsButton.href = 'dar-permisos.html';
+permissionsButton.innerHTML = '<i class="fas fa-user-lock"></i> Gestión de Permisos';
+permissionsButton.style.padding = '15px 20px';
+permissionsButton.style.backgroundColor = '#34495e';
+permissionsButton.style.color = 'white'; 
+permissionsButton.style.borderRadius = '8px';
+permissionsButton.style.textDecoration = 'none';
+permissionsButton.style.display = 'flex';
+permissionsButton.style.alignItems = 'center';
+permissionsButton.style.gap = '10px';
+permissionsButton.style.transition = 'all 0.3s';
+permissionsButton.style.fontWeight = 'bold';
+
+permissionsButton.addEventListener('mouseover', () => {
+  permissionsButton.style.backgroundColor = '#16e086';
+  permissionsButton.style.transform = 'translateY(-2px)';
+});
+
+permissionsButton.addEventListener('mouseout', () => {
+  permissionsButton.style.backgroundColor = '#34495e';
+  permissionsButton.style.transform = 'translateY(0)';
+});
+
+// Agregar el botón al DOM - Ajusta el selector según donde quieras colocarlo
+const headerActions = document.querySelector('.header-actions');
+if (headerActions) {
+  headerActions.appendChild(permissionsButton);
+} else {
+  // Si no existe el contenedor, creamos uno
+  const header = document.querySelector('header');
+  if (header) {
+    const newContainer = document.createElement('div');
+    newContainer.className = 'header-actions';
+    newContainer.appendChild(permissionsButton);
+    header.appendChild(newContainer);
+  }
+}
       
       // Botón de configuración
       const settingsButton = document.createElement('a');
