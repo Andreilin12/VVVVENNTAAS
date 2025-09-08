@@ -1,0 +1,2678 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema Retom - Panel de Seguridad</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <style>
+    :root {
+      --primary-dark: #1a2238;
+      --primary: #1a2238;
+      --primary-light: #212b48;
+      --accent: #15a086;
+      --accent-dark: #0d8a72;
+      --accent-light: #1dba9c;
+      --text: #fff;
+      --text-light: #a9b7d0;
+      --text-lighter: #7a88a6;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --glass: rgba(255, 255, 255, 0.05);
+      --glass-light: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --glass-border-light: rgba(255, 255, 255, 0.15);
+      --neon-shadow: 0 0 10px rgba(21, 160, 134, 0.5);
+      --neon-glow: 0 0 15px rgba(21, 160, 134, 0.7);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-user-drag: none;
+      -khtml-user-drag: none;
+      -moz-user-drag: none;
+      -o-user-drag: none;
+      user-drag: none;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDYwIDYwIj48ZyBmaWxs="none" stroke="rgba(21,160,134,0.05)" stroke-width="2"><rect width="60" height="60"/></g></svg>');
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Header mejorado */
+    header {
+      background: var(--primary);
+      padding: 1.5rem;
+      text-align: center;
+      border-bottom: 1px solid var(--glass-border);
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      animation: neon-glow 3s linear infinite;
+    }
+
+    @keyframes neon-glow {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+
+    .header-title {
+      flex: 1;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      background: linear-gradient(to right, var(--text-light), var(--accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: 1px;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .header-btn {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      color: var(--text);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .header-btn:hover {
+      background: var(--accent);
+      transform: rotate(15deg);
+    }
+
+    /* Contenedor principal */
+    main {
+      padding: 2rem;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    /* Alertas mejoradas */
+    .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--error);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: var(--neon-shadow);
+      z-index: 1000;
+      display: none;
+      animation: slideIn 0.3s ease-out;
+      border-left: 4px solid white;
+      backdrop-filter: blur(10px);
+      max-width: 400px;
+    }
+
+    .alert.success {
+      background: var(--success);
+    }
+
+    .alert.info {
+      background: var(--info);
+    }
+
+    .alert.warning {
+      background: var(--warning);
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .alert.show {
+      display: block;
+    }
+
+    /* Panel de estadísticas */
+    .stats-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: var(--transition);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), var(--neon-shadow);
+      border-color: var(--accent);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(21, 160, 134, 0.05), transparent);
+      pointer-events: none;
+    }
+
+    .stat-icon {
+      font-size: 2.5rem;
+      margin-right: 1rem;
+      color: var(--accent);
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .stat-content {
+      flex: 1;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-light);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-lighter);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Filtros y búsqueda */
+    .filters-container {
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--glass-light);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 0.8rem 1rem 0.8rem 3rem;
+      color: var(--text);
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(21, 160, 134, 0.3);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+    }
+
+    .filter-select {
+      background: var(--glass-light);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+      color: var(--text);
+      outline: none;
+      cursor: pointer;
+      transition: var(--transition);
+      min-width: 180px;
+    }
+
+    .filter-select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(21, 160, 134, 0.3);
+    }
+
+    /* Grid de usuarios mejorado */
+    .user-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .user-card {
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: var(--transition);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .user-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), var(--neon-shadow);
+      border-color: var(--accent);
+    }
+
+    .user-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(21, 160, 134, 0.05), transparent);
+      pointer-events: none;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .user-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 1rem;
+      border: 2px solid var(--accent);
+      box-shadow: var(--neon-shadow);
+      transition: var(--transition);
+    }
+
+    .user-card:hover .user-avatar {
+      transform: scale(1.1);
+      box-shadow: var(--neon-glow);
+    }
+
+    .user-details {
+      flex: 1;
+    }
+
+    .user-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-bottom: 0.2rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .user-status {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-left: 8px;
+    }
+
+    .user-status.online {
+      background-color: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    .user-status.offline {
+      background-color: var(--text-lighter);
+    }
+
+    .user-email {
+      font-size: 0.85rem;
+      color: var(--text);
+      opacity: 0.8;
+      margin-bottom: 0.5rem;
+    }
+
+    .user-permissions-badge {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.5rem;
+    }
+
+    .permission-badge {
+      background: rgba(21, 160, 134, 0.2);
+      color: var(--accent-light);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      display: inline-block;
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .manage-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      transition: var(--transition);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .manage-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(21, 160, 134, 0.4);
+      background: linear-gradient(135deg, var(--accent-light), var(--accent));
+    }
+
+    .manage-btn i {
+      margin-right: 8px;
+    }
+
+    .view-log-btn {
+      background: var(--glass-light);
+      color: var(--text);
+      border: 1px solid var(--glass-border);
+      padding: 0.6rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .view-log-btn:hover {
+      background: var(--glass);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Modal mejorado */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal.active {
+      opacity: 1;
+      pointer-events: all;
+      z-index: 2001; /* Asegura que el modal activo esté por encima */
+    }
+
+    .modal-content {
+      background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      width: 90%;
+      max-width: 900px;
+      max-height: 80vh;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), var(--neon-shadow);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: var(--primary);
+      z-index: 1;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      color: var(--text-light);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.3s ease;
+      padding: 0.5rem;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      background: var(--glass);
+      color: var(--accent);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--glass-border);
+      position: sticky;
+      top: 70px;
+      background: var(--primary);
+      z-index: 1;
+      flex-wrap: wrap;
+    }
+
+    .modal-action-btn {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .modal-action-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .search-container {
+      flex: 1;
+      position: relative;
+      min-width: 200px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 6px;
+      padding: 0.5rem 1rem 0.5rem 2.5rem;
+      color: var(--text);
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(21, 160, 134, 0.3);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+    }
+
+    .permission-container {
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .permission-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .permission-item {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: var(--transition);
+    }
+
+    .permission-item:hover {
+      border-color: var(--accent);
+      box-shadow: var(--neon-shadow);
+      transform: translateY(-2px);
+    }
+
+    .permission-info {
+      display: flex;
+      align-items: center;
+      flex: 1;
+    }
+
+    .permission-icon {
+      font-size: 1.4rem;
+      margin-right: 1rem;
+      color: var(--accent);
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .permission-name {
+      font-weight: 500;
+      color: var(--text-light);
+    }
+
+    .permission-description {
+      font-size: 0.8rem;
+      color: var(--text-lighter);
+      margin-top: 0.2rem;
+    }
+
+    .permission-toggle {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: var(--transition);
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .permission-toggle.remove {
+      background: var(--error);
+    }
+
+    .permission-toggle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(21, 160, 134, 0.4);
+    }
+
+    .permission-toggle.remove:hover {
+      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Modal de logs */
+    .log-modal .modal-content {
+      max-width: 1000px;
+    }
+
+    .log-container {
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .log-filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .log-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .log-table th,
+    .log-table td {
+      padding: 0.8rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .log-table th {
+      background: var(--glass);
+      color: var(--text-light);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+
+    .log-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .log-table tr:hover {
+      background: var(--glass-light);
+    }
+
+    .log-action.granted {
+      color: var(--success);
+    }
+
+    .log-action.revoked {
+      color: var(--error);
+    }
+
+    /* Modal de plantillas - CORREGIDO */
+    .templates-modal .modal-content {
+      max-width: 600px; /* Reducido para que sea más compacto */
+      width: auto; /* Para que se adapte al contenido */
+    }
+
+    .templates-container {
+      padding: 1rem; /* Reducido el padding */
+      overflow-y: auto;
+    }
+
+    .templates-grid {
+      display: flex; /* Cambiado a flex para diseño horizontal */
+      flex-direction: column; /* Mantener columna pero con scroll interno */
+      gap: 0.8rem; /* Reducido el espacio entre elementos */
+      max-height: 300px; /* Altura máxima para el contenedor */
+      overflow-y: auto; /* Scroll interno */
+    }
+
+    .template-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px; /* Reducido el radio de borde */
+      padding: 1rem; /* Reducido el padding */
+      transition: var(--transition);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .template-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--neon-shadow);
+      transform: translateY(-2px);
+    }
+
+    .template-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem; /* Reducido el margen inferior */
+    }
+
+    .template-name {
+      font-weight: 600;
+      color: var(--text-light);
+      font-size: 1rem; /* Reducido el tamaño de fuente */
+    }
+
+    .template-actions {
+      display: flex;
+      gap: 0.3rem; /* Reducido el espacio entre botones */
+    }
+
+    .template-action-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-lighter);
+      cursor: pointer;
+      transition: var(--transition);
+      padding: 0.2rem; /* Reducido el padding */
+      border-radius: 4px;
+      font-size: 0.8rem; /* Reducido el tamaño de fuente */
+    }
+
+    .template-action-btn:hover {
+      color: var(--accent);
+      background: var(--glass-light);
+    }
+
+    .template-permissions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.2rem; /* Reducido el espacio entre permisos */
+    }
+
+    .template-permission {
+      background: rgba(21, 160, 134, 0.2);
+      color: var(--accent-light);
+      padding: 0.1rem 0.3rem; /* Reducido el padding */
+      border-radius: 3px; /* Reducido el radio de borde */
+      font-size: 0.6rem; /* Reducido el tamaño de fuente */
+    }
+
+    /* Modal de ayuda */
+    .help-modal .modal-content {
+      max-width: 700px;
+    }
+
+    .help-container {
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+
+    .help-section {
+      margin-bottom: 2rem;
+    }
+
+    .help-section-title {
+      font-size: 1.2rem;
+      color: var(--text-light);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .faq-item {
+      margin-bottom: 1rem;
+      background: var(--glass);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .faq-question {
+      padding: 1rem;
+      background: var(--glass-light);
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .faq-answer {
+      padding: 1rem;
+      color: var(--text-lighter);
+      border-top: 1px solid var(--glass-border);
+    }
+
+    /* Loader */
+    .loader {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .loader-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--glass);
+      border-top: 3px solid var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Botón flotante */
+    .floating-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: white;
+      border: none;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), var(--neon-shadow);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      z-index: 100;
+      transition: var(--transition);
+    }
+
+    .floating-btn:hover {
+      transform: translateY(-5px) rotate(90deg);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), var(--neon-glow);
+    }
+
+    /* Sweet Alert personalizado - CORREGIDO */
+    .swal2-popup {
+      background: linear-gradient(145deg, var(--primary), var(--primary-dark)) !important;
+      border: 1px solid var(--glass-border) !important;
+      border-radius: 16px !important;
+      color: var(--text) !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), var(--neon-shadow) !important;
+      z-index: 2002 !important; /* Por encima de los modales */
+      max-width: 600px !important; /* Limitar el ancho máximo */
+      width: 90% !important; /* Hacerlo responsivo */
+    }
+
+    .swal2-title {
+      color: var(--text-light) !important;
+      font-size: 1.5rem !important;
+    }
+
+    .swal2-html-container {
+      color: var(--text-lighter) !important;
+    }
+
+
+
+/* Asegurar que el contenedor se adapte */
+.swal2-html-container {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  flex-direction: column !important;
+}
+
+    .swal2-confirm {
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark)) !important;
+      border: none !important;
+      border-radius: 8px !important;
+      padding: 0.6rem 1.5rem !important;
+      transition: var(--transition) !important;
+    }
+
+    .swal2-confirm:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 5px 15px rgba(21, 160, 134, 0.4) !important;
+    }
+
+    .swal2-cancel {
+      background: var(--glass) !important;
+      border: 1px solid var(--glass-border) !important;
+      border-radius: 8px !important;
+      color: var(--text) !important;
+      padding: 0.6rem 1.5rem !important;
+      transition: var(--transition) !important;
+    }
+
+    .swal2-cancel:hover {
+      background: var(--glass-light) !important;
+    }
+
+    /* Estilos específicos para el modal de selección de plantillas */
+.swal2-popup #templateSelector {
+  width: 85% !important;
+  max-width: 85% !important;
+  margin: 10px auto !important;
+  display: block !important;
+  background: var(--glass-light) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 8px !important;
+  color: var(--text) !important;
+  padding: 0.8rem 1rem !important;
+  box-sizing: border-box !important;
+  transition: all 0.3s ease !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2315a086'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 16px !important;
+}
+
+/* Hover para el selector de plantillas */
+.swal2-popup #templateSelector:hover {
+  border-color: #15a086 !important;
+  box-shadow: 0 0 0 2px rgba(21, 160, 134, 0.3) !important;
+}
+
+/* Focus para el selector de plantillas - FORZAR COLOR #15a086 */
+.swal2-popup #templateSelector:focus {
+  border-color: #15a086 !important;
+  box-shadow: 0 0 0 2px rgba(21, 160, 134, 0.3) !important;
+  outline: none !important;
+}
+
+/* Quitar el outline azul por defecto del navegador */
+.swal2-popup #templateSelector:focus-visible {
+  outline: none !important;
+  border-color: #15a086 !important;
+}
+
+/* Forzar el color en el estado activo */
+.swal2-popup #templateSelector:active {
+  border-color: #15a086 !important;
+}
+
+/* Contenedor de la vista previa */
+.swal2-popup #templatePreview {
+  width: 85% !important;
+  margin: 10px auto !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Hover para la vista previa */
+.swal2-popup #templatePreview:hover {
+  border-color: #15a086 !important;
+}
+
+/* Texto de instrucciones */
+.swal2-popup .swal2-html-container > div {
+  width: 85% !important;
+  margin: 0 auto 10px auto !important;
+  text-align: left !important;
+  color: var(--text-lighter) !important;
+}
+
+/* Estilo para las opciones del dropdown */
+.swal2-popup #templateSelector option {
+  background: var(--primary-dark) !important;
+  color: var(--text) !important;
+  padding: 8px !important;
+}
+
+/* Hover para las opciones del dropdown */
+.swal2-popup #templateSelector option:hover,
+.swal2-popup #templateSelector option:focus,
+.swal2-popup #templateSelector option:checked {
+  background: #15a086 !important;
+  color: white !important;
+}
+
+/* Forzar el color del texto seleccionado */
+.swal2-popup #templateSelector option:checked {
+  background: #15a086 !important;
+  color: white !important;
+}
+
+/* Estilo para el texto dentro de la vista previa */
+#previewContent {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 5px !important;
+}
+
+/* Estilo para los badges de permisos en la vista previa */
+#previewContent > div {
+  background: rgba(21, 160, 134, 0.2) !important;
+  color: #1dba9c !important;
+  padding: 3px 8px !important;
+  border-radius: 4px !important;
+  font-size: 0.8em !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Hover para los badges de permisos */
+#previewContent > div:hover {
+  background: #15a086 !important;
+  color: white !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Flecha personalizada del dropdown con color #15a086 */
+.swal2-popup #templateSelector::-ms-expand {
+  display: none !important;
+}
+
+/* Para Firefox - quitar el estilo por defecto */
+.swal2-popup #templateSelector {
+  -moz-appearance: none !important;
+  text-indent: 0.01px !important;
+  text-overflow: '' !important;
+}
+
+    .swal2-select option {
+      background: #2c3e50 !important;
+      color: var(--text) !important;
+    }
+
+    /* Estilos para los dropdowns nativos */
+    select {
+      background: var(--glass-light) !important;
+      color: var(--text) !important;
+      border: 1px solid var(--glass-border) !important;
+    }
+
+    select option {
+      background: #2c3e50 !important;
+      color: var(--text) !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .user-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      }
+    }
+
+    @media (max-width: 768px) {
+      main {
+        padding: 1.5rem;
+      }
+      
+      .stats-panel {
+        grid-template-columns: 1fr;
+      }
+      
+      .filters-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .permission-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-actions {
+        flex-direction: column;
+      }
+      
+      .search-container {
+        width: 100%;
+      }
+
+      header {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+      }
+
+      .header-title {
+        width: 100%;
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: center;
+      }
+
+      /* Ajustes responsivos para el modal de plantillas */
+      .templates-modal .modal-content {
+        width: 95%;
+        max-width: 95%;
+        margin: 1rem;
+      }
+
+      .templates-grid {
+        max-height: 250px; /* Altura reducida en móviles */
+      }
+
+      /* Ajustes para SweetAlert en móviles */
+      .swal2-popup {
+        width: 95% !important;
+        padding: 1rem !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .user-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .modal-content {
+        width: 50%;
+        margin: 1rem;
+      }
+      
+      .modal-header {
+        padding: 1rem;
+      }
+      
+      .modal-title {
+        font-size: 1.2rem;
+      }
+      
+      .stat-card {
+        padding: 1rem;
+      }
+      
+      .stat-icon {
+        font-size: 2rem;
+        min-width: 50px;
+      }
+      
+      .stat-value {
+        font-size: 1.5rem;
+      }
+
+      /* Ajustes adicionales para móviles pequeños */
+      .template-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .template-actions {
+        align-self: flex-end;
+      }
+    }
+
+    /* Animaciones */
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Scroll personalizado */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--glass);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-light);
+    }
+  </style>
+  <!-- Incluir SweetAlert2 para alertas elegantes -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <header>
+    <div class="header-title">
+      <h1><i class="fas fa-shield-alt"></i> Panel de Seguridad</h1>
+    </div>
+    <div class="header-actions">
+      <button class="header-btn" id="templatesBtn" title="Ver plantillas guardadas">
+        <i class="fas fa-layer-group"></i>
+      </button>
+      <button class="header-btn" id="helpBtn" title="Centro de ayuda">
+        <i class="fas fa-question"></i>
+      </button>
+    </div>
+  </header>
+  
+  <main>
+    <div id="alert" class="alert"></div>
+    
+    <!-- Panel de estadísticas -->
+    <div class="stats-panel">
+      <div class="stat-card animate__animated animate__fadeIn">
+        <div class="stat-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value" id="totalUsers">0</div>
+          <div class="stat-label">Usuarios Totales</div>
+        </div>
+      </div>
+      
+      <div class="stat-card animate__animated animate__fadeIn animate__delay-1s">
+        <div class="stat-icon">
+          <i class="fas fa-user-check"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value" id="activeUsers">0</div>
+          <div class="stat-label">Usuarios Activos</div>
+        </div>
+      </div>
+      
+      <div class="stat-card animate__animated animate__fadeIn animate__delay-2s">
+        <div class="stat-icon">
+          <i class="fas fa-key"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value" id="totalPermissions">0</div>
+          <div class="stat-label">Permisos Otorgados</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Filtros y búsqueda -->
+    <div class="filters-container">
+      <div class="search-box">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="userSearch" class="search-input" placeholder="Buscar usuarios..." oninput="filterUsers()">
+      </div>
+      
+      <select id="filterStatus" class="filter-select" onchange="filterUsers()">
+        <option value="all">Todos los estados</option>
+        <option value="online">Conectados</option>
+        <option value="offline">Desconectados</option>
+      </select>
+      
+      <select id="filterPermissions" class="filter-select" onchange="filterUsers()">
+        <option value="all">Todos los permisos</option>
+        <option value="inventario">Inventarios</option>
+        <option value="reportes">Reportes</option>
+        <option value="facturas">Facturación</option>
+        <option value="analisis">Análisis</option>
+      </select>
+    </div>
+    
+    <h2 style="margin-bottom: 1.5rem; font-weight: 300; color: var(--text-light);">
+      <i class="fas fa-users-cog"></i> Gestión de accesos del sistema
+    </h2>
+    
+    <div class="user-grid" id="userListContainer">
+      <div class="loader">
+        <div class="loader-spinner"></div>
+      </div>
+    </div>
+
+    <!-- Modal para permisos -->
+    <div id="permissionModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title"><i class="fas fa-key"></i> <span id="modalTitle">Permisos de Usuario</span></h2>
+          <button class="modal-close" id="modalClose">&times;</button>
+        </div>
+        <div class="modal-actions">
+          <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="permissionSearch" class="search-input" placeholder="Buscar permisos...">
+          </div>
+          <button class="modal-action-btn" id="selectAllBtn">
+            <i class="fas fa-check-circle"></i> Seleccionar todos
+          </button>
+          <button class="modal-action-btn" id="deselectAllBtn">
+            <i class="fas fa-times-circle"></i> Deseleccionar todos
+          </button>
+          <button class="modal-action-btn" id="saveTemplateBtn">
+            <i class="fas fa-save"></i> Guardar como plantilla
+          </button>
+          <button class="modal-action-btn" id="loadTemplateBtn">
+            <i class="fas fa-download"></i> Cargar plantilla
+          </button>
+        </div>
+        <div class="permission-container">
+          <div class="permission-grid" id="modalPermissions"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal para logs -->
+    <div id="logModal" class="modal log-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title"><i class="fas fa-history"></i> Historial de Permisos</h2>
+          <button class="modal-close" id="logModalClose">&times;</button>
+        </div>
+        <div class="modal-actions">
+          <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="logSearch" class="search-input" placeholder="Buscar en historial...">
+          </div>
+          <select id="logActionFilter" class="filter-select">
+            <option value="all">Todas las acciones</option>
+            <option value="granted">Otorgados</option>
+            <option value="revoked">Revocados</option>
+          </select>
+          <select id="logUserFilter" class="filter-select">
+            <option value="all">Todos los usuarios</option>
+          </select>
+        </div>
+        <div class="log-container">
+          <table class="log-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Permiso</th>
+                <th>Acción</th>
+                <th>Administrador</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody id="logTableBody">
+              <tr>
+                <td colspan="5" style="text-align: center; padding: 2rem;">
+                  <div class="loader">
+                    <div class="loader-spinner"></div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para plantillas - CORREGIDO -->
+    <div id="templatesModal" class="modal templates-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title"><i class="fas fa-layer-group"></i> Plantillas de Permisos</h2>
+          <button class="modal-close" id="templatesModalClose">&times;</button>
+        </div>
+        <div class="modal-actions">
+          <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="templateSearch" class="search-input" placeholder="Buscar plantillas...">
+          </div>
+        </div>
+        <div class="templates-container">
+          <div class="templates-grid" id="templatesGrid">
+            <div class="loader">
+              <div class="loader-spinner"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de ayuda -->
+    <div id="helpModal" class="modal help-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title"><i class="fas fa-question-circle"></i> Centro de Ayuda</h2>
+          <button class="modal-close" id="helpModalClose">&times;</button>
+        </div>
+        <div class="help-container">
+          <div class="help-section">
+            <h3 class="help-section-title"><i class="fas fa-info-circle"></i> Información General</h3>
+            <p>Bienvenido al Panel de Seguridad de Sistema Retom. Desde aquí puedes gestionar los permisos de acceso de todos los usuarios del sistema.</p>
+          </div>
+
+          <div class="help-section">
+            <h3 class="help-section-title"><i class="fas fa-question-circle"></i> Preguntas Frecuentes</h3>
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                ¿Qué son las plantillas de permisos?
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                Las plantillas de permisos son configuraciones predefinidas que puedes guardar y aplicar a usuarios. Son útiles para asignar rápidamente conjuntos de permisos a usuarios con roles similares.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                ¿Cómo puedo cargar una plantilla?
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                Para cargar una plantilla, abre el modal de gestión de permisos de un usuario y haz clic en el botón "Cargar plantilla". Selecciona la plantilla deseada y se aplicarán todos los permisos configurados en ella.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                ¿Puedo editar o eliminar una plantilla?
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                Sí, desde el modal de plantillas puedes ver todas las plantillas guardadas. Cada plantilla tiene opciones para editarla, aplicarla o eliminarla.
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                ¿Qué información se guarda en el historial?
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                El historial registra todas las acciones relacionadas con permisos: cuándo se otorgaron o revocaron permisos, qué administrador realizó la acción y la fecha exacta de cada cambio.
+              </div>
+            </div>
+          </div>
+
+          <div class="help-section">
+            <h3 class="help-section-title"><i class="fas fa-keyboard"></i> Atajos de Teclado</h3>
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                Ctrl + F
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                Buscar en la sección actual (usuarios, permisos o historial)
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                Ctrl + R
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                Refrescar los datos de la página
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                Esc
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                Cerrar el modal activo
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <button class="floating-btn" id="refreshBtn">
+    <i class="fas fa-sync-alt"></i>
+  </button>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, getDoc, addDoc, getDocs, query, where, orderBy, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // Definición de tipos de permisos con descripciones
+    const permissionTypes = [
+      { 
+        id: "inventario", 
+        name: "Inventarios", 
+        icon: "fa-boxes", 
+        description: "Gestionar productos y existencias en el inventario" 
+      },
+      { 
+        id: "reportes", 
+        name: "Reportes De Ventas", 
+        icon: "fa-chart-line", 
+        description: "Generar y visualizar reportes de ventas" 
+      },
+      { 
+        id: "facturas", 
+        name: "Facturación", 
+        icon: "fa-receipt", 
+        description: "Crear y administrar facturas de clientes" 
+      },
+      { 
+        id: "analisis", 
+        name: "Analisis De Ventas", 
+        icon: "fa-chart-pie", 
+        description: "Analizar tendencias y métricas de ventas" 
+      }
+    ]; 
+
+    let currentEditingUserId = null;
+    let currentEditingUserName = null;
+    let allUsers = [];
+    let permissionLogs = [];
+    let userStatus = {};
+    let permissionTemplates = [];
+    
+    const permissionModal = document.getElementById("permissionModal");
+    const logModal = document.getElementById("logModal");
+    const templatesModal = document.getElementById("templatesModal");
+    const helpModal = document.getElementById("helpModal");
+    const modalClose = document.getElementById("modalClose");
+    const logModalClose = document.getElementById("logModalClose");
+    const templatesModalClose = document.getElementById("templatesModalClose");
+    const helpModalClose = document.getElementById("helpModalClose");
+    const permissionSearch = document.getElementById("permissionSearch");
+    const selectAllBtn = document.getElementById("selectAllBtn");
+    const deselectAllBtn = document.getElementById("deselectAllBtn");
+    const saveTemplateBtn = document.getElementById("saveTemplateBtn");
+    const loadTemplateBtn = document.getElementById("loadTemplateBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const logSearch = document.getElementById("logSearch");
+    const logActionFilter = document.getElementById("logActionFilter");
+    const logUserFilter = document.getElementById("logUserFilter");
+    const templatesBtn = document.getElementById("templatesBtn");
+    const helpBtn = document.getElementById("helpBtn");
+    const templateSearch = document.getElementById("templateSearch");
+    const templatesGrid = document.getElementById("templatesGrid");
+
+    // Inicializar la aplicación
+    function initApp() {
+      setupEventListeners();
+      loadUserStatus();
+      loadUsers();
+      loadPermissionLogs();
+      loadPermissionTemplates();
+    }
+
+    // Configurar event listeners
+    function setupEventListeners() {
+      // Cierre de modales
+      modalClose.addEventListener('click', closePermissionModal);
+      logModalClose.addEventListener('click', closeLogModal);
+      templatesModalClose.addEventListener('click', closeTemplatesModal);
+      helpModalClose.addEventListener('click', closeHelpModal);
+      
+      permissionModal.addEventListener('click', (e) => {
+        if (e.target === permissionModal) closePermissionModal();
+      });
+      
+      logModal.addEventListener('click', (e) => {
+        if (e.target === logModal) closeLogModal();
+      });
+      
+      templatesModal.addEventListener('click', (e) => {
+        if (e.target === templatesModal) closeTemplatesModal();
+      });
+      
+      helpModal.addEventListener('click', (e) => {
+        if (e.target === helpModal) closeHelpModal();
+      });
+
+      // Búsqueda de permisos
+      permissionSearch.addEventListener('input', filterPermissions);
+      
+      // Botones de selección masiva
+      selectAllBtn.addEventListener('click', selectAllPermissions);
+      deselectAllBtn.addEventListener('click', deselectAllPermissions);
+      saveTemplateBtn.addEventListener('click', saveAsTemplate);
+      loadTemplateBtn.addEventListener('click', showLoadTemplateOptions);
+      
+      // Botón de refrescar
+      refreshBtn.addEventListener('click', refreshData);
+      
+      // Filtros de logs
+      logSearch.addEventListener('input', filterLogs);
+      logActionFilter.addEventListener('change', filterLogs);
+      logUserFilter.addEventListener('change', filterLogs);
+      
+      // Botones de header
+      templatesBtn.addEventListener('click', openTemplatesModal);
+      helpBtn.addEventListener('click', openHelpModal);
+      
+      // Búsqueda de plantillas
+      templateSearch.addEventListener('input', filterTemplates);
+      
+      // Teclas de acceso rápido
+      document.addEventListener('keydown', handleKeyboardShortcuts);
+    }
+
+    // Atajos de teclado
+    function handleKeyboardShortcuts(e) {
+      // Esc para cerrar modales
+      if (e.key === "Escape") {
+        if (permissionModal.classList.contains("active")) closePermissionModal();
+        if (logModal.classList.contains("active")) closeLogModal();
+        if (templatesModal.classList.contains("active")) closeTemplatesModal();
+        if (helpModal.classList.contains("active")) closeHelpModal();
+      }
+      
+      // Ctrl+F para buscar en la página actual
+      if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        const activeModal = document.querySelector('.modal.active');
+        if (activeModal && activeModal.id === 'permissionModal') {
+          permissionSearch.focus();
+        } else if (activeModal && activeModal.id === 'logModal') {
+          logSearch.focus();
+        } else if (activeModal && activeModal.id === 'templatesModal') {
+          templateSearch.focus();
+        } else {
+          document.getElementById('userSearch').focus();
+        }
+      }
+      
+      // Ctrl+R para refrescar
+      if (e.ctrlKey && e.key === 'r') {
+        e.preventDefault();
+        refreshData();
+      }
+    }
+
+    // Cargar estado de usuarios (conectados/desconectados)
+    function loadUserStatus() {
+      // En una implementación real, esto vendría de Firebase Presence o de un campo en la base de datos
+      // Por ahora simulamos algunos usuarios conectados
+      onSnapshot(collection(db, "users"), (snapshot) => {
+        snapshot.forEach((doc) => {
+          // Simular estado aleatorio para demostración
+          userStatus[doc.id] = Math.random() > 0.5 ? 'online' : 'offline';
+        });
+        
+        // Actualizar estadísticas
+        updateStats();
+      });
+    }
+
+    // Cargar usuarios en tiempo real
+    function loadUsers() {
+      const userListContainer = document.getElementById("userListContainer");
+
+      onSnapshot(collection(db, "users"), (snapshot) => {
+        allUsers = [];
+        userListContainer.innerHTML = "";
+
+        snapshot.forEach((doc) => {
+          const userData = doc.data();
+          const userId = doc.id;
+          
+          allUsers.push({
+            id: userId,
+            ...userData
+          });
+
+          const userCard = document.createElement('div');
+          userCard.className = 'user-card animate-fade-in';
+          userCard.innerHTML = `
+            <div class="user-info">
+              <img src="${userData.photoURL || 'https://i.imgur.com/8Km9tLL.png'}" alt="${userData.name}" class="user-avatar">
+              <div class="user-details">
+                <div class="user-name">${userData.name}
+                  <span class="user-status ${userStatus[userId] || 'offline'}"></span>
+                </div>
+                <div class="user-email">${userData.email || 'Sin email registrado'}</div>
+                ${userData.permisos && userData.permisos.length > 0 ? `
+                  <div class="user-permissions-badge">
+                    ${userData.permisos.slice(0, 3).map(perm => {
+                      const permInfo = permissionTypes.find(p => p.id === perm);
+                      return `<span class="permission-badge" title="${permInfo ? permInfo.name : perm}">
+                        <i class="fas ${permInfo ? permInfo.icon : 'fa-key'}"></i> ${permInfo ? permInfo.name : perm}
+                      </span>`;
+                    }).join('')}
+                    ${userData.permisos.length > 3 ? `<span class="permission-badge">+${userData.permisos.length - 3}</span>` : ''}
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+            <div class="user-actions">
+              <button class="manage-btn" onclick="openUserPermissions('${userId}', '${userData.name.replace(/'/g, "\\'")}')">
+                <i class="fas fa-user-cog"></i> Gestionar
+              </button>
+              <button class="view-log-btn" onclick="viewUserLogs('${userId}', '${userData.name.replace(/'/g, "\\'")}')" title="Ver historial">
+                <i class="fas fa-history"></i>
+              </button>
+            </div>
+          `;
+
+          userListContainer.appendChild(userCard);
+        });
+        
+        // Actualizar estadísticas
+        updateStats();
+        
+        // Actualizar filtro de usuarios en logs
+        updateLogUserFilter();
+      });
+    }
+
+    // Cargar plantillas de permisos
+    function loadPermissionTemplates() {
+      onSnapshot(collection(db, "permissionTemplates"), (snapshot) => {
+        permissionTemplates = [];
+        snapshot.forEach((doc) => {
+          permissionTemplates.push({
+            id: doc.id,
+            ...doc.data()
+          });
+        });
+        
+        // Si el modal de plantillas está abierto, actualizar la vista
+        if (templatesModal.classList.contains("active")) {
+          renderTemplates(permissionTemplates);
+        }
+      });
+    }
+
+    // Cargar historial de permisos
+    async function loadPermissionLogs() {
+      try {
+        const logsQuery = query(
+          collection(db, "PermisosCCTV"), 
+          orderBy("timestamp", "desc")
+        );
+        
+        onSnapshot(logsQuery, (snapshot) => {
+          permissionLogs = [];
+          snapshot.forEach((doc) => {
+            permissionLogs.push({
+              id: doc.id,
+              ...doc.data()
+            });
+          });
+          
+          // Si el modal de logs está abierto, actualizar la tabla
+          if (logModal.classList.contains("active")) {
+            renderLogTable(permissionLogs);
+          }
+        });
+      } catch (error) {
+        console.error("Error loading permission logs:", error);
+        showAlert("Error al cargar el historial de permisos", false);
+      }
+    }
+
+    // Filtrar usuarios según búsqueda y filtros
+    window.filterUsers = function() {
+      const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+      const statusFilter = document.getElementById('filterStatus').value;
+      const permissionFilter = document.getElementById('filterPermissions').value;
+      
+      const userCards = document.querySelectorAll('.user-card');
+      
+      userCards.forEach(card => {
+        const userName = card.querySelector('.user-name').textContent.toLowerCase();
+        const userStatus = card.querySelector('.user-status').classList.contains('online') ? 'online' : 'offline';
+        const userPermissions = Array.from(card.querySelectorAll('.permission-badge')).map(badge => {
+          return badge.textContent.toLowerCase().trim();
+        }).join(' ');
+        
+        const matchesSearch = userName.includes(searchTerm);
+        const matchesStatus = statusFilter === 'all' || userStatus === statusFilter;
+        const matchesPermission = permissionFilter === 'all' || 
+          userPermissions.includes(permissionFilter);
+        
+        if (matchesSearch && matchesStatus && matchesPermission) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // Filtrar permisos en el modal
+    function filterPermissions() {
+      const searchTerm = permissionSearch.value.toLowerCase();
+      const permissionItems = document.querySelectorAll('.permission-item');
+      
+      permissionItems.forEach(item => {
+        const permissionName = item.querySelector('.permission-name').textContent.toLowerCase();
+        const permissionDesc = item.querySelector('.permission-description').textContent.toLowerCase();
+        
+        if (permissionName.includes(searchTerm) || permissionDesc.includes(searchTerm)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    // Filtrar plantillas
+    function filterTemplates() {
+      const searchTerm = templateSearch.value.toLowerCase();
+      const templateCards = document.querySelectorAll('.template-card');
+      
+      templateCards.forEach(card => {
+        const templateName = card.querySelector('.template-name').textContent.toLowerCase();
+        
+        if (templateName.includes(searchTerm)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // Filtrar logs en el modal de historial
+    function filterLogs() {
+      const searchTerm = logSearch.value.toLowerCase();
+      const actionFilter = logActionFilter.value;
+      const userFilter = logUserFilter.value;
+      
+      const filteredLogs = permissionLogs.filter(log => {
+        const matchesSearch = 
+          log.userName.toLowerCase().includes(searchTerm) ||
+          log.permissionName.toLowerCase().includes(searchTerm) ||
+          log.adminId.toLowerCase().includes(searchTerm);
+        
+        const matchesAction = actionFilter === 'all' || log.action === actionFilter;
+        const matchesUser = userFilter === 'all' || log.userId === userFilter;
+        
+        return matchesSearch && matchesAction && matchesUser;
+      });
+      
+      renderLogTable(filteredLogs);
+    }
+
+    // Actualizar filtro de usuarios en el modal de logs
+    function updateLogUserFilter() {
+      const userFilter = document.getElementById('logUserFilter');
+      
+      // Limpiar opciones excepto la primera
+      while (userFilter.options.length > 1) {
+        userFilter.remove(1);
+      }
+      
+      // Agregar usuarios
+      allUsers.forEach(user => {
+        const option = document.createElement('option');
+        option.value = user.id;
+        option.textContent = user.name;
+        userFilter.appendChild(option);
+      });
+    }
+
+    // Renderizar tabla de logs
+    function renderLogTable(logs) {
+      const tbody = document.getElementById('logTableBody');
+      
+      if (logs.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 2rem;">
+              No se encontraron registros
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      tbody.innerHTML = logs.map(log => `
+        <tr>
+          <td>${log.userName}</td>
+          <td>${log.permissionName}</td>
+          <td class="log-action ${log.action}">${log.action === 'granted' ? 'Otorgado' : 'Revocado'}</td>
+          <td>${log.adminId}</td>
+          <td>${formatDate(log.timestamp?.toDate())}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Renderizar plantillas
+    function renderTemplates(templates) {
+      if (templates.length === 0) {
+        templatesGrid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+            No hay plantillas guardadas. Crea una desde el modal de permisos de usuario.
+          </div>
+        `;
+        return;
+      }
+      
+      templatesGrid.innerHTML = templates.map(template => `
+        <div class="template-card">
+          <div class="template-header">
+            <div class="template-name">${template.name}</div>
+            <div class="template-actions">
+              <button class="template-action-btn" onclick="applyTemplate('${template.id}')" title="Aplicar plantilla">
+                <i class="fas fa-check"></i>
+              </button>
+              <button class="template-action-btn" onclick="editTemplate('${template.id}')" title="Editar plantilla">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="template-action-btn" onclick="deleteTemplate('${template.id}')" title="Eliminar plantilla">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          <div class="template-permissions">
+            ${template.permissions.slice(0, 5).map(perm => {
+              const permInfo = permissionTypes.find(p => p.id === perm);
+              return `<span class="template-permission">${permInfo ? permInfo.name : perm}</span>`;
+            }).join('')}
+            ${template.permissions.length > 5 ? `<span class="template-permission">+${template.permissions.length - 5}</span>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Formatear fecha
+    function formatDate(date) {
+      if (!date) return 'Fecha no disponible';
+      
+      return new Intl.DateTimeFormat('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(date);
+    }
+
+    // Actualizar panel de estadísticas
+    function updateStats() {
+      const totalUsers = allUsers.length;
+      const activeUsers = Object.values(userStatus).filter(status => status === 'online').length;
+      
+      let totalPermissions = 0;
+      allUsers.forEach(user => {
+        if (user.permisos && Array.isArray(user.permisos)) {
+          totalPermissions += user.permisos.length;
+        }
+      });
+      
+      document.getElementById('totalUsers').textContent = totalUsers;
+      document.getElementById('activeUsers').textContent = activeUsers;
+      document.getElementById('totalPermissions').textContent = totalPermissions;
+    }
+
+    // Abrir modal de permisos para un usuario
+    window.openUserPermissions = async (userId, userName) => {
+      currentEditingUserId = userId;
+      currentEditingUserName = userName;
+      
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+      
+      if (!userSnap.exists()) {
+        showAlert("Usuario no encontrado");
+        return;
+      }
+
+      const userData = userSnap.data();
+      const userPermissions = userData.permisos || [];
+
+      const modalPermissions = document.getElementById("modalPermissions");
+      modalPermissions.innerHTML = "";
+      
+      document.getElementById("modalTitle").textContent = `Permisos de ${userName}`;
+
+      permissionTypes.forEach(perm => {
+        const hasPermission = userPermissions.includes(perm.id);
+        
+        const permItem = document.createElement('div');
+        permItem.className = 'permission-item';
+        permItem.innerHTML = `
+          <div class="permission-info">
+            <i class="fas ${perm.icon} permission-icon"></i>
+            <div>
+              <div class="permission-name">${perm.name}</div>
+              <div class="permission-description">${perm.description}</div>
+            </div>
+          </div>
+          <button class="permission-toggle ${hasPermission ? 'remove' : ''}" 
+                  onclick="togglePermission('${perm.id}', ${hasPermission})">
+            ${hasPermission ? 'Quitar' : 'Dar'}
+          </button>
+        `;
+        
+        modalPermissions.appendChild(permItem);
+      });
+
+      showPermissionModal();
+    };
+
+    // Abrir modal de logs para un usuario
+    window.viewUserLogs = async (userId, userName) => {
+      currentEditingUserId = userId;
+      
+      // Filtrar logs por usuario
+      const userLogs = permissionLogs.filter(log => log.userId === userId);
+      
+      // Actualizar título
+      document.querySelector('#logModal .modal-title').innerHTML = `<i class="fas fa-history"></i> Historial de ${userName}`;
+      
+      // Establecer filtro de usuario
+      logUserFilter.value = userId;
+      
+      // Renderizar tabla
+      renderLogTable(userLogs);
+      
+      // Mostrar modal
+      showLogModal();
+    };
+
+    // Abrir modal de plantillas
+    function openTemplatesModal() {
+      renderTemplates(permissionTemplates);
+      showTemplatesModal();
+    }
+
+    // Abrir modal de ayuda
+    function openHelpModal() {
+      showHelpModal();
+    }
+
+    // Cambiar permiso
+    window.togglePermission = async (permissionId, hasPermission) => {
+      if (!currentEditingUserId) return;
+
+      const userRef = doc(db, "users", currentEditingUserId);
+      const permissionName = permissionTypes.find(p => p.id === permissionId)?.name || permissionId;
+      
+      try {
+        if (hasPermission) {
+          // Quitar permiso
+          await updateDoc(userRef, {
+            permisos: arrayRemove(permissionId)
+          });
+          
+          // Registrar en PermisosAcceso
+          await addDoc(collection(db, "PermisosCCTV"), {
+            userId: currentEditingUserId,
+            permissionId: permissionId,
+            action: 'revoked',
+            adminId: auth.currentUser.uid,
+            timestamp: new Date(),
+            userName: currentEditingUserName,
+            permissionName: permissionName
+          });
+          
+          showAlert(`Permiso "${permissionName}" revocado a ${currentEditingUserName}`, true);
+        } else {
+          // Dar permiso
+          await updateDoc(userRef, {
+            permisos: arrayUnion(permissionId)
+          });
+          
+          // Registrar en PermisosAcceso
+          await addDoc(collection(db, "PermisosCCTV"), {
+            userId: currentEditingUserId,
+            permissionId: permissionId,
+            action: 'granted',
+            adminId: auth.currentUser.uid,
+            timestamp: newDate(),
+            userName: currentEditingUserName,
+            permissionName: permissionName
+          });
+          
+          showAlert(`Permiso "${permissionName}" otorgado a ${currentEditingUserName}`, true);
+        }
+        
+        // Actualizar vista
+        openUserPermissions(currentEditingUserId, currentEditingUserName);
+      } catch (error) {
+        showAlert("Error al actualizar permiso: " + error.message);
+      }
+    };
+
+    // Seleccionar todos los permisos
+    async function selectAllPermissions() {
+      if (!currentEditingUserId) return;
+      
+      const userRef = doc(db, "users", currentEditingUserId);
+      const userSnap = await getDoc(userRef);
+      
+      if (!userSnap.exists()) {
+        showAlert("Usuario no encontrado");
+        return;
+      }
+
+      const userData = userSnap.data();
+      const userPermissions = userData.permisos || [];
+      const allPermissionIds = permissionTypes.map(perm => perm.id);
+      const permissionsToAdd = allPermissionIds.filter(id => !userPermissions.includes(id));
+      
+      if (permissionsToAdd.length === 0) {
+        showAlert("El usuario ya tiene todos los permisos", true);
+        return;
+      }
+
+      try {
+        await updateDoc(userRef, {
+          permisos: arrayUnion(...permissionsToAdd)
+        });
+        
+        // Registrar en PermisosAcceso
+        for (const permissionId of permissionsToAdd) {
+          const permissionName = permissionTypes.find(p => p.id === permissionId)?.name || permissionId;
+          
+          await addDoc(collection(db, "PermisosCCTV"), {
+            userId: currentEditingUserId,
+            permissionId: permissionId,
+            action: 'granted',
+            adminId: auth.currentUser.uid,
+            timestamp: new Date(),
+            userName: currentEditingUserName,
+            permissionName: permissionName
+          });
+        }
+        
+        showAlert(`Todos los permisos otorgados a ${currentEditingUserName}`, true);
+        openUserPermissions(currentEditingUserId, currentEditingUserName);
+      } catch (error) {
+        showAlert("Error al actualizar permisos: " + error.message);
+      }
+    }
+
+    // Deseleccionar todos los permisos
+    async function deselectAllPermissions() {
+      if (!currentEditingUserId) return;
+      
+      const userRef = doc(db, "users", currentEditingUserId);
+      const userSnap = await getDoc(userRef);
+      
+      if (!userSnap.exists()) {
+        showAlert("Usuario no encontrado");
+        return;
+      }
+
+      const userData = userSnap.data();
+      const userPermissions = userData.permisos || [];
+      
+      if (userPermissions.length === 0) {
+        showAlert("El usuario no tiene permisos asignados", true);
+        return;
+      }
+
+      try {
+        await updateDoc(userRef, {
+          permisos: arrayRemove(...userPermissions)
+        });
+        
+        // Registrar en PermisosAcceso
+        for (const permissionId of userPermissions) {
+          const permissionName = permissionTypes.find(p => p.id === permissionId)?.name || permissionId;
+          
+          await addDoc(collection(db, "PermisosCCTV"), {
+            userId: currentEditingUserId,
+            permissionId: permissionId,
+            action: 'revoked',
+            adminId: auth.currentUser.uid,
+            timestamp: new Date(),
+            userName: currentEditingUserName,
+            permissionName: permissionName
+          });
+        }
+        
+        showAlert(`Todos los permisos revocados a ${currentEditingUserName}`, true);
+        openUserPermissions(currentEditingUserId, currentEditingUserName);
+      } catch (error) {
+        showAlert("Error al actualizar permisos: " + error.message);
+      }
+    }
+
+    // Guardar configuración como plantilla
+    async function saveAsTemplate() {
+      if (!currentEditingUserId) return;
+      
+      const userRef = doc(db, "users", currentEditingUserId);
+      const userSnap = await getDoc(userRef);
+      
+      if (!userSnap.exists()) {
+        showAlert("Usuario no encontrado");
+        return;
+      }
+
+      const userData = userSnap.data();
+      const userPermissions = userData.permisos || [];
+      
+      try {
+        const { value: templateName } = await Swal.fire({
+          title: 'Guardar como plantilla',
+          html: `
+            <input type="text" id="templateName" class="swal2-input" placeholder="Nombre de la plantilla" value="Plantilla de ${currentEditingUserName}">
+            <p style="text-align: left; margin-top: 10px; font-size: 0.9em; color: #a9b7d0;">
+              Esta plantilla incluirá los permisos actuales del usuario. Podrás aplicarla a otros usuarios más tarde.
+            </p>
+          `,
+          focusConfirm: false,
+          showCancelButton: true,
+          confirmButtonText: 'Guardar',
+          cancelButtonText: 'Cancelar',
+          preConfirm: () => {
+            return document.getElementById('templateName').value;
+          }
+        });
+        
+        if (!templateName) return;
+        
+        await addDoc(collection(db, "permissionTemplates"), {
+          name: templateName,
+          permissions: userPermissions,
+          createdAt: new Date(),
+          createdBy: auth.currentUser.uid,
+          basedOn: currentEditingUserName
+        });
+        
+        showAlert(`Plantilla "${templateName}" guardada correctamente`, true);
+      } catch (error) {
+        showAlert("Error al guardar plantilla: " + error.message);
+      }
+    }
+
+    // Mostrar opciones para cargar plantilla - CORREGIDO
+    async function showLoadTemplateOptions() {
+      if (permissionTemplates.length === 0) {
+        showAlert("No hay plantillas guardadas. Primero guarda una plantilla desde el botón 'Guardar como plantilla'.", false);
+        return;
+      }
+      
+      // Cerrar el modal de permisos primero
+      closePermissionModal();
+      
+      // Crear un modal de selección de plantillas mejorado
+      const { value: templateId } = await Swal.fire({
+        title: 'Seleccionar plantilla',
+        html: `
+          <div style="text-align: left; margin-bottom: 1rem; color: var(--text-lighter);">
+            Selecciona una plantilla para aplicar al usuario actual:
+          </div>
+          <select id="templateSelector" class="swal2-select" style="width: 100%; padding: 10px; margin-bottom: 1rem;">
+            ${permissionTemplates.map(template => 
+              `<option value="${template.id}">${template.name}</option>`
+            ).join('')}
+          </select>
+          <div id="templatePreview" style="text-align: left; background: var(--glass); padding: 10px; border-radius: 8px; margin-top: 10px; max-height: 150px; overflow-y: auto;">
+            <div style="font-weight: bold; margin-bottom: 5px;">Permisos incluidos:</div>
+            <div id="previewContent">Selecciona una plantilla para ver sus permisos</div>
+          </div>
+        `,
+        width: '600px',
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Aplicar plantilla',
+        cancelButtonText: 'Cancelar',
+        didOpen: () => {
+          const selector = document.getElementById('templateSelector');
+          const preview = document.getElementById('previewContent');
+          
+          // Actualizar vista previa cuando cambia la selección
+          selector.addEventListener('change', function() {
+            const selectedTemplate = permissionTemplates.find(t => t.id === this.value);
+            if (selectedTemplate) {
+              preview.innerHTML = selectedTemplate.permissions.map(permId => {
+                const perm = permissionTypes.find(p => p.id === permId);
+                return `<div style="display: inline-block; background: rgba(21, 160, 134, 0.2); color: var(--accent-light); padding: 3px 8px; border-radius: 4px; margin: 2px; font-size: 0.8em;">
+                  <i class="fas ${perm ? perm.icon : 'fa-key'}"></i> ${perm ? perm.name : permId}
+                </div>`;
+              }).join('');
+            }
+          });
+          
+          // Disparar evento change para mostrar la primera plantilla
+          selector.dispatchEvent(new Event('change'));
+        },
+        preConfirm: () => {
+          return document.getElementById('templateSelector').value;
+        }
+      });
+      
+      if (templateId) {
+        await applyTemplate(templateId);
+      }
+    }
+
+    // Aplicar plantilla a usuario actual
+    window.applyTemplate = async (templateId) => {
+      if (!currentEditingUserId) {
+        showAlert("Primero debes seleccionar un usuario para aplicar la plantilla", false);
+        return;
+      }
+      
+      const template = permissionTemplates.find(t => t.id === templateId);
+      if (!template) {
+        showAlert("Plantilla no encontrada", false);
+        return;
+      }
+      
+      try {
+        const userRef = doc(db, "users", currentEditingUserId);
+        
+        // Primero eliminar todos los permisos actuales
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          const currentPermissions = userData.permisos || [];
+          
+          if (currentPermissions.length > 0) {
+            await updateDoc(userRef, {
+              permisos: arrayRemove(...currentPermissions)
+            });
+            
+            // Registrar revocación de permisos actuales
+            for (const permissionId of currentPermissions) {
+              const permissionName = permissionTypes.find(p => p.id === permissionId)?.name || permissionId;
+              
+              await addDoc(collection(db, "PermisosCCTV"), {
+                userId: currentEditingUserId,
+                permissionId: permissionId,
+                action: 'revoked',
+                adminId: auth.currentUser.uid,
+                timestamp: new Date(),
+                userName: currentEditingUserName,
+                permissionName: permissionName,
+                note: 'Revocado al aplicar plantilla'
+              });
+            }
+          }
+        }
+        
+        // Aplicar permisos de la plantilla
+        if (template.permissions.length > 0) {
+          await updateDoc(userRef, {
+            permisos: arrayUnion(...template.permissions)
+          });
+          
+          // Registrar concesión de nuevos permisos
+          for (const permissionId of template.permissions) {
+            const permissionName = permissionTypes.find(p => p.id === permissionId)?.name || permissionId;
+            
+            await addDoc(collection(db, "PermisosCCTV"), {
+              userId: currentEditingUserId,
+              permissionId: permissionId,
+              action: 'granted',
+              adminId: auth.currentUser.uid,
+              timestamp: new Date(),
+              userName: currentEditingUserName,
+              permissionName: permissionName,
+              note: 'Otorgado mediante plantilla: ' + template.name
+              });
+          }
+        }
+        
+        showAlert(`Plantilla "${template.name}" aplicada a ${currentEditingUserName}`, true);
+        // No cerramos el modal de plantillas ya que fue abierto desde el modal de permisos
+        openUserPermissions(currentEditingUserId, currentEditingUserName);
+      } catch (error) {
+        showAlert("Error al aplicar plantilla: " + error.message);
+      }
+    };
+
+    // Editar plantilla (renombrar) - CORREGIDO
+    window.editTemplate = async (templateId) => {
+      const template = permissionTemplates.find(t => t.id === templateId);
+      if (!template) {
+        showAlert("Plantilla no encontrada", false);
+        return;
+      }
+      
+      // Cerrar el modal de plantillas primero
+      closeTemplatesModal();
+      
+      try {
+        const { value: newName } = await Swal.fire({
+          title: 'Renombrar plantilla',
+          input: 'text',
+          inputValue: template.name,
+          inputPlaceholder: 'Nuevo nombre para la plantilla',
+          showCancelButton: true,
+          confirmButtonText: 'Guardar',
+          cancelButtonText: 'Cancelar',
+          inputValidator: (value) => {
+            if (!value) {
+              return 'El nombre no puede estar vacío';
+            }
+          }
+        });
+        
+        if (newName) {
+          const templateRef = doc(db, "permissionTemplates", templateId);
+          await updateDoc(templateRef, {
+            name: newName
+          });
+          
+          showAlert(`Plantilla renombrada a "${newName}"`, true);
+          // Volver a abrir el modal de plantillas para ver los cambios
+          openTemplatesModal();
+        } else {
+          // Si se canceló, volver a abrir el modal de plantillas
+          openTemplatesModal();
+        }
+      } catch (error) {
+        showAlert("Error al renombrar plantilla: " + error.message);
+        // Volver a abrir el modal de plantillas en caso de error
+        openTemplatesModal();
+      }
+    };
+
+    // Eliminar plantilla - CORREGIDO
+    window.deleteTemplate = async (templateId) => {
+      const template = permissionTemplates.find(t => t.id === templateId);
+      if (!template) {
+        showAlert("Plantilla no encontrada", false);
+        return;
+      }
+      
+      // Cerrar el modal de plantillas primero
+      closeTemplatesModal();
+      
+      try {
+        const result = await Swal.fire({
+          title: '¿Eliminar plantilla?',
+          html: `¿Estás seguro de que quieres eliminar la plantilla "<b>${template.name}</b>"? Esta acción no se puede deshacer.`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, eliminar',
+          cancelButtonText: 'Cancelar'
+        });
+        
+        if (result.isConfirmed) {
+          const templateRef = doc(db, "permissionTemplates", templateId);
+          await deleteDoc(templateRef);
+          
+          showAlert(`Plantilla "${template.name}" eliminada`, true);
+        }
+        
+        // Volver a abrir el modal de plantillas para ver los cambios
+        openTemplatesModal();
+      } catch (error) {
+        showAlert("Error al eliminar plantilla: " + error.message);
+        // Volver a abrir el modal de plantillas en caso de error
+        openTemplatesModal();
+      }
+    };
+
+    // Refrescar datos
+    function refreshData() {
+      showAlert("Datos actualizados", true);
+      loadUsers();
+      loadPermissionLogs();
+      loadPermissionTemplates();
+      
+      // Agregar animación al botón de refresh
+      refreshBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+      setTimeout(() => {
+        refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+      }, 1000);
+    }
+
+    // Alternar FAQ
+    window.toggleFaq = function(element) {
+      const answer = element.nextElementSibling;
+      const icon = element.querySelector('i');
+      
+      if (answer.style.display === 'block') {
+        answer.style.display = 'none';
+        icon.classList.remove('fa-chevron-up');
+        icon.classList.add('fa-chevron-down');
+      } else {
+        answer.style.display = 'block';
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-up');
+      }
+    };
+
+    // Mostrar alerta
+    function showAlert(message, isSuccess = false) {
+      const alert = document.getElementById("alert");
+      alert.textContent = message;
+      alert.className = isSuccess ? "alert success show" : "alert show";
+      setTimeout(() => {
+        alert.classList.remove("show");
+      }, 5000);
+    }
+
+    // Mostrar modal de permisos
+    function showPermissionModal() {
+      // Cerrar otros modales abiertos primero
+      closeAllModals();
+      
+      permissionModal.classList.add("active");
+      document.body.style.overflow = "hidden";
+      permissionSearch.value = ""; // Limpiar búsqueda
+    }
+
+    // Cerrar modal de permisos
+    function closePermissionModal() {
+      permissionModal.classList.remove("active");
+      document.body.style.overflow = "auto";
+    }
+
+    // Mostrar modal de logs
+    function showLogModal() {
+      // Cerrar otros modales abiertos primero
+      closeAllModals();
+      
+      logModal.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+
+    // Cerrar modal de logs
+    function closeLogModal() {
+      logModal.classList.remove("active");
+      document.body.style.overflow = "auto";
+      // Restablecer filtros
+      logSearch.value = "";
+      logActionFilter.value = "all";
+      logUserFilter.value = "all";
+    }
+
+    // Mostrar modal de plantillas
+    function showTemplatesModal() {
+      // Cerrar otros modales abiertos primero
+      closeAllModals();
+      
+      templatesModal.classList.add("active");
+      document.body.style.overflow = "hidden";
+      templateSearch.value = ""; // Limpiar búsqueda
+    }
+
+    // Cerrar modal de plantillas
+    function closeTemplatesModal() {
+      templatesModal.classList.remove("active");
+      document.body.style.overflow = "auto";
+    }
+
+    // Mostrar modal de ayuda
+    function showHelpModal() {
+      // Cerrar otros modales abiertos primero
+      closeAllModals();
+      
+      helpModal.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+
+    // Cerrar modal de ayuda
+    function closeHelpModal() {
+      helpModal.classList.remove("active");
+      document.body.style.overflow = "auto";
+    }
+
+    // Cerrar todos los modales
+    function closeAllModals() {
+      permissionModal.classList.remove("active");
+      logModal.classList.remove("active");
+      templatesModal.classList.remove("active");
+      helpModal.classList.remove("active");
+    }
+
+    // Verificar autenticación
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+      
+      // Cargar la interfaz
+      initApp();
+    });
+
+    // Bloquear inspección
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if (e.key === "F12" || 
+          (e.ctrlKey && e.shiftKey && e.key === 'I') || 
+          (e.ctrlKey && e.key === 'u') || 
+          (e.ctrlKey && e.shiftKey && e.key === 'J')) {
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+</html>
