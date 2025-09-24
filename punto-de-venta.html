@@ -1,0 +1,3751 @@
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Punto de Ventas</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Estilo general */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-user-drag: none;
+      -moz-user-drag: none;
+      user-drag: none;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      color: #ecf0f1;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Login Styles */
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      position: relative;
+    }
+
+    .login-loading {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      display: none;
+    }
+
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 5px solid #16e086;
+      border-bottom-color: transparent;
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+    }
+
+    @keyframes rotation {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .login-form {
+      background: rgba(44, 62, 80, 0.9);
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .login-form h2 {
+      margin-bottom: 20px;
+      color: #16e086;
+    }
+
+    .login-form input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ecf0f1;
+      font-size: 16px;
+    }
+
+    .login-form button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 5px;
+      background: #16e086;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .login-form button:hover {
+      background: #15a086;
+    }
+
+    .login-error {
+      color: #ff7675;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #47627d;
+      padding: 10px 20px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .header-icons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .icon {
+      color: #15a086;
+      font-size: 1.8em;
+      transition: transform 0.3s ease, color 0.3s ease;
+      cursor: pointer;
+    }
+
+    .icon:hover {
+      transform: scale(1.2);
+      color: #16e086;
+    }
+
+    /* Estilo para iconos bloqueados en el header */
+    .icon.locked {
+      opacity: 0.5;
+      pointer-events: none;
+      position: relative;
+    }
+
+    .icon.locked::after {
+      content: "\f023";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1rem;
+      color: #e74c3c;
+      z-index: 1;
+    }
+
+    #invoiceUser {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    /* Main Layout */
+    .main-container {
+      display: flex;
+      margin-top: 60px;
+      flex-grow: 1;
+      min-height: calc(100vh - 120px);
+    }
+
+    /* Left: Product List */
+    .product-list-container {
+      flex: 3;
+      padding: 20px;
+      overflow-y: auto;
+      background: #34495e;
+      border-radius: 10px;
+      margin: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      height: calc(100vh - 180px);
+    }
+
+    .product-list-container h1 {
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      color: #16e086;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 10px;
+    }
+
+    .view-toggle-btn {
+      background: none;
+      border: none;
+      color: #15a086;
+      font-size: 1.2em;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .view-toggle-btn:hover, .view-toggle-btn.active {
+      color: #16e086;
+      transform: scale(1.2);
+    }
+
+    /* Estilos para diferentes vistas de productos */
+    .products-list {
+      height: calc(100% - 100px);
+      overflow-y: auto;
+    }
+
+    .products-list.grid-view {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .products-list.grid-view .product-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      transition: all 0.3s;
+      cursor: pointer;
+      height: 220px;
+    }
+
+    .products-list.grid-view .product-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-5px);
+    }
+
+    .products-list.grid-view .product-item img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+
+    .products-list.grid-view .product-item .product-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 0.9em;
+    }
+
+    .products-list.grid-view .product-item .product-price {
+      color: #16e086;
+      font-weight: bold;
+      font-size: 1em;
+    }
+
+    .products-list.grid-view .product-item .product-stock {
+      font-size: 0.8em;
+      color: #95a5a6;
+    }
+
+    .products-list.grid-overlay {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .products-list.grid-overlay .product-item {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      transition: all 0.3s;
+      cursor: pointer;
+      height: 220px;
+      overflow: hidden;
+    }
+
+    .products-list.grid-overlay .product-item img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+
+    .products-list.grid-overlay .product-item .product-info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(44, 62, 80, 0.9);
+      padding: 10px;
+      transform: translateY(100%);
+      transition: all 0.3s;
+    }
+
+    .products-list.grid-overlay .product-item:hover .product-info {
+      transform: translateY(0);
+    }
+
+    .products-list.grid-overlay .product-item .product-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+      font-size: 0.9em;
+    }
+
+    .products-list.grid-overlay .product-item .product-price {
+      color: #16e086;
+      font-weight: bold;
+      font-size: 1em;
+    }
+
+    .products-list.grid-overlay .product-item .product-stock {
+      font-size: 0.8em;
+      color: #95a5a6;
+    }
+
+    .products-list.list-view {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .products-list.list-view .product-item {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      transition: all 0.3s;
+      cursor: pointer;
+      height: auto;
+    }
+
+    .products-list.list-view .product-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .products-list.list-view .product-item img {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      margin-right: 15px;
+      border-radius: 5px;
+    }
+
+    .products-list.list-view .product-item .product-details {
+      flex-grow: 1;
+    }
+
+    .products-list.list-view .product-item .product-name {
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+
+    .products-list.list-view .product-item .product-price {
+      color: #16e086;
+      font-weight: bold;
+      font-size: 1em;
+    }
+
+    .products-list.list-view .product-item .product-stock {
+      font-size: 0.8em;
+      color: #95a5a6;
+    }
+
+    .products-list.text-only {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .products-list.text-only .product-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      transition: all 0.3s;
+      cursor: pointer;
+      height: auto;
+    }
+
+    .products-list.text-only .product-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .products-list.text-only .product-item .product-name {
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+
+    .products-list.text-only .product-item .product-price {
+      color: #16e086;
+      font-weight: bold;
+      font-size: 1em;
+    }
+
+    /* Right: Current Invoice */
+    .products-container {
+      flex: 3;
+      padding: 20px;
+      overflow-y: auto;
+      background: #2c3e50;
+      border-radius: 10px;
+      margin: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      height: calc(100vh - 180px);
+    }
+
+    .products-container h1 {
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      color: #16e086;
+    }
+
+    /* Search Container */
+    .search-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .search-container input {
+      flex-grow: 1;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 25px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: #dfe6e9;
+      transition: background 0.3s ease;
+    }
+
+    .search-container input:focus {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Product Items */
+    .product-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      margin-bottom: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      transition: transform 0.3s ease, background 0.3s ease;
+      cursor: pointer;
+    }
+
+    .product-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-5px);
+    }
+
+    .invoice-item {
+      padding: 10px;
+      border-bottom: 1px solid #95a5a6;
+      margin-bottom: 10px;
+      background: #2c3e50;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.3s ease;
+    }
+
+    .invoice-item:hover {
+      transform: translateX(5px);
+    }
+
+    .remove-btn {
+      background-color: #d63031;
+      color: #fff;
+      padding: 5px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-left: auto;
+    }
+
+    .remove-btn:hover {
+      background-color: #ff7675;
+    }
+
+    /* Bottom Totals Bar */
+    .totals-bar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #2c3e50;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .totals-bar .total-container {
+      background: #47627d;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 1em;
+      color: #ecf0f1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .totals-bar .total-container i {
+      font-size: 1.2em;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .button {
+      padding: 12px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 1em;
+      color: #ecf0f1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.3s, transform 0.3s;
+      text-decoration: none;
+    }
+
+    .button:hover {
+      transform: scale(1.05);
+    }
+
+    .button i {
+      font-size: 1.2em;
+    }
+
+    .button-efectivo {
+      background-color: #27ae60;
+    }
+
+    .button-efectivo:hover {
+      background-color: #2ecc71;
+    }
+
+    .button-tarjeta {
+      background-color: #2980b9;
+    }
+
+    .button-tarjeta:hover {
+      background-color: #3498db;
+    }
+
+    .button-descuento {
+      background-color: #e67e22;
+    }
+
+    .button-descuento:hover {
+      background-color: #d35400;
+    }
+
+    .button-home {
+      background-color: #8e44ad;
+    }
+
+    .button-home:hover {
+      background-color: #9b59b6;
+    }
+
+    .button-pay {
+      background: linear-gradient(135deg, #16e086, #15a086);
+      color: #fff;
+      font-size: 18px;
+      padding: 12px 25px;
+      border-radius: 50px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .button-pay:hover {
+      background: linear-gradient(135deg, #15a086, #16e086);
+    }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: #2c3e50;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80mm;
+      max-width: 90%;
+      border-radius: 10px;
+      color: #ecf0f1;
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes slideIn {
+      from { transform: translate(-50%, -100px); opacity: 0; }
+      to { transform: translate(-50%, -50%); opacity: 1; }
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #fff;
+    }
+
+    /* Payment Modals */
+    .payment-modal-content {
+      background-color: #2c3e50;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 300px;
+      max-width: 90%;
+      border-radius: 10px;
+      color: #ecf0f1;
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .payment-modal-content input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #888;
+      background-color: #34495e;
+      color: #ecf0f1;
+      font-size: 1em;
+    }
+
+    .payment-modal-content button {
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 1em;
+      background-color: #27ae60;
+      color: #ecf0f1;
+      transition: background 0.3s, transform 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px auto;
+    }
+
+    .payment-modal-content button:hover {
+      background-color: #2ecc71;
+      transform: scale(1.05);
+    }
+
+    /* Modal de tasas de cambio */
+    .rates-modal-content {
+      background-color: #2c3e50;
+      padding: 30px;
+      border: 1px solid #888;
+      width: 350px;
+      max-width: 90%;
+      border-radius: 15px;
+      color: #ecf0f1;
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .rates-modal-content h2 {
+      margin-bottom: 20px;
+      color: #16e086;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .rates-modal-content .current-rates {
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .rates-modal-content .current-rates h3 {
+      margin-bottom: 10px;
+      color: #16e086;
+    }
+
+    .rates-modal-content .current-rates p {
+      margin: 5px 0;
+      font-size: 1.1em;
+    }
+
+    .rates-modal-content .current-rates .rate-value {
+      font-weight: bold;
+      color: #16e086;
+    }
+
+    /* Password Modal */
+    .password-modal-content {
+      background-color: #2c3e50;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 300px;
+      max-width: 90%;
+      border-radius: 10px;
+      color: #ecf0f1;
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .password-modal-content input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #888;
+      background-color: #34495e;
+      color: #ecf0f1;
+    }
+
+    .password-modal-content button {
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 1em;
+      background-color: #27ae60;
+      color: #ecf0f1;
+      transition: background 0.3s, transform 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .password-modal-content button:hover {
+      background-color: #2ecc71;
+      transform: scale(1.05);
+    }
+
+    /* Discount Applied Modal */
+    .discount-applied-modal {
+      background-color: #2c3e50;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 300px;
+      max-width: 90%;
+      border-radius: 10px;
+    }
+
+    /* Numeric Keyboard */
+    .numeric-keyboard {
+      display: none;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 15px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    .numeric-btn {
+      padding: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+      background: linear-gradient(145deg, #2c3e50, #222);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      box-shadow: 0 0 8px rgba(22, 224, 136);
+      transition: all 0.3s ease-in-out;
+    }
+
+    .numeric-btn:hover {
+      background: #16e086;
+      color: #000;
+      box-shadow: 0 0 15px rgba(22, 224, 134);
+      transform: scale(1.1);
+    }
+
+    #backspaceBtn {
+      background: #ff004c;
+      color: white;
+      box-shadow: 0 0 10px rgba(255, 0, 76, 0.6);
+    }
+
+    #backspaceBtn:hover {
+      background: #ff3366;
+      box-shadow: 0 0 20px rgba(255, 0, 76, 1); 
+      transform: scale(1.1);
+    }
+
+    #acceptBtn {
+      background: #15a086;
+      color: #fff;
+      font-size: 18px;
+      padding: 15px 50px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(21, 160, 135);
+      grid-column: span 1;
+    }
+
+    #acceptBtn:hover {
+      background: #16e086;
+      box-shadow: 0 0 20px rgba(22, 224, 134);
+      transform: scale(1.05);
+    }
+
+    /* Text Keyboard */
+    .text-keyboard {
+      display: none;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 8px;
+      margin-top: 15px;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+      backdrop-filter: blur(10px);
+    }
+
+    .text-keyboard button {
+      padding: 10px;
+      font-size: 16px;
+      background: #2c3e50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .text-keyboard button:hover {
+      background: #16e086;
+      transform: scale(1.1);
+    }
+
+    .text-keyboard .space {
+      grid-column: span 4;
+    }
+
+    .text-keyboard .enter {
+      grid-column: span 3;
+      background: #27ae60;
+    }
+
+    .text-keyboard .shift {
+      grid-column: span 2;
+      background: #e67e22;
+    }
+
+    .text-keyboard .backspace {
+      grid-column: span 2;
+      background: #d63031;
+    }
+
+    /* Factura Styles */
+    .invoice-container {
+      width: 100%;
+      max-width: 80mm;
+      margin: 0 auto;
+      padding: 10px;
+      font-family: Arial, sans-serif;
+    }
+
+    .invoice-header {
+      text-align: center;
+      margin-bottom: 10px;
+      border-bottom: 1px dashed #000;
+      padding-bottom: 10px;
+    }
+
+    .invoice-header h2 {
+      margin: 5px 0;
+      font-size: 18px;
+    }
+
+    .invoice-header p {
+      margin: 3px 0;
+      font-size: 14px;
+    }
+
+    .invoice-user {
+      margin: 10px 0;
+      padding-bottom: 5px;
+      border-bottom: 1px dashed #000;
+    }
+
+    .invoice-products {
+      margin: 10px 0;
+    }
+
+    .product-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .product-name {
+      flex: 3;
+    }
+
+    .product-quantity, .product-price, .product-total, .product-itbis {
+      flex: 1;
+      text-align: right;
+      margin-left: 5px;
+    }
+
+    .invoice-totals {
+      margin-top: 15px;
+      border-top: 1px dashed #000;
+      padding-top: 10px;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .barcode {
+      text-align: center;
+      margin-top: 15px;
+      font-family: 'Libre Barcode 39', cursive;
+      font-size: 36px;
+      padding: 5px 0;
+    }
+
+    .thank-you {
+      text-align: center;
+      margin-top: 10px;
+      font-style: italic;
+      padding: 5px 0;
+    }
+
+    /* Print Button Style */
+    #btnPrint {
+      background: linear-gradient(135deg, #16e086, #15a086);
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 50px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #btnPrint:hover {
+      background: linear-gradient(135deg, #15a086, #16e086);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    #btnPrint i {
+      font-size: 18px;
+    }
+
+    /* Reports Section */
+    .reports-section {
+      display: none;
+      padding: 20px;
+      margin-top: 60px;
+      background: #34495e;
+      border-radius: 10px;
+      margin: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      width: calc(100% - 20px);
+      height: calc(100vh - 180px);
+      overflow-y: auto;
+    }
+
+    .reports-section h1 {
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      color: #16e086;
+      text-align: center;
+    }
+
+    .report-item {
+      padding: 15px;
+      margin-bottom: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .report-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .report-total {
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-top: 20px;
+      padding: 10px;
+      background: rgba(22, 224, 134, 0.2);
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    /* User Info Modal */
+    .user-info-modal {
+      background-color: #2c3e50;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 300px;
+      max-width: 90%;
+      border-radius: 10px;
+      color: #ecf0f1;
+      text-align: center;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .user-info-modal h2 {
+      margin-bottom: 15px;
+      color: #16e086;
+    }
+
+    .user-info-modal p {
+      margin: 10px 0;
+    }
+
+    .logout-btn {
+      background: #d63031;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background 0.3s;
+    }
+
+    .logout-btn:hover {
+      background: #ff7675;
+    }
+
+    /* Elegant Alerts */
+    .alert-modal {
+      background-color: #2c3e50;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 300px;
+      max-width: 90%;
+      border-radius: 10px;
+      color: #ecf0f1;
+      text-align: center;
+      animation: slideIn 0.3s ease;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .alert-modal h2 {
+      margin-bottom: 15px;
+    }
+
+    .alert-success h2 {
+      color: #16e086;
+    }
+
+    .alert-error h2 {
+      color: #ff7675;
+    }
+
+    .alert-warning h2 {
+      color: #fdcb6e;
+    }
+
+    .alert-modal button {
+      background: #16e086;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background 0.3s;
+    }
+
+    .alert-modal button:hover {
+      background: #15a086;
+    }
+
+    /* Responsividad */
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+
+      .products-container, .product-list-container, .reports-section {
+        margin: 5px;
+        padding: 10px;
+      }
+
+      .totals-bar {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .action-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .button {
+        flex: 1 1 45%;
+      }
+
+      .text-keyboard {
+        grid-template-columns: repeat(8, 1fr);
+      }
+
+      .text-keyboard .space {
+        grid-column: span 3;
+      }
+
+      .text-keyboard .enter {
+        grid-column: span 2;
+      }
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .modal-content, .modal-content * {
+        visibility: visible;
+      }
+      .modal-content {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        color: #000;
+      }
+      .modal-content button {
+        display: none;
+      }
+      .report-print-container, .report-print-container * {
+        visibility: visible;
+      }
+      .report-print-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        color: #000;
+        padding: 20px;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    /* Nuevos estilos para las secciones de reportes */
+    .report-container {
+      display: flex;
+      width: 100%;
+      gap: 20px;
+    }
+
+    .report-list {
+      flex: 1;
+      overflow-y: auto;
+      max-height: calc(100vh - 200px);
+    }
+
+    .report-detail {
+      flex: 1;
+      background: #2c3e50;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+    }
+
+    .invoice-ticket {
+      width: 80mm;
+      margin: 0 auto;
+      padding: 10px;
+      font-family: Arial, sans-serif;
+      background: white;
+      color: black;
+      border-radius: 5px;
+    }
+
+    .date-filter {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .date-filter input {
+      padding: 8px;
+      border-radius: 5px;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ecf0f1;
+    }
+
+    .date-filter button {
+      padding: 8px 15px;
+      background: #16e086;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .chart-container {
+      margin-top: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    /* Estilos para los totales en diferentes monedas */
+    .currency-totals {
+      display: flex;
+      gap: 10px;
+      margin-left: 10px;
+    }
+
+    .currency-total {
+      background: #47627d;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 0.9em;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .currency-total i {
+      font-size: 1em;
+    }
+
+    /* Nuevos estilos para botones de impresión */
+    .print-btn {
+      background: linear-gradient(135deg, #16e086, #15a086);
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+
+    .print-btn:hover {
+      background: linear-gradient(135deg, #15a086, #16e086);
+      transform: translateY(-2px);
+    }
+
+    .print-btn i {
+      font-size: 16px;
+    }
+
+    /* Estilo para el contenedor de impresión de reportes */
+    .report-print-container {
+      display: none;
+    }
+
+    /* Nueva sección de productos facturados */
+    .sales-analysis-section {
+      display: none;
+      padding: 20px;
+      margin-top: 60px;
+      background: #34495e;
+      border-radius: 10px;
+      margin: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      width: calc(100% - 20px);
+      height: calc(100vh - 180px);
+      overflow-y: auto;
+    }
+
+    .sales-analysis-section h1 {
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      color: #16e086;
+      text-align: center;
+    }
+
+    .sales-categories {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .sales-category {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 15px;
+      transition: all 0.3s;
+    }
+
+    .sales-category:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-5px);
+    }
+
+    .category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .category-title {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #16e086;
+    }
+
+    .category-total {
+      font-weight: bold;
+      background: rgba(22, 224, 134, 0.2);
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+
+    .top-product {
+      margin-bottom: 15px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 5px;
+    }
+
+    .product-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .product-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9em;
+      color: #95a5a6;
+    }
+
+    .suggestion {
+      margin-top: 15px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 5px;
+      border-left: 3px solid #16e086;
+    }
+
+    .suggestion-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #16e086;
+    }
+
+    .suggestion-text {
+      font-size: 0.9em;
+    }
+
+    .no-products {
+      text-align: center;
+      padding: 20px;
+      color: #95a5a6;
+      font-style: italic;
+    }
+
+    .analysis-chart {
+      margin-top: 30px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 10px;
+    }
+    
+    /* Estilos corregidos para las vistas de productos */
+    .products-list.grid-view .product-item img,
+    .products-list.grid-overlay .product-item img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+    
+    /* Estilos para la sección de análisis mejorada */
+    .analysis-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .analysis-charts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    
+    .chart-wrapper {
+      flex: 1;
+      min-width: 300px;
+      max-width: 45%;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 15px;
+    }
+    
+    .chart-title {
+      text-align: center;
+      margin-bottom: 15px;
+      color: #16e086;
+      font-weight: bold;
+    }
+    
+    .product-suggestion {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    .product-suggestion:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .suggestion-icon {
+      font-size: 1.2em;
+      color: #16e086;
+    }
+    
+    .suggestion-content {
+      flex: 1;
+    }
+    
+    .suggestion-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+    
+    .suggestion-product {
+      font-weight: bold;
+    }
+    
+    .suggestion-stats {
+      font-size: 0.8em;
+      color: #95a5a6;
+    }
+    
+    .suggestion-details {
+      display: none;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+      margin-top: 5px;
+    }
+    
+    .suggestion.active .suggestion-details {
+      display: block;
+    }
+
+
+/* Nuevos estilos para el modal de acceso rápido */
+.quick-access-modal {
+  background-color: #2c3e50;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 300px;
+  max-width: 90%;
+  border-radius: 10px;
+  color: #ecf0f1;
+  text-align: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2000;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.quick-access-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.quick-access-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 5px;
+  color: #ecf0f1;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+}
+
+.quick-access-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.quick-access-btn i {
+  font-size: 1.2em;
+}
+
+
+     /* Estilos para navegadores Webkit (Chrome, Safari, Edge) */
+
+/* El fondo del deslizador, transparente como pediste */
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* La barra del deslizador (el pulgar) - TRANSPARENTE POR DEFECTO */
+::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 10px;
+  /* Altura fija para que siempre sea pequeña */
+  height: 10px;
+  /* Transición suave para el efecto hover */
+  transition: background-color 0.3s ease;
+}
+
+/* El deslizador en general */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+/* Cuando el mouse pasa sobre el pulgar - COLOR AL HOVER */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #15a086;
+}
+
+/* Color cuando está activo (opcional) */
+::-webkit-scrollbar-thumb:active {
+  background-color: #0d705c;
+}
+  </style>
+</head>
+<body>
+  <!-- Login Section -->
+  <div id="loginSection" class="login-container">
+    <div class="login-loading" id="loginLoading">
+      <div class="loader"></div>
+      <p style="margin-top: 20px; font-size: 1.2em;">Iniciando sesión...</p>
+    </div>
+    <div class="login-form">
+      <h2>Iniciar Sesión</h2>
+      <input type="email" id="loginEmail" placeholder="Correo electrónico">
+      <input type="password" id="loginPassword" placeholder="Contraseña">
+      <button id="loginButton">Iniciar Sesión</button>
+      <p id="loginError" class="login-error">Credenciales incorrectas</p>
+    </div>
+  </div>
+
+  <!-- POS Section (hidden by default) -->
+  <div id="posSection" style="display: none;">
+    <header>
+      <div class="header-icons"> 
+        <a href="#" id="homeBtn" title="Inicio"><i class="fa-solid fa-house icon"></i></a>
+        <a href="inventario.html" id="inventoryBtn" title="Inventario" data-permission="inventario"><i class="fa-solid fa-box icon"></i></a>
+        <a href="reportes.html" id="reportsBtn" title="Reportes" data-permission="reportes"><i class="fa-solid fa-chart-line icon"></i></a>
+        <a href="facturas.html" id="invoicesBtn" title="Facturas" data-permission="facturas"><i class="fa-solid fa-receipt icon"></i></a>
+        <a href="analisis-ventas.html" id="salesAnalysisBtn" title="Análisis de Ventas" data-permission="analisis-ventas"><i class="fa-solid fa-chart-pie icon"></i></a>
+        <a href="#" id="userBtn" title="Usuario"><i class="fa-solid fa-user icon"></i></a>
+        <a href="#" id="ratesBtn" title="Tasas de Cambio"><i class="fa-solid fa-money-bill-transfer icon"></i></a>
+        <a href="notificacion-stock-bajo.html" id="inventoryBtn" title="Inventario" data-permission="inventario"><i class="fa-solid fa-bell icon"></i></a>
+      </div>
+      <span id="invoiceUser"></span>
+    </header>
+
+    <div class="main-container">
+      <!-- Left: Product List -->
+      <div class="product-list-container" id="productListSection">
+        <h1>Todos los Productos
+          <div class="view-toggle">
+            <button class="view-toggle-btn" id="viewGrid" title="Vista de cuadrícula"><i class="fa-solid fa-grip"></i></button>
+            <button class="view-toggle-btn" id="viewList" title="Vista de lista"><i class="fa-solid fa-list"></i></button>
+          </div>
+        </h1>
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="Buscar por EAN o UPC" autofocus>
+          <input type="text" id="searchByNameInput" placeholder="Buscar por nombre">
+        </div>
+        <!-- Teclado numérico para búsqueda EAN/UPC -->
+        <div id="numericKeyboard" class="numeric-keyboard">
+          <button class="numeric-btn" data-value="1">1</button>
+          <button class="numeric-btn" data-value="2">2</button>
+          <button class="numeric-btn" data-value="3">3</button>
+          <button class="numeric-btn" data-value="4">4</button>
+          <button class="numeric-btn" data-value="5">5</button>
+          <button class="numeric-btn" data-value="6">6</button>
+          <button class="numeric-btn" data-value="7">7</button>
+          <button class="numeric-btn" data-value="8">8</button>
+          <button class="numeric-btn" data-value="9">9</button>
+          <button class="numeric-btn" data-value="0">0</button>
+          <button class="numeric-btn" id="backspaceBtn">⌫</button>
+          <button class="numeric-btn" id="acceptBtn">✔</button>
+        </div>
+        <!-- Teclado de texto para búsqueda por nombre -->
+        <div id="textKeyboard" class="text-keyboard">
+          <!-- Primera fila -->
+          <button data-value="q">q</button>
+          <button data-value="w">w</button>
+          <button data-value="e">e</button>
+          <button data-value="r">r</button>
+          <button data-value="t">t</button>
+          <button data-value="y">y</button>
+          <button data-value="u">u</button>
+          <button data-value="i">i</button>
+          <button data-value="o">o</button>
+          <button data-value="p">p</button>
+          <!-- Segunda fila -->
+          <button data-value="a">a</button>
+          <button data-value="s">s</button>
+          <button data-value="d">d</button>
+          <button data-value="f">f</button>
+          <button data-value="g">g</button>
+          <button data-value="h">h</button>
+          <button data-value="j">j</button>
+          <button data-value="k">k</button>
+          <button data-value="l">l</button>
+          <button class="backspace">⌫</button>
+          <!-- Tercera fila -->
+          <button data-value="z">z</button>
+          <button data-value="x">x</button>
+          <button data-value="c">c</button>
+          <button data-value="v">v</button>
+          <button data-value="b">b</button>
+          <button data-value="n">n</button>
+          <button data-value="m">m</button>
+          <button data-value=",">,</button>
+          <button data-value=".">.</button>
+          <button class="shift">Shift</button>
+          <!-- Cuarta fila -->
+          <button class="space">Espacio</button>
+          <button class="enter">Enter</button>
+        </div>
+        <div id="productList" class="products-list grid-view"></div>
+      </div>
+
+      <!-- Right: Current Invoice -->
+      <div class="products-container" id="invoiceSection">
+        <h1>Factura Actual</h1>
+        <div id="invoiceItems"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Totals Bar -->
+    <div class="totals-bar">
+      <div style="display: flex; align-items: center;">
+        <div class="total-container" id="invoiceTotal"><i class="fa-solid fa-calculator"></i> Total: DOP $0.00</div>
+        <div class="currency-totals">
+          <div class="currency-total" id="usdTotal"><i class="fa-solid fa-dollar-sign"></i> USD $0.00</div>
+          <div class="currency-total" id="eurTotal"><i class="fa-solid fa-euro-sign"></i> EUR €0.00</div>
+        </div>
+      </div>
+      <div class="action-buttons">
+        <button class="button button-descuento" id="btnApplyDiscount"><i class="fa-solid fa-percent"></i> Descuento</button>
+        <button class="button button-efectivo" id="btnEfectivo"><i class="fa-solid fa-money-bill"></i> Efectivo</button>
+        <button class="button button-tarjeta" id="btnTarjeta"><i class="fa-solid fa-credit-card"></i> Tarjeta</button>
+        <button class="button button-pay" id="payButton"><i class="fa-solid fa-credit-card"></i> Facturar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Print Modal -->
+  <div id="printModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeModal">×</span>
+      <div id="invoicePrintContent"></div>
+      <button id="btnPrint"><i class="fa-solid fa-print"></i> Imprimir</button>
+    </div>
+  </div>
+
+  <!-- Payment Modal (Efectivo) -->
+  <div id="efectivoModal" class="modal">
+    <div class="payment-modal-content">
+      <span class="close" id="closeEfectivoModal">×</span>
+      <h2>Pago en Efectivo</h2>
+      <div style="margin: 20px 0; font-size: 1.2em;">
+        <p style="margin-bottom: 10px;">Total a Pagar:</p>
+        <p style="font-size: 1.5em; color: #16e086; font-weight: bold;" id="efectivoTotal">DOP $0.00</p>
+      </div>
+      <input type="number" id="efectivoReceived" placeholder="Monto Recibido (DOP)" style="font-size: 1.2em; padding: 15px;">
+      <div style="margin: 20px 0; font-size: 1.1em;">
+        <p style="margin-bottom: 5px;">Monto Recibido:</p>
+        <p style="font-size: 1.3em; color: #fdcb6e;" id="efectivoReceivedDisplay">DOP $0.00</p>
+      </div>
+      <div style="margin: 20px 0; font-size: 1.1em;">
+        <p style="margin-bottom: 5px;">Cambio:</p>
+        <p style="font-size: 1.3em; color: #00b894; font-weight: bold;" id="efectivoChange">DOP $0.00</p>
+      </div>
+      <button id="confirmEfectivo" style="padding: 15px 30px; font-size: 1.1em;"><i class="fa-solid fa-check"></i> Confirmar Pago</button>
+    </div>
+  </div>
+
+  <!-- Payment Modal (Tarjeta) -->
+  <div id="tarjetaModal" class="modal">
+    <div class="payment-modal-content">
+      <span class="close" id="closeTarjetaModal">×</span>
+      <h2>Pago con Tarjeta</h2>
+      <p>Total a Pagar: <span id="tarjetaTotal"></span></p>
+      <button id="confirmTarjeta"><i class="fa-solid fa-check"></i> Confirmar Pago</button>
+    </div>
+  </div>
+
+  <!-- Password Modal -->
+  <div id="passwordModal" class="modal">
+    <div class="password-modal-content">
+      <span class="close" id="closePasswordModal">×</span>
+      <h2>Introduce la Contraseña</h2>
+      <input type="password" id="passwordInput" placeholder="Contraseña de 6 dígitos">
+      <button id="submitPassword"><i class="fa-solid fa-lock"></i> Aceptar</button>
+      <p id="passwordError" style="color: #e74c3c; display: none;">Contraseña incorrecta</p>
+    </div>
+  </div>
+
+  <!-- Discount Applied Modal -->
+  <div id="discountAppliedModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeDiscountModal">×</span>
+      <h2>Descuento Aplicado</h2>
+      <p id="discountMessage"></p>
+    </div>
+  </div>
+
+  <!-- User Info Modal -->
+  <div id="userInfoModal" class="modal">
+    <div class="user-info-modal">
+      <span class="close" id="closeUserModal">×</span>
+      <h2>Información del Usuario</h2>
+      <p id="userName"></p>
+      <p id="userEmail"></p>
+      <button id="logoutBtn" class="logout-btn">Cerrar Sesión</button>
+    </div>
+  </div>
+
+  <!-- Rates Modal -->
+  <div id="ratesModal" class="modal">
+    <div class="rates-modal-content">
+      <span class="close" id="closeRatesModal">×</span>
+      <h2><i class="fa-solid fa-money-bill-transfer"></i> Tasas de Cambio</h2>
+      
+      <div class="current-rates">
+        <h3>Tasas Actuales</h3>
+        <p>Dólar (USD): <span class="rate-value" id="currentUsdRate">$56.50</span></p>
+        <p>Euro (EUR): <span class="rate-value" id="currentEurRate">€61.20</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Modals -->
+  <div id="successAlert" class="modal">
+    <div class="alert-modal alert-success">
+      <span class="close" id="closeSuccessAlert">×</span>
+      <h2>Éxito</h2>
+      <p id="successMessage"></p>
+      <button id="successOkBtn">Aceptar</button>
+    </div>
+  </div>
+
+  <div id="errorAlert" class="modal">
+    <div class="alert-modal alert-error">
+      <span class="close" id="closeErrorAlert">×</span>  
+      <h2>Error</h2> 
+      <p id="errorMessage"></p>
+      <button id="errorOkBtn">Aceptar</button>
+    </div>
+  </div>
+
+  <div id="warningAlert" class="modal">
+    <div class="alert-modal alert-warning">
+      <span class="close" id="closeWarningAlert">×</span>
+      <h2>Advertencia</h2>
+      <p id="warningMessage"></p>
+      <button id="warningOkBtn">Aceptar</button>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación para productos próximos a vencer -->
+  <div id="expiryWarningModal" class="modal">
+    <div class="alert-modal alert-warning">
+      <span class="close" id="closeExpiryWarning">×</span>
+      <h2>Producto Próximo a Vencer</h2>
+      <p id="expiryWarningMessage"></p>
+      <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+        <button id="confirmExpirySale" style="background: #16e086;">Sí, Vender</button>
+        <button id="cancelExpirySale" style="background: #e74c3c;">No, Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de acceso rápido con Ctrl+Alt+P -->
+  <div id="quickAccessModal" class="modal">
+    <div class="quick-access-modal">
+      <span class="close" id="closeQuickAccess">×</span>
+      <h2><i class="fa-solid fa-keyboard"></i> Acceso Rápido</h2>
+      <div class="quick-access-buttons">
+        <a href="dar-permisos.html" class="quick-access-btn" id="quickAccessPermissions">
+          <i class="fa-solid fa-lock"></i>
+          <span>Gestión de Permisos</span>
+        </a>
+        <a href="#" class="quick-access-btn" id="quickAccessSettings">
+          <i class="fa-solid fa-gear"></i>
+          <span>Configuración</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor para imprimir reportes (oculto) -->
+  <div id="reportPrintContainer" class="report-print-container"></div>
+
+<link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39+Text&display=swap" rel="stylesheet">
+    
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      orderBy,
+      limit,
+      getDocs,
+      doc,
+      getDoc,
+      updateDoc,
+      addDoc,
+      deleteDoc,
+      Timestamp,
+      where,
+      setDoc,
+      arrayUnion,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { 
+      getAuth, 
+      onAuthStateChanged, 
+      signInWithEmailAndPassword,
+      signOut 
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app); 
+    const storage = getStorage(app);
+
+    // Definición de tipos de permisos para el header
+    const headerPermissionTypes = [
+      { id: "inventario", name: "Acceso a Inventario", icon: "fa-solid fa-box" },
+      { id: "reportes", name: "Acceso a Reportes", icon: "fa-solid fa-chart-line" },
+      { id: "facturas", name: "Acceso a Facturas", icon: "fa-solid fa-receipt" },
+      { id: "analisis", name: "Acceso a Análisis", icon: "fa-solid fa-chart-pie" }
+    ];
+
+    // Elementos del DOM
+    const loginSection = document.getElementById("loginSection"); 
+    const loginLoading = document.getElementById("loginLoading");
+    const posSection = document.getElementById("posSection");
+    const loginEmail = document.getElementById("loginEmail");
+    const loginPassword = document.getElementById("loginPassword");
+    const loginButton = document.getElementById("loginButton");
+    const loginError = document.getElementById("loginError");
+
+    const searchInput = document.getElementById("searchInput");
+    const searchByNameInput = document.getElementById("searchByNameInput");
+    const productList = document.getElementById("productList");
+    const invoiceItems = document.getElementById("invoiceItems");
+    const invoiceTotal = document.getElementById("invoiceTotal");
+    const usdTotal = document.getElementById("usdTotal");
+    const eurTotal = document.getElementById("eurTotal");
+    const payButton = document.getElementById("payButton");
+    const numericKeyboard = document.getElementById("numericKeyboard");
+    const numericButtons = document.querySelectorAll(".numeric-btn");
+    const backspaceBtn = document.getElementById("backspaceBtn");
+    const acceptBtn = document.getElementById("acceptBtn");
+    const textKeyboard = document.getElementById("textKeyboard");
+    const textButtons = document.querySelectorAll(".text-keyboard button");
+    const invoiceUser = document.getElementById("invoiceUser");
+
+    // Botones de vista de productos
+    const viewGrid = document.getElementById("viewGrid");
+    const viewList = document.getElementById("viewList");
+
+    // Elementos de facturación
+    const btnEfectivo = document.getElementById("btnEfectivo");
+    const btnTarjeta = document.getElementById("btnTarjeta");
+    const btnApplyDiscount = document.getElementById("btnApplyDiscount");
+    const printModal = document.getElementById("printModal");
+    const invoicePrintContent = document.getElementById("invoicePrintContent");
+    const closeModal = document.getElementById("closeModal");
+    const btnPrint = document.getElementById("btnPrint");
+
+    const efectivoModal = document.getElementById("efectivoModal");
+    const closeEfectivoModal = document.getElementById("closeEfectivoModal");
+    const efectivoReceived = document.getElementById("efectivoReceived");
+    const efectivoReceivedDisplay = document.getElementById("efectivoReceivedDisplay");
+    const efectivoTotal = document.getElementById("efectivoTotal");
+    const efectivoChange = document.getElementById("efectivoChange");
+    const confirmEfectivo = document.getElementById("confirmEfectivo");
+
+    const tarjetaModal = document.getElementById("tarjetaModal");
+    const closeTarjetaModal = document.getElementById("closeTarjetaModal");
+    const tarjetaTotal = document.getElementById("tarjetaTotal");
+    const confirmTarjeta = document.getElementById("confirmTarjeta");
+
+    const passwordModal = document.getElementById("passwordModal");
+    const closePasswordModal = document.getElementById("closePasswordModal");
+    const passwordInput = document.getElementById("passwordInput");
+    const submitPassword = document.getElementById("submitPassword");
+    const passwordError = document.getElementById("passwordError");
+
+    const discountAppliedModal = document.getElementById("discountAppliedModal");
+    const closeDiscountModal = document.getElementById("closeDiscountModal");
+    const discountMessage = document.getElementById("discountMessage");
+
+    // Elementos de navegación (header)
+    const homeBtn = document.getElementById("homeBtn");
+    const inventoryBtn = document.getElementById("inventoryBtn");
+    const reportsBtn = document.getElementById("reportsBtn");
+    const invoicesBtn = document.getElementById("invoicesBtn");
+    const salesAnalysisBtn = document.getElementById("salesAnalysisBtn");
+    const userBtn = document.getElementById("userBtn");
+    const ratesBtn = document.getElementById("ratesBtn");
+
+    // Secciones
+    const productListSection = document.getElementById("productListSection");
+    const invoiceSection = document.getElementById("invoiceSection");
+
+    // Modales de usuario
+    const userInfoModal = document.getElementById("userInfoModal");
+    const closeUserModal = document.getElementById("closeUserModal");
+    const userName = document.getElementById("userName");
+    const userEmail = document.getElementById("userEmail");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    // Modales de tasas de cambio
+    const ratesModal = document.getElementById("ratesModal");
+    const closeRatesModal = document.getElementById("closeRatesModal");
+    const currentUsdRate = document.getElementById("currentUsdRate");
+    const currentEurRate = document.getElementById("currentEurRate");
+
+    // Alertas elegantes
+    const successAlert = document.getElementById("successAlert");
+    const successMessage = document.getElementById("successMessage");
+    const closeSuccessAlert = document.getElementById("closeSuccessAlert");
+    const successOkBtn = document.getElementById("successOkBtn");
+
+    const errorAlert = document.getElementById("errorAlert");
+    const errorMessage = document.getElementById("errorMessage");
+    const closeErrorAlert = document.getElementById("closeErrorAlert");
+    const errorOkBtn = document.getElementById("errorOkBtn");
+
+    const warningAlert = document.getElementById("warningAlert");
+    const warningMessage = document.getElementById("warningMessage");
+    const closeWarningAlert = document.getElementById("closeWarningAlert");
+    const warningOkBtn = document.getElementById("warningOkBtn");
+
+    // Barra de progreso
+    const progressBarContainer = document.createElement("div");
+    progressBarContainer.style.position = "fixed";
+    progressBarContainer.style.bottom = "20px";
+    progressBarContainer.style.left = "50%";
+    progressBarContainer.style.transform = "translateX(-50%)";
+    progressBarContainer.style.width = "300px";
+    progressBarContainer.style.backgroundColor = "#f1f1f1";
+    progressBarContainer.style.borderRadius = "5px";
+    progressBarContainer.style.padding = "10px";
+    progressBarContainer.style.boxShadow = "0 2px 5px rgba(0,0,0,0.2)";
+    progressBarContainer.style.zIndex = "1000";
+    progressBarContainer.style.display = "none";
+
+    const progressBar = document.createElement("div");
+    progressBar.style.height = "20px";
+    progressBar.style.backgroundColor = "#4CAF50";
+    progressBar.style.borderRadius = "3px";
+    progressBar.style.width = "0%";
+    progressBar.style.transition = "width 0.3s";
+
+    const progressText = document.createElement("div");
+    progressText.style.textAlign = "center";
+    progressText.style.marginTop = "5px";
+    progressText.style.fontSize = "12px";
+    progressText.style.color = "#333";
+
+    progressBarContainer.appendChild(progressBar);
+    progressBarContainer.appendChild(progressText);
+    document.body.appendChild(progressBarContainer);
+
+    // Variables globales
+    let invoice = [];
+    let totalPrice = 0;
+    let currentUser = null;
+    let userPermissions = []; // Permisos del usuario
+    let exchangeRates = { usd: 56.50, eur: 61.20 }; // Tasas de cambio
+    let discount = 0;
+    let discountedTotal = 0;
+    let invoiceId = null;
+    let isShiftPressed = false;
+    let amountReceived = 0; // Variable para almacenar el monto recibido
+    let currentView = 'grid'; // Vista actual de productos
+    let isOnline = navigator.onLine; // Estado de conexión
+
+    // Verificar estado de conexión
+    window.addEventListener('online', () => {
+      isOnline = true;
+      actualizarPermisosUI();
+    });
+    
+    window.addEventListener('offline', () => {
+      isOnline = false;
+      actualizarPermisosUI();
+    });
+
+    // Función para mostrar la barra de progreso
+    function showProgressBar(percentage, message) {
+      progressBar.style.width = `${percentage}%`;
+      progressText.textContent = message;
+      progressBarContainer.style.display = "block";
+      
+      if (percentage >= 100) {
+        setTimeout(() => {
+          progressBarContainer.style.display = "none";
+        }, 2000);
+      }
+    }
+
+    // Función para mostrar alertas elegantes
+    function showAlert(type, message) {
+      if (type === 'success') {
+        successMessage.textContent = message;
+        successAlert.style.display = 'flex';
+      } else if (type === 'error') {
+        errorMessage.textContent = message;
+        errorAlert.style.display = 'flex';
+      } else if (type === 'warning') {
+        warningMessage.textContent = message;
+        warningAlert.style.display = 'flex';
+      }
+    }
+
+    // Función para cerrar todas las alertas
+    function closeAllAlerts() {
+      successAlert.style.display = 'none';
+      errorAlert.style.display = 'none';
+      warningAlert.style.display = 'none';
+    }
+
+    // Función para verificar si un producto está vencido o próximo a vencer
+    async function checkProductExpiration(product, businessName, productId) {
+      try {
+        // Obtener información de vencimiento del producto
+        const productRef = doc(db, "businesses", businessName, "products", productId);
+        const productDoc = await getDoc(productRef);
+        
+        if (productDoc.exists()) {
+          const productData = productDoc.data();
+          
+          // Verificar si el producto tiene fecha de vencimiento
+          if (productData.expirationDate) {
+            const expirationDate = productData.expirationDate.toDate();
+            const today = new Date();
+            const timeDiff = expirationDate.getTime() - today.getTime();
+            const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            
+            // Si el producto ya está vencido
+            if (daysDiff < 0) {
+              return {
+                expired: true,
+                days: daysDiff,
+                message: `Este producto está vencido hace ${Math.abs(daysDiff)} días. No se puede vender.`
+              };
+            }
+            // Si al producto le faltan 10 días o menos para vencer
+            else if (daysDiff <= 10) {
+              return {
+                expired: false,
+                days: daysDiff,
+                message: `Este producto está próximo a vencer. Le faltan ${daysDiff} días. ¿Desea venderlo de todas formas? Es su responsabilidad si realiza la venta.`
+              };
+            }
+          }
+        }
+        
+        // Si no hay fecha de vencimiento o no está próximo a vencer
+        return {
+          expired: false,
+          days: null,
+          message: null
+        };
+      } catch (error) {
+        console.error("Error al verificar vencimiento del producto:", error);
+        return {
+          expired: false,
+          days: null,
+          message: null
+        };
+      }
+    }
+
+    // Función para mostrar alerta de vencimiento
+    function showExpirationAlert(product, businessName, productId, expirationInfo) {
+      return new Promise((resolve) => {
+        // Crear modal personalizado para vencimiento
+        const expirationModal = document.createElement('div');
+        expirationModal.style.position = 'fixed';
+        expirationModal.style.top = '0';
+        expirationModal.style.left = '0';
+        expirationModal.style.width = '100%';
+        expirationModal.style.height = '100%';
+        expirationModal.style.backgroundColor = 'rgba(0,0,0,0.7)';
+        expirationModal.style.display = 'flex';
+        expirationModal.style.justifyContent = 'center';
+        expirationModal.style.alignItems = 'center';
+        expirationModal.style.zIndex = '2000';
+        
+        // Contenido del modal
+        const modalContent = document.createElement('div');
+        modalContent.style.backgroundColor = expirationInfo.expired ? '#e74c3c' : '#f39c12';
+        modalContent.style.padding = '30px';
+        modalContent.style.borderRadius = '15px';
+        modalContent.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+        modalContent.style.maxWidth = '500px';
+        modalContent.style.width = '90%';
+        modalContent.style.textAlign = 'center';
+        modalContent.style.color = 'white';
+        
+        // Icono según el estado
+        const icon = document.createElement('i');
+        icon.className = expirationInfo.expired ? 'fas fa-exclamation-circle' : 'fas fa-exclamation-triangle';
+        icon.style.fontSize = '48px';
+        icon.style.marginBottom = '20px';
+        icon.style.display = 'block';
+        
+        // Título
+        const title = document.createElement('h2');
+        title.textContent = expirationInfo.expired ? 'Producto Vencido' : 'Producto Próximo a Vencer';
+        title.style.marginBottom = '20px';
+        title.style.fontSize = '24px';
+        
+        // Mensaje
+        const message = document.createElement('p');
+        message.textContent = expirationInfo.message;
+        message.style.marginBottom = '30px';
+        message.style.fontSize = '18px';
+        message.style.lineHeight = '1.5';
+        
+        // Botones
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.justifyContent = 'center';
+        buttonContainer.style.gap = '15px';
+        
+        if (expirationInfo.expired) {
+          // Solo botón de aceptar para productos vencidos
+          const acceptButton = document.createElement('button');
+          acceptButton.textContent = 'Aceptar';
+          acceptButton.style.padding = '12px 30px';
+          acceptButton.style.border = 'none';
+          acceptButton.style.borderRadius = '5px';
+          acceptButton.style.backgroundColor = '#fff';
+          acceptButton.style.color = expirationInfo.expired ? '#e74c3c' : '#f39c12';
+          acceptButton.style.fontWeight = 'bold';
+          acceptButton.style.cursor = 'pointer';
+          acceptButton.style.transition = 'transform 0.2s, box-shadow 0.2s';
+          
+          acceptButton.addEventListener('mouseover', () => {
+            acceptButton.style.transform = 'scale(1.05)';
+            acceptButton.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+          });
+          
+          acceptButton.addEventListener('mouseout', () => {
+            acceptButton.style.transform = 'scale(1)';
+            acceptButton.style.boxShadow = 'none';
+          });
+          
+          acceptButton.addEventListener('click', () => {
+            document.body.removeChild(expirationModal);
+            resolve(false); // No permitir la venta
+          });
+          
+          buttonContainer.appendChild(acceptButton);
+        } else {
+          // Botones de Sí y No para productos próximos a vencer
+          const yesButton = document.createElement('button');
+          yesButton.textContent = 'Sí, Vender';
+          yesButton.style.padding = '12px 30px';
+          yesButton.style.border = 'none';
+          yesButton.style.borderRadius = '5px';
+          yesButton.style.backgroundColor = '#2ecc71';
+          yesButton.style.color = 'white';
+          yesButton.style.fontWeight = 'bold';
+          yesButton.style.cursor = 'pointer';
+          yesButton.style.transition = 'transform 0.2s, box-shadow 0.2s';
+          
+          yesButton.addEventListener('mouseover', () => {
+            yesButton.style.transform = 'scale(1.05)';
+            yesButton.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+          });
+          
+          yesButton.addEventListener('mouseout', () => {
+            yesButton.style.transform = 'scale(1)';
+            yesButton.style.boxShadow = 'none';
+          });
+          
+          yesButton.addEventListener('click', () => {
+            document.body.removeChild(expirationModal);
+            resolve(true); // Permitir la venta
+          });
+          
+          const noButton = document.createElement('button');
+          noButton.textContent = 'No, Cancelar';
+          noButton.style.padding = '12px 30px';
+          noButton.style.border = 'none';
+          noButton.style.borderRadius = '5px';
+          noButton.style.backgroundColor = '#e74c3c';
+          noButton.style.color = 'white';
+          noButton.style.fontWeight = 'bold';
+          noButton.style.cursor = 'pointer';
+          noButton.style.transition = 'transform 0.2s, box-shadow 0.2s';
+          
+          noButton.addEventListener('mouseover', () => {
+            noButton.style.transform = 'scale(1.05)';
+            noButton.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+          });
+          
+          noButton.addEventListener('mouseout', () => {
+            noButton.style.transform = 'scale(1)';
+            noButton.style.boxShadow = 'none';
+          });
+          
+          noButton.addEventListener('click', () => {
+            document.body.removeChild(expirationModal);
+            resolve(false); // No permitir la venta
+          });
+          
+          buttonContainer.appendChild(yesButton);
+          buttonContainer.appendChild(noButton);
+        }
+        
+        // Agregar elementos al modal
+        modalContent.appendChild(icon);
+        modalContent.appendChild(title);
+        modalContent.appendChild(message);
+        modalContent.appendChild(buttonContainer);
+        
+        expirationModal.appendChild(modalContent);
+        document.body.appendChild(expirationModal);
+      });
+    }
+
+    // Event listeners para alertas
+    closeSuccessAlert.addEventListener('click', closeAllAlerts);
+    successOkBtn.addEventListener('click', closeAllAlerts);
+    closeErrorAlert.addEventListener('click', closeAllAlerts);
+    errorOkBtn.addEventListener('click', closeAllAlerts);
+    closeWarningAlert.addEventListener('click', closeAllAlerts);
+    warningOkBtn.addEventListener('click', closeAllAlerts);
+
+    // Observador de autenticación
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        
+        // Obtener permisos del usuario
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists()) {
+            userPermissions = userDoc.data().permisos || [];
+            actualizarPermisosUI(); // Actualizar UI según permisos
+            
+            // Configurar listener para cambios en los permisos
+            const userRef = doc(db, 'users', user.uid);
+            onSnapshot(userRef, (doc) => {
+              if (doc.exists()) {
+                userPermissions = doc.data().permisos || [];
+                actualizarPermisosUI(); // Actualizar UI cuando cambien los permisos
+              }
+            });
+          }
+        } catch (error) {
+          console.error("Error al obtener permisos:", error);
+          // Si hay error de conexión, mostrar candados
+          if (!isOnline) {
+            userPermissions = [];
+            actualizarPermisosUI();
+          }
+        }
+        
+        loginSection.style.display = 'none';
+        posSection.style.display = 'block';
+        
+        if (user.displayName) {
+          invoiceUser.textContent = user.displayName;
+          userName.textContent = `Nombre: ${user.displayName}`;
+        } else {
+          const nameFromEmail = user.email.split('@')[0];
+          invoiceUser.textContent = nameFromEmail;
+          userName.textContent = `Nombre: ${nameFromEmail}`;
+        }
+        
+        userEmail.textContent = `Correo: ${user.email}`;
+        localStorage.setItem('userLoggedIn', 'true');
+        
+        // Mostrar barra de progreso al cargar productos
+        showProgressBar(0, "Cargando productos...");
+        renderProducts().then(() => {
+          showProgressBar(100, "Productos cargados con éxito");
+        });
+        
+        // Cargar tasas de cambio
+        loadExchangeRates();
+        // Cargar preferencia de vista de productos
+        loadProductViewPreference();
+        
+        // Iniciar listeners para actualización en tiempo real
+        setupRealTimeListeners();
+      } else {
+        loginSection.style.display = 'flex';
+        posSection.style.display = 'none';
+        localStorage.removeItem('userLoggedIn');
+      }
+    });
+
+    // Función para actualizar la UI según los permisos del usuario
+    function actualizarPermisosUI() {
+      // Verificar permisos para los iconos del header
+      const headerIcons = [
+        { id: inventoryBtn, permission: 'inventario' },
+        { id: reportsBtn, permission: 'reportes' },
+        { id: invoicesBtn, permission: 'facturas' },
+        { id: salesAnalysisBtn, permission: 'analisis' }
+      ];
+
+      headerIcons.forEach(icon => {
+        // Limpiar cualquier candado existente primero
+        const existingLock = icon.id.querySelector('.fa-lock');
+        if (existingLock) {
+          existingLock.remove();
+        }
+
+        // Verificar si hay conexión a internet
+        if (!isOnline) {
+          // Sin conexión: mostrar todos los botones bloqueados
+          icon.id.style.opacity = '0.5';
+          icon.id.style.pointerEvents = 'none';
+          icon.id.title = 'Sin conexión - No se pueden verificar permisos';
+          
+          // Agregar icono de candado
+          const lockIcon = document.createElement('i');
+          lockIcon.className = 'fas fa-lock';
+          lockIcon.style.marginLeft = '5px';
+          lockIcon.style.color = '#e74c3c';
+          icon.id.appendChild(lockIcon);
+          return;
+        }
+
+        if (!userPermissions.includes(icon.permission)) {
+          // Si no tiene permiso, deshabilitar el botón
+          icon.id.style.opacity = '0.5';
+          icon.id.style.pointerEvents = 'none';
+          icon.id.title = 'No tiene permiso para acceder a esta función';
+          
+          // Agregar icono de candado
+          const lockIcon = document.createElement('i');
+          lockIcon.className = 'fas fa-lock';
+          lockIcon.style.marginLeft = '5px';
+          lockIcon.style.color = '#e74c3c';
+          icon.id.appendChild(lockIcon);
+        } else {
+          // Si tiene permiso, asegurarse de que esté habilitado
+          icon.id.style.opacity = '1';
+          icon.id.style.pointerEvents = 'auto';
+          icon.id.title = icon.id.getAttribute('data-original-title') || '';
+        }
+      });
+    }
+
+    // Configurar listeners para actualización en tiempo real
+    function setupRealTimeListeners() {
+      if (!currentUser) return;
+      
+      // Listener para el total actual
+      const totalRef = doc(db, "users", currentUser.uid, "totals", "currentTotal");
+      onSnapshot(totalRef, (doc) => {
+        if (doc.exists()) {
+          const data = doc.data();
+          invoiceTotal.innerHTML = `<i class="fa-solid fa-calculator"></i> Total: DOP $${data.total.toFixed(2)}`;
+          efectivoTotal.textContent = `DOP $${data.total.toFixed(2)}`;
+          tarjetaTotal.textContent = `DOP $${data.total.toFixed(2)}`;
+          
+          const usdAmount = (data.total / exchangeRates.usd).toFixed(2);
+          const eurAmount = (data.total / exchangeRates.eur).toFixed(2);
+          
+          usdTotal.innerHTML = `<i class="fa-solid fa-dollar-sign"></i> USD $${usdAmount}`;
+          eurTotal.innerHTML = `<i class="fa-solid fa-euro-sign"></i> EUR €${eurAmount}`;
+        }
+      });
+      
+      // Listener para los productos en la factura actual
+      const productosRef = doc(db, "users", currentUser.uid, "totalApagarVentas", "currentVenta");
+      onSnapshot(productosRef, (doc) => {
+        if (doc.exists()) {
+          const data = doc.data();
+          invoiceItems.innerHTML = "";
+          
+          if (data.productos && data.productos.length > 0) {
+            data.productos.forEach((producto) => {
+              const productDiv = document.createElement("div");
+              productDiv.classList.add("invoice-item");
+              productDiv.innerHTML = `
+                <i class="fa-solid fa-box"></i> ${producto.nombre} x ${producto.cantidad} - $${producto.precio.toFixed(2)}
+                <button class="remove-btn" onclick="removeProduct('${producto.id}')">Eliminar</button>
+              `;
+              invoiceItems.appendChild(productDiv);
+            });
+          }
+        }
+      });
+    }
+
+    // Verificar si hay sesión guardada
+    if (localStorage.getItem('userLoggedIn') === 'true') {
+      loginSection.style.display = 'none';
+      posSection.style.display = 'block';
+    } else {
+      loginSection.style.display = 'flex';
+      posSection.style.display = 'none';
+    }
+
+    // Login
+    loginButton.addEventListener('click', async () => {
+      try {
+        loginLoading.style.display = 'flex';
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          loginEmail.value,
+          loginPassword.value
+        );
+        loginError.style.display = 'none';
+        loginLoading.style.display = 'none';
+      } catch (error) {
+        loginError.style.display = 'block';
+        loginError.textContent = 'Credenciales incorrectas';
+        loginLoading.style.display = 'none';
+        console.error('Error al iniciar sesión:', error);
+      }
+    });
+
+    // Logout con confirmación
+    logoutBtn.addEventListener('click', () => {
+      // Crear modal de confirmación
+      const confirmModal = document.createElement('div');
+      confirmModal.style.position = 'fixed';
+      confirmModal.style.top = '0';
+      confirmModal.style.left = '0';
+      confirmModal.style.width = '100%';
+      confirmModal.style.height = '100%';
+      confirmModal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+      confirmModal.style.display = 'flex';
+      confirmModal.style.justifyContent = 'center';
+      confirmModal.style.alignItems = 'center';
+      confirmModal.style.zIndex = '2000';
+      
+      // Contenido del modal
+      const modalContent = document.createElement('div');
+      modalContent.style.backgroundColor = '#fff';
+      modalContent.style.padding = '20px';
+      modalContent.style.borderRadius = '10px';
+      modalContent.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+      modalContent.style.maxWidth = '400px';
+      modalContent.style.width = '90%';
+      modalContent.style.textAlign = 'center';
+      
+      // Título
+      const title = document.createElement('h2');
+      title.textContent = 'Confirmar Cierre de Sesión';
+      title.style.color = '#e74c3c';
+      title.style.marginBottom = '20px';
+      
+      // Mensaje
+      const message = document.createElement('p');
+      message.textContent = '¿Estás seguro que deseas cerrar sesión?';
+      message.style.marginBottom = '20px';
+      message.style.fontSize = '16px';
+      
+      // Botones
+      const buttonContainer = document.createElement('div');
+      buttonContainer.style.display = 'flex';
+      buttonContainer.style.justifyContent = 'center';
+      buttonContainer.style.gap = '10px';
+      
+      const cancelButton = document.createElement('button');
+      cancelButton.textContent = 'Cancelar';
+      cancelButton.style.padding = '10px 20px';
+      cancelButton.style.border = 'none';
+      cancelButton.style.borderRadius = '5px';
+      cancelButton.style.backgroundColor = '#95a5a6';
+      cancelButton.style.color = 'white';
+      cancelButton.style.cursor = 'pointer';
+      cancelButton.style.transition = 'background-color 0.3s';
+      
+      cancelButton.addEventListener('mouseover', () => {
+        cancelButton.style.backgroundColor = '#7f8c8d';
+      });
+      
+      cancelButton.addEventListener('mouseout', () => {
+        cancelButton.style.backgroundColor = '#95a5a6';
+      });
+      
+      const confirmButton = document.createElement('button');
+      confirmButton.textContent = 'Cerrar Sesión';
+      confirmButton.style.padding = '10px 20px';
+      confirmButton.style.border = 'none';
+      confirmButton.style.borderRadius = '5px';
+      confirmButton.style.backgroundColor = '#e74c3c';
+      confirmButton.style.color = 'white';
+      confirmButton.style.cursor = 'pointer';
+      confirmButton.style.transition = 'background-color 0.3s';
+      
+      confirmButton.addEventListener('mouseover', () => {
+        confirmButton.style.backgroundColor = '#c0392b';
+      });
+      
+      confirmButton.addEventListener('mouseout', () => {
+        confirmButton.style.backgroundColor = '#e74c3c';
+      });
+      
+      // Eventos de los botones
+      cancelButton.addEventListener('click', () => {
+        document.body.removeChild(confirmModal);
+      });
+      
+      confirmButton.addEventListener('click', async () => {
+        try {
+          showProgressBar(30, "Cerrando sesión...");
+          await signOut(auth);
+          userInfoModal.style.display = 'none';
+          document.body.removeChild(confirmModal);
+          showProgressBar(100, "Sesión cerrada correctamente");
+          showAlert('success', 'Sesión cerrada correctamente');
+        } catch (error) {
+          console.error('Error al cerrar sesión:', error);
+          showProgressBar(0, "Error al cerrar sesión");
+          showAlert('error', 'Error al cerrar sesión');
+        }
+      });
+      
+      // Agregar elementos al modal
+      buttonContainer.appendChild(cancelButton);
+      buttonContainer.appendChild(confirmButton);
+      
+      modalContent.appendChild(title);
+      modalContent.appendChild(message);
+      modalContent.appendChild(buttonContainer);
+      
+      confirmModal.appendChild(modalContent);
+      document.body.appendChild(confirmModal);
+    });
+
+    // Funciones de negocio
+    const getBusinessDetails = async () => {
+      try {
+        showProgressBar(20, "Obteniendo detalles del negocio...");
+        const businessRef = doc(db, "businessDetails", "info");
+        const businessDoc = await getDoc(businessRef);
+        
+        if (businessDoc.exists()) {
+          const data = businessDoc.data();
+          showProgressBar(100, "Detalles cargados");
+          return {
+            name: data.name || "Nombre del Negocio",
+            address: data.address || "Dirección del Negocio",
+            rnc: data.rnc || "123456789"
+          };
+        } else {
+          const defaultData = {
+            name: "Nombre del Negocio",
+            address: "Dirección del Negocio",
+            rnc: "123456789"
+          };
+          await setDoc(businessRef, defaultData);
+          showProgressBar(100, "Detalles creados");
+          return defaultData;
+        }
+      } catch (error) {
+        console.error("Error al obtener detalles del negocio:", error);
+        showProgressBar(0, "Error al cargar detalles");
+        return {
+            name: "Nombre del Negocio",
+            address: "Dirección del Negocio",
+            rnc: "123456789"
+          };
+      }
+    };
+
+    // Cargar tasas de cambio
+    const loadExchangeRates = async () => {
+      try {
+        const ratesRef = doc(db, "exchangeRates", "rates");
+        const ratesDoc = await getDoc(ratesRef);
+        
+        if (ratesDoc.exists()) {
+          exchangeRates = ratesDoc.data();
+          currentUsdRate.textContent = `$${exchangeRates.usd}`;
+          currentEurRate.textContent = `€${exchangeRates.eur}`;
+        }
+      } catch (error) {
+        console.error("Error al cargar tasas de cambio:", error);
+      }
+    };
+
+    // Cargar preferencia de vista de productos
+    const loadProductViewPreference = async () => {
+      if (!currentUser) return;
+      
+      try {
+        const prefRef = doc(db, "userPreferences", currentUser.uid);
+        const prefDoc = await getDoc(prefRef);
+        
+        if (prefDoc.exists() && prefDoc.data().productView) {
+          currentView = prefDoc.data().productView;
+          setProductView(currentView);
+        }
+      } catch (error) {
+        console.error("Error al cargar preferencia de vista:", error);
+      }
+    };
+
+    // Guardar preferencia de vista de productos
+    const saveProductViewPreference = async (view) => {
+      if (!currentUser) return;
+      
+      try {
+        const prefRef = doc(db, "userPreferences", currentUser.uid);
+        await setDoc(prefRef, {
+          productView: view
+        }, { merge: true });
+      } catch (error) {
+        console.error("Error al guardar preferencia de vista:", error);
+      }
+    };
+
+    // Establecer vista de productos
+    const setProductView = (view) => {
+      currentView = view;
+      productList.className = `products-list ${view}-view`;
+      
+      // Actualizar botones activos
+      viewGrid.classList.remove('active');
+      viewList.classList.remove('active');
+      
+      if (view === 'grid') viewGrid.classList.add('active');
+      if (view === 'list') viewList.classList.add('active');
+      
+      // Guardar preferencia
+      saveProductViewPreference(view);
+    };
+
+    // Event listeners para botones de vista
+    viewGrid.addEventListener('click', () => setProductView('grid'));
+    viewList.addEventListener('click', () => setProductView('list'));
+
+    // Funciones de productos
+    const renderProducts = async (eanTerm = "", nameTerm = "") => {
+      if (!currentUser) return;
+
+      try {
+        showProgressBar(0, "Buscando productos...");
+        const businessesRef = collection(db, "businesses");
+        const businessesSnapshot = await getDocs(businessesRef);
+
+        productList.innerHTML = "";
+
+        if (businessesSnapshot.empty) {
+          productList.innerHTML = "<p>No hay productos disponibles.</p>";
+          showProgressBar(100, "No hay productos");
+          return;
+        }
+
+        let productsCount = 0;
+        const businessPromises = [];
+        
+        businessesSnapshot.forEach(async (businessDoc) => {
+          const productsRef = collection(db, "businesses", businessDoc.id, "products");
+          let productsQuery = query(productsRef);
+
+          if (eanTerm) {
+            productsQuery = query(productsRef, where("eanUpcCode", "==", eanTerm));
+          } else if (nameTerm) {
+            productsQuery = query(productsRef, where("name", ">=", nameTerm), where("name", "<=", nameTerm + '\uf8ff'));
+          }
+
+          const promise = getDocs(productsQuery).then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+              const product = doc.data();
+              const productDiv = document.createElement("div");
+              productDiv.classList.add("product-item");
+              
+              // Imagen por defecto si no hay imagen
+              const productImage = product.imageUrl || 'https://via.placeholder.com/100x100?text=No+Image';
+              
+              if (currentView === 'grid') {
+                productDiv.innerHTML = `
+                  <img src="${productImage}" alt="${product.name}" style="width: 100px; height: 100px; object-fit: contain;">
+                  <div class="product-name">${product.name}</div>
+                  <div class="product-price">$${product.pricePerUnit}</div>
+                  <div class="product-stock">Stock: ${product.quantity}</div>
+                `;
+              } else if (currentView === 'list') {
+                productDiv.innerHTML = `
+                  <img src="${productImage}" alt="${product.name}" style="width: 50px; height: 50px; object-fit: contain;">
+                  <div class="product-details">
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-price">$${product.pricePerUnit}</div>
+                    <div class="product-stock">Stock: ${product.quantity}</div>
+                  </div>
+                `;
+              }
+              
+              if (product.quantity === 0) {
+                productDiv.style.backgroundColor = 'rgba(255, 99, 71, 0.2)';
+                productDiv.innerHTML += '<div style="color: #ff7675; font-weight: bold;">AGOTADO</div>';
+              }
+              
+              productDiv.addEventListener("click", async () => {
+                if (product.quantity === 0) {
+                  showAlert('warning', 'Este producto está agotado');
+                  return;
+                }
+                
+                // Verificar vencimiento del producto
+                const expirationInfo = await checkProductExpiration(product, businessDoc.id, doc.id);
+                
+                if (expirationInfo.expired) {
+                  // Producto vencido - mostrar alerta y no permitir la venta
+                  await showExpirationAlert(product, businessDoc.id, doc.id, expirationInfo);
+                  return;
+                } else if (expirationInfo.message) {
+                  // Producto próximo a vencer - preguntar si desea vender
+                  const allowSale = await showExpirationAlert(product, businessDoc.id, doc.id, expirationInfo);
+                  if (!allowSale) return;
+                }
+                
+                // Si no hay problemas de vencimiento o el usuario aceptó vender
+                updateInvoice(product, businessDoc.id, doc.id);
+              });
+              productList.appendChild(productDiv);
+              productsCount++;
+              
+              // Actualizar barra de progreso
+              const progress = Math.min(90, Math.floor((productsCount / 50) * 90));
+              showProgressBar(progress, `Cargando productos (${productsCount})`);
+            });
+          });
+          businessPromises.push(promise);
+        });
+
+        await Promise.all(businessPromises);
+        showProgressBar(100, `Productos cargados: ${productsCount}`);
+
+        if (eanTerm) addToInvoiceBySearch(eanTerm);
+      } catch (error) {
+        console.error("Error al obtener los productos:", error);
+        showProgressBar(0, "Error al cargar productos");
+        showAlert('error', 'Error al cargar los productos');
+      }
+    };
+
+    const addToInvoiceBySearch = async (eanTerm) => {
+      const businessesRef = collection(db, "businesses");
+
+      getDocs(businessesRef).then((businessesSnapshot) => {
+        businessesSnapshot.forEach(async (businessDoc) => {
+          const productsRef = collection(db, "businesses", businessDoc.id, "products");
+          const productsQuery = query(productsRef, where("eanUpcCode", "==", eanTerm));
+
+          getDocs(productsQuery).then(async (querySnapshot) => {
+            querySnapshot.forEach(async (doc) => {
+              const product = doc.data();
+              if (product.quantity === 0) {
+                showAlert('warning', 'Este producto está agotado');
+                return;
+              }
+              
+              // Verificar vencimiento del producto
+              const expirationInfo = await checkProductExpiration(product, businessDoc.id, doc.id);
+              
+              if (expirationInfo.expired) {
+                // Producto vencido - mostrar alerta y no permitir la venta
+                await showExpirationAlert(product, businessDoc.id, doc.id, expirationInfo);
+                return;
+              } else if (expirationInfo.message) {
+                // Producto próximo a vencer - preguntar si desea vender
+                const allowSale = await showExpirationAlert(product, businessDoc.id, doc.id, expirationInfo);
+                if (!allowSale) return;
+              }
+              
+              // Si no hay problemas de vencimiento o el usuario aceptó vender
+              updateInvoice(product, businessDoc.id, doc.id);
+            });
+          });
+        });
+      });
+    };
+
+    // Funciones de facturación
+    const updateInvoice = (product, businessName, productId) => {
+      const existingProduct = invoice.find((item) => item.productId === productId);
+      if (existingProduct) {
+        if (existingProduct.quantity >= product.quantity) {
+          showAlert('warning', 'No hay suficiente stock de este producto');
+          return;
+        }
+        existingProduct.quantity += 1;
+      } else {
+        invoice.push({ ...product, businessName, productId, quantity: 1 });
+      }
+
+      const profitPercentage = product.profitPercentage || 10;
+      const priceWithProfit = product.pricePerUnit * (1 + profitPercentage / 100);
+      totalPrice += priceWithProfit * 1.18;
+      renderInvoice();
+      
+      // Actualizar en Firestore para sincronización en tiempo real
+      updateRealTimeInvoice();
+    };
+
+    const updateRealTimeInvoice = async () => {
+      if (!currentUser) return;
+      
+      try {
+        const productos = invoice.map(item => {
+          const profitPercentage = item.profitPercentage || 10;
+          const priceWithProfit = item.pricePerUnit * (1 + profitPercentage / 100);
+          
+          return {
+            id: item.productId,
+            nombre: item.name,
+            cantidad: item.quantity,
+            precio: priceWithProfit * 1.18 * item.quantity
+          };
+        });
+        
+        // Actualizar total
+        const totalRef = doc(db, "users", currentUser.uid, "totals", "currentTotal");
+        await setDoc(totalRef, {
+          total: discountedTotal > 0 ? discountedTotal : totalPrice
+        }, { merge: true });
+        
+        // Actualizar productos
+        const productosRef = doc(db, "users", currentUser.uid, "totalApagarVentas", "currentVenta");
+        await setDoc(productosRef, {
+          productos: productos
+        }, { merge: true });
+      } catch (error) {
+        console.error("Error al actualizar factura en tiempo real:", error);
+      }
+    };
+
+    const renderInvoice = () => {
+      invoiceItems.innerHTML = "";
+      totalPrice = 0;
+
+      invoice.forEach((item) => {
+        const profitPercentage = item.profitPercentage || 10;
+        const priceWithProfit = item.pricePerUnit * (1 + profitPercentage / 100);
+        const totalItemPrice = priceWithProfit * 1.18 * item.quantity;
+
+        const productDiv = document.createElement("div");
+        productDiv.classList.add("invoice-item");
+        productDiv.innerHTML = `
+          <i class="fa-solid fa-box"></i> ${item.name} x ${item.quantity} - $${totalItemPrice.toFixed(2)}
+          <button class="remove-btn" onclick="removeProduct('${item.productId}')">Eliminar</button>
+        `;
+        invoiceItems.appendChild(productDiv);
+        totalPrice += totalItemPrice;
+      });
+
+      discountedTotal = discount > 0 ? totalPrice - (totalPrice * discount / 100) : totalPrice;
+      
+      invoiceTotal.innerHTML = `<i class="fa-solid fa-calculator"></i> Total: DOP $${discountedTotal.toFixed(2)}`;
+      efectivoTotal.textContent = `DOP $${discountedTotal.toFixed(2)}`;
+      tarjetaTotal.textContent = `DOP $${discountedTotal.toFixed(2)}`;
+      
+      const usdAmount = (discountedTotal / exchangeRates.usd).toFixed(2);
+      const eurAmount = (discountedTotal / exchangeRates.eur).toFixed(2);
+      
+      usdTotal.innerHTML = `<i class="fa-solid fa-dollar-sign"></i> USD $${usdAmount}`;
+      eurTotal.innerHTML = `<i class="fa-solid fa-euro-sign"></i> EUR €${eurAmount}`;
+      
+      // Actualizar en Firestore para sincronización en tiempo real
+      updateRealTimeInvoice();
+    };
+
+    window.removeProduct = (productId) => {
+      const productIndex = invoice.findIndex((item) => item.productId === productId);
+      if (productIndex > -1) {
+        const profitPercentage = invoice[productIndex].profitPercentage || 10;
+        const priceWithProfit = invoice[productIndex].pricePerUnit * (1 + profitPercentage / 100);
+        totalPrice -= priceWithProfit * 1.18;
+        invoice[productIndex].quantity -= 1;
+        if (invoice[productIndex].quantity === 0) {
+          invoice.splice(productIndex, 1);
+        }
+        renderInvoice();
+      }
+    };
+
+    // Funciones de pago y facturación
+    const generateInvoice = async (paymentTypeValue, change = 0) => {
+      const businessDetails = await getBusinessDetails();
+      const totalITBIS = totalPrice * 0.18;
+      
+      // Asegurarnos de que amountReceived tenga un valor válido
+      const receivedAmount = paymentTypeValue === 'Efectivo' ? parseFloat(amountReceived) || 0 : 0;
+      
+      // Generar código de barras con formato visual (6 dígitos)
+      const barcodeData = generateBarcode();
+      const barcodeHTML = `
+        <div style="text-align: center; margin: 10px 0;">
+          <div style="font-family: 'Libre Barcode 39 Text', cursive; font-size: 48px; letter-spacing: 2px;">
+            ${barcodeData}
+          </div>
+          <div style="font-family: monospace; font-size: 14px; margin-top: 5px;">
+            ${barcodeData.replace(/\*/g, '')}
+          </div>
+        </div>
+      `;
+      
+      const invoiceHTML = `
+        <div class="invoice-container" style="max-height: 80vh; overflow-y: auto;">
+          <div class="invoice-header">
+            <h2>${businessDetails.name}</h2>
+            <p>RNC: ${businessDetails.rnc}</p>
+            <p>${businessDetails.address}</p>
+          </div>
+          <div class="invoice-user">
+            <p>Atendido por: ${currentUser.displayName || currentUser.email.split('@')[0]}</p>
+          </div>
+          <div class="invoice-products">
+            <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px;">
+              <span class="product-name">Producto</span>
+              <span class="product-quantity">Cant</span>
+              <span class="product-price">Precio</span>
+              <span class="product-total">Total</span>
+              <span class="product-itbis">ITBIS</span>
+            </div>
+            ${invoice.map(item => {
+              const profitPercentage = item.profitPercentage || 10;
+              const priceWithProfit = item.pricePerUnit * (1 + profitPercentage / 100);
+              const itemTotal = priceWithProfit * item.quantity;
+              const itbis = itemTotal * 0.18;
+              
+              return `
+                <div class="product-row">
+                  <span class="product-name">${item.name}</span>
+                  <span class="product-quantity">${item.quantity}</span>
+                  <span class="product-price">$${priceWithProfit.toFixed(2)}</span>
+                  <span class="product-total">$${itemTotal.toFixed(2)}</span>
+                  <span class="product-itbis">$${itbis.toFixed(2)}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <div class="invoice-totals">
+            <div class="total-row">
+              <span>Descuento:</span>
+              <span>${discount > 0 ? `$${(totalPrice * discount / 100).toFixed(2)} (${discount}%)` : '$0.00'}</span>
+            </div>
+            ${paymentTypeValue === 'Efectivo' ? `
+              <div class="total-row">
+                <span>Monto Recibido:</span>
+                <span>$${receivedAmount.toFixed(2)}</span>
+              </div>
+              <div class="total-row">
+                <span>Cambio:</span>
+                <span>$${change.toFixed(2)}</span>
+              </div>
+            ` : ''}
+            <div class="total-row">
+              <span>Total ITBIS:</span>
+              <span>$${totalITBIS.toFixed(2)}</span>
+            </div>
+            <div class="total-row" style="font-weight: bold;">
+              <span>Total general:</span>
+              <span>$${discountedTotal.toFixed(2)}</span>
+            </div>
+            <div class="total-row">
+              <span>Método de pago:</span>
+              <span>${paymentTypeValue}</span>
+            </div>
+          </div>
+          <div class="barcode">
+            ${barcodeHTML}
+          </div>
+          <div class="thank-you">
+            <p>Gracias por su compra</p>
+          </div>
+        </div>
+      `;
+      
+      invoicePrintContent.innerHTML = invoiceHTML;
+      await saveInvoiceToFirebase(paymentTypeValue, change, receivedAmount, barcodeData);
+      
+      // Limpiar datos en tiempo real después de facturar
+      await clearRealTimeData();
+    };
+
+    const clearRealTimeData = async () => {
+      if (!currentUser) return;
+      
+      try {
+        const totalRef = doc(db, "users", currentUser.uid, "totals", "currentTotal");
+        await setDoc(totalRef, {
+          total: 0
+        }, { merge: true });
+        
+        const productosRef = doc(db, "users", currentUser.uid, "totalApagarVentas", "currentVenta");
+        await setDoc(productosRef, {
+          productos: []
+        }, { merge: true });
+      } catch (error) {
+        console.error("Error al limpiar datos en tiempo real:", error);
+      }
+    };
+
+    const generateBarcode = () => {
+      // Generar código de 6 dígitos
+      const randomNumber = Math.floor(100000 + Math.random() * 900000).toString();
+      return `*${randomNumber}*`;
+    };
+
+    const saveInvoiceToFirebase = async (paymentTypeValue, change = 0, receivedAmount = 0, barcode = '') => {
+      try {
+        showProgressBar(0, "Guardando factura...");
+        const businessDetails = await getBusinessDetails();
+        const totalITBIS = totalPrice * 0.18;
+        
+        const subtotalSinITBIS = invoice.reduce((sum, item) => {
+          const profitPercentage = item.profitPercentage || 10;
+          const priceWithProfit = item.pricePerUnit * (1 + profitPercentage / 100);
+          return sum + (priceWithProfit * item.quantity);
+        }, 0);
+        
+        const invoiceData = {
+          businessName: businessDetails.name,
+          businessRNC: businessDetails.rnc,
+          businessAddress: businessDetails.address,
+          user: currentUser.displayName || currentUser.email.split('@')[0],
+          userId: currentUser.uid,
+          items: invoice.map(item => {
+            const profitPercentage = item.profitPercentage || 10;
+            const priceWithProfit = item.pricePerUnit * (1 + profitPercentage / 100);
+            const itemTotal = priceWithProfit * item.quantity;
+            const itbis = itemTotal * 0.18;
+            
+            return {
+              name: item.name,
+              quantity: item.quantity,
+              pricePerUnit: item.pricePerUnit,
+              priceWithProfit: priceWithProfit,
+              total: itemTotal,
+              itbis: itbis,
+              productId: item.productId,
+              businessName: item.businessName
+            };
+          }),
+          subtotal: subtotalSinITBIS,
+          discount: discount > 0 ? (totalPrice * discount / 100) : 0,
+          discountPercentage: discount,
+          itbis: totalITBIS,
+          total: discountedTotal,
+          paymentType: paymentTypeValue,
+          amountReceived: paymentTypeValue === 'Efectivo' ? parseFloat(receivedAmount) : 0,
+          change: paymentTypeValue === 'Efectivo' ? change : 0,
+          date: Timestamp.now(),
+          barcode: barcode || generateBarcode(),
+          timestamp: new Date().getTime()
+        };
+
+        showProgressBar(30, "Guardando en facturación...");
+        // Guardar en facturacionCarrito
+        const carritoRef = await addDoc(collection(db, "facturacionCarrito"), invoiceData);
+        
+        showProgressBar(60, "Actualizando historial...");
+        // Guardar en el historial del usuario
+        const userInvoiceRef = collection(db, "users", currentUser.uid, "invoiceHistory");
+        await addDoc(userInvoiceRef, {
+          ...invoiceData,
+          carritoId: carritoRef.id
+        });
+        
+        showProgressBar(80, "Actualizando cuadres...");
+        // Guardar en FacturaDeCuadres
+        await addDoc(collection(db, "FacturaDeCuadres"), invoiceData);
+        
+        showProgressBar(90, "Actualizando stock...");
+        // Actualizar stock
+        for (const item of invoice) {
+          const productRef = doc(db, "businesses", item.businessName, "products", item.productId);
+          const productDoc = await getDoc(productRef);
+          
+          if (productDoc.exists()) {
+            const currentStock = productDoc.data().quantity;
+            await updateDoc(productRef, {
+              quantity: currentStock - item.quantity
+            });
+            
+            // Actualizar la lista de productos después de actualizar el stock
+            renderProducts();
+          }
+        }
+        
+        showProgressBar(100, "Factura guardada con éxito");
+        showAlert('success', 'El pago fue realizado');
+      } catch (error) {
+        console.error("Error al guardar la factura:", error);
+        showProgressBar(0, "Error al guardar factura");
+        showAlert('error', 'Error al guardar la factura: ' + error.message);
+      }
+    };
+
+    const processPayment = async (paymentTypeValue) => {
+      try {
+        if (invoice.length === 0) {
+          showAlert('warning', 'No hay productos en la factura');
+          return;
+        }
+
+        showProgressBar(10, "Verificando stock...");
+        // Verificar stock
+        for (const item of invoice) {
+          const productRef = doc(db, "businesses", item.businessName, "products", item.productId);
+          const productDoc = await getDoc(productRef);
+
+          if (productDoc.exists()) {
+            const productData = productDoc.data();
+            const currentQuantity = productData.quantity || 0;
+            
+            if (currentQuantity < item.quantity) {
+              showAlert('warning', `No hay suficiente stock de ${item.name}`);
+              return;
+            }
+          } else {
+            showAlert('warning', `Producto ${item.name} no encontrado`);
+            return;
+          }
+        }
+
+        showProgressBar(30, "Validando pago...");
+        // Solo validar monto para pagos en efectivo
+        if (paymentTypeValue === 'Efectivo') {
+          const received = parseFloat(amountReceived) || 0;
+          if (received < discountedTotal) {
+            showAlert('warning', 'El monto recibido es insuficiente');
+            return;
+          }
+        }
+        
+        const change = paymentTypeValue === 'Efectivo' ? amountReceived - discountedTotal : 0;
+        
+        showProgressBar(50, "Generando factura...");
+        await generateInvoice(paymentTypeValue, change);
+        printModal.style.display = "block";
+
+        // Limpiar factura
+        invoice = [];
+        totalPrice = 0;
+        discount = 0;
+        discountedTotal = 0;
+        amountReceived = 0;
+        renderInvoice();
+        
+        // Actualizar lista de productos después del pago
+        renderProducts();
+        
+        showProgressBar(100, "Pago procesado con éxito");
+      } catch (error) {
+        console.error("Error al procesar el pago:", error);
+        showProgressBar(0, "Error al procesar pago");
+        showAlert('error', 'Error al procesar el pago: ' + error.message);
+      }
+    };
+
+    // Funciones de descuento
+    const applyDiscount = async () => {
+      passwordModal.style.display = "block";
+    };
+
+    const calculateChange = () => {
+      const received = parseFloat(efectivoReceived.value) || 0;
+      amountReceived = received; // Actualizar la variable global
+      const change = received - discountedTotal;
+      efectivoChange.textContent = `DOP $${change.toFixed(2)}`;
+      efectivoReceivedDisplay.textContent = `DOP $${received.toFixed(2)}`;
+    };
+
+    // Navegación
+    homeBtn.addEventListener('click', () => {
+      productListSection.style.display = 'block';
+      invoiceSection.style.display = 'block';
+    });
+
+    inventoryBtn.addEventListener('click', (e) => {
+      if (!userPermissions.includes('inventario')) {
+        e.preventDefault();
+        showAlert('warning', 'No tiene permiso para acceder al inventario');
+        return;
+      }
+      // La redirección se manejará automáticamente por el href
+    });
+
+    reportsBtn.addEventListener('click', (e) => {
+      if (!userPermissions.includes('reportes')) {
+        e.preventDefault();
+        showAlert('warning', 'No tiene permiso para acceder a reportes');
+        return;
+      }
+      // La redirección se manejará automáticamente por el href
+    });
+
+    invoicesBtn.addEventListener('click', (e) => {
+      if (!userPermissions.includes('facturas')) {
+        e.preventDefault();
+        showAlert('warning', 'No tiene permiso para acceder a facturas');
+        return;
+      }
+      // La redirección se manejará automáticamente por el href
+    });
+
+    salesAnalysisBtn.addEventListener('click', (e) => {
+      if (!userPermissions.includes('analisis')) {
+        e.preventDefault();
+        showAlert('warning', 'No tiene permiso para acceder a análisis');
+        return;
+      }
+      // La redirección se manejará automáticamente por el href
+    });
+
+    userBtn.addEventListener('click', () => {
+      userInfoModal.style.display = 'flex';
+    });
+
+    ratesBtn.addEventListener('click', () => {
+      ratesModal.style.display = 'flex';
+    });
+
+    // Event Listeners
+    submitPassword.addEventListener("click", async () => {
+      const password = passwordInput.value;
+      const discountRef = doc(db, "settings", "discount");
+      const discountDoc = await getDoc(discountRef);
+
+      if (discountDoc.exists()) {
+        const storedPassword = discountDoc.data().password;
+        discount = discountDoc.data().discount;
+
+        if (password === storedPassword) {
+          renderInvoice();
+          passwordModal.style.display = "none";
+          discountMessage.textContent = `Descuento del ${discount}% aplicado.`;
+          discountAppliedModal.style.display = "block";
+        } else {
+          passwordError.style.display = "block";
+        }
+      } else {
+        console.error("No se encontró la configuración de descuento.");
+      }
+    });
+
+    btnEfectivo.addEventListener("click", () => {
+      if (invoice.length === 0) {
+        showAlert('warning', 'No hay factura para pagar');
+        return;
+      }
+      efectivoModal.style.display = "flex";
+    });
+
+    confirmEfectivo.addEventListener("click", () => {
+      const received = parseFloat(efectivoReceived.value) || 0;
+      if (received < discountedTotal) {
+        showAlert('warning', 'El monto recibido es insuficiente');
+        return;
+      }
+      amountReceived = received;
+      processPayment("Efectivo");
+      efectivoModal.style.display = "none";
+      efectivoReceived.value = "";
+      efectivoChange.textContent = "DOP $0.00";
+      efectivoReceivedDisplay.textContent = "DOP $0.00";
+    });
+
+    btnTarjeta.addEventListener("click", () => {
+      if (invoice.length === 0) {
+        showAlert('warning', 'No hay factura para pagar');
+        return;
+      }
+      tarjetaModal.style.display = "flex";
+    });
+
+    confirmTarjeta.addEventListener("click", () => {
+      processPayment("Tarjeta");
+      tarjetaModal.style.display = "none";
+    });
+
+    btnApplyDiscount.addEventListener("click", applyDiscount);
+
+    payButton.addEventListener("click", () => {
+      if (invoice.length === 0) {
+        showAlert('warning', 'No hay productos en la factura');
+        return;
+      }
+      efectivoModal.style.display = "flex";
+    });
+
+    efectivoReceived.addEventListener("input", calculateChange);
+
+    // Eventos del teclado numérico
+    searchInput.addEventListener("click", () => {
+      numericKeyboard.style.display = "grid";
+      textKeyboard.style.display = "none";
+    });
+
+    searchByNameInput.addEventListener("click", () => {
+      textKeyboard.style.display = "grid";
+      numericKeyboard.style.display = "none";
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!searchInput.contains(e.target) && !numericKeyboard.contains(e.target)) {
+        numericKeyboard.style.display = "none";
+      }
+      if (!searchByNameInput.contains(e.target) && !textKeyboard.contains(e.target)) {
+        textKeyboard.style.display = "none";
+      }
+    });
+
+    numericButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        if (button.id !== "backspaceBtn" && button.id !== "acceptBtn") {
+          searchInput.value += button.getAttribute("data-value");
+        }
+      });
+    });
+
+    backspaceBtn.addEventListener("click", () => {
+      searchInput.value = searchInput.value.slice(0, -1);
+    });
+
+    acceptBtn.addEventListener("click", () => {
+      renderProducts(searchInput.value, "");
+      numericKeyboard.style.display = "none";
+    });
+
+    // Eventos del teclado de texto
+    textButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        if (button.classList.contains('backspace')) {
+          searchByNameInput.value = searchByNameInput.value.slice(0, -1);
+        } else if (button.classList.contains('space')) {
+          searchByNameInput.value += ' ';
+        } else if (button.classList.contains('enter')) {
+          renderProducts("", searchByNameInput.value);
+          textKeyboard.style.display = "none";
+        } else if (button.classList.contains('shift')) {
+          isShiftPressed = !isShiftPressed;
+        } else {
+          const value = isShiftPressed ? 
+            button.getAttribute("data-value").toUpperCase() : 
+            button.getAttribute("data-value");
+          searchByNameInput.value += value;
+        }
+      });
+    });
+
+    searchInput.addEventListener("input", (e) => {
+      if (e.target.value.trim() === "") {
+        productList.innerHTML = "";
+        return;
+      }
+      renderProducts(e.target.value, searchByNameInput.value);
+    });
+
+    searchByNameInput.addEventListener("input", (e) => {
+      if (e.target.value.trim() === "") {
+        productList.innerHTML = "";
+        return;
+      }
+      renderProducts(searchInput.value, e.target.value);
+    });
+
+    // Eventos de cierre de modales
+    closeModal.addEventListener("click", () => printModal.style.display = "none");
+    closeEfectivoModal.addEventListener("click", () => {
+      efectivoModal.style.display = "none";
+      efectivoReceived.value = "";
+      efectivoChange.textContent = "DOP $0.00";
+      efectivoReceivedDisplay.textContent = "DOP $0.00";
+    });
+    closeTarjetaModal.addEventListener("click", () => tarjetaModal.style.display = "none");
+    closePasswordModal.addEventListener("click", () => {
+      passwordModal.style.display = "none";
+      passwordError.style.display = "none";
+    });
+    closeDiscountModal.addEventListener("click", () => discountAppliedModal.style.display = "none");
+    closeUserModal.addEventListener("click", () => userInfoModal.style.display = "none");
+    closeRatesModal.addEventListener("click", () => ratesModal.style.display = "none");
+
+    btnPrint.addEventListener("click", () => {
+      const printContent = invoicePrintContent.innerHTML;
+      const printWindow = window.open('', '', 'height=400,width=600');
+      printWindow.document.write('<html><head><title>Imprimir Factura</title>');
+      printWindow.document.write('<style>body { font-family: Arial; width: 80mm; margin: 0; padding: 10px; } p, h2, h3 { color: #000; margin: 5px 0; } button { display: none; } .invoice-container { width: 100%; max-width: 80mm; margin: 0 auto; padding: 10px; font-family: Arial, sans-serif; } .invoice-header { text-align: center; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 10px; } .invoice-header h2 { margin: 5px 0; font-size: 18px; } .invoice-header p { margin: 3px 0; font-size: 14px; } .invoice-user { margin: 10px 0; padding-bottom: 5px; border-bottom: 1px dashed #000; } .invoice-products { margin: 10px 0; } .product-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; } .product-name { flex: 3; } .product-quantity, .product-price, .product-total, .product-itbis { flex: 1; text-align: right; } .invoice-totals { margin-top: 15px; border-top: 1px dashed #000; padding-top: 10px; } .total-row { display: flex; justify-content: space-between; margin-bottom: 5px; } .barcode { text-align: center; margin-top: 15px; font-family: "Libre Barcode 39 Text", cursive; font-size: 36px; } .thank-you { text-align: center; margin-top: 10px; font-style: italic; }</style></head><body>');
+      printWindow.document.write(printContent);
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.print();
+      printWindow.close();
+    });
+
+    // Atajos de teclado
+    document.addEventListener('keydown', (e) => {
+      // Ctrl+D para descuento
+      if (e.ctrlKey && e.key === 'd') {
+        e.preventDefault();
+        btnApplyDiscount.click();
+      }
+      
+      // Ctrl+E para pago en efectivo
+      if (e.ctrlKey && e.key === 'e') {
+        e.preventDefault();
+        btnEfectivo.click();
+      }
+      
+      // Ctrl+T para pago con tarjeta
+      if (e.ctrlKey && e.key === 't') {
+        e.preventDefault();
+        btnTarjeta.click();
+      }
+      
+      // Ctrl+F para facturar
+      if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        payButton.click();
+      }
+      
+      // Ctrl+Alt+P para modo especial
+      if (e.ctrlKey && e.altKey && e.key === 'p') {
+        e.preventDefault();
+        // Crear modal de acceso rápido
+        const quickAccessModal = document.createElement('div');
+        quickAccessModal.style.position = 'fixed';
+        quickAccessModal.style.top = '0';
+        quickAccessModal.style.left = '0';
+        quickAccessModal.style.width = '100%';
+        quickAccessModal.style.height = '100%';
+        quickAccessModal.style.backgroundColor = 'rgba(0,0,0,0.7)';
+        quickAccessModal.style.display = 'flex';
+        quickAccessModal.style.justifyContent = 'center';
+        quickAccessModal.style.alignItems = 'center';
+        quickAccessModal.style.zIndex = '2000';
+        
+        // Contenido del modal
+        const modalContent = document.createElement('div');
+        modalContent.style.backgroundColor = '#2c3e50';
+        modalContent.style.padding = '30px';
+        modalContent.style.borderRadius = '15px';
+        modalContent.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+        modalContent.style.maxWidth = '400px';
+        modalContent.style.width = '90%';
+        modalContent.style.textAlign = 'center';
+        
+        // Título
+        const title = document.createElement('h2');
+        title.textContent = 'Acceso Rápido';
+        title.style.color = '#16e086';
+        title.style.marginBottom = '30px';
+        title.style.display = 'flex';
+        title.style.alignItems = 'center';
+        title.style.justifyContent = 'center';
+        title.style.gap = '10px';
+        
+        const keyIcon = document.createElement('i');
+        keyIcon.className = 'fas fa-key';
+        title.appendChild(keyIcon);
+        title.appendChild(document.createTextNode('Acceso Rápido'));
+        
+        // Botones
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.flexDirection = 'column';
+        buttonContainer.style.gap = '15px';
+        
+        // Botón de permisos
+        const permissionsButton = document.createElement('a');
+        permissionsButton.href = 'dar-permisos.html';
+        permissionsButton.innerHTML = '<i class="fas fa-user-lock"></i> Gestión de Permisos';
+        permissionsButton.style.padding = '15px 20px';
+        permissionsButton.style.backgroundColor = '#34495e';
+        permissionsButton.style.color = 'white'; 
+        permissionsButton.style.borderRadius = '8px';
+        permissionsButton.style.textDecoration = 'none';
+        permissionsButton.style.display = 'flex';
+        permissionsButton.style.alignItems = 'center';
+        permissionsButton.style.gap = '10px';
+        permissionsButton.style.transition = 'all 0.3s';
+        permissionsButton.style.fontWeight = 'bold';
+
+        permissionsButton.addEventListener('mouseover', () => {
+          permissionsButton.style.backgroundColor = '#16e086';
+          permissionsButton.style.transform = 'translateY(-2px)';
+        });
+
+        permissionsButton.addEventListener('mouseout', () => {
+          permissionsButton.style.backgroundColor = '#34495e';
+          permissionsButton.style.transform = 'translateY(0)';
+        });
+        
+        // Botón de configuración
+        const settingsButton = document.createElement('a');
+        settingsButton.href = '#';
+        settingsButton.innerHTML = '<i class="fas fa-cog"></i> Configuración';
+        settingsButton.style.padding = '15px 20px';
+        settingsButton.style.backgroundColor = '#34495e';
+        settingsButton.style.color = 'white';
+        settingsButton.style.borderRadius = '8px';
+        settingsButton.style.textDecoration = 'none';
+        settingsButton.style.display = 'flex';
+        settingsButton.style.alignItems = 'center';
+        settingsButton.style.gap = '10px';
+        settingsButton.style.transition = 'all 0.3s';
+        settingsButton.style.fontWeight = 'bold';
+        
+        settingsButton.addEventListener('mouseover', () => {
+          settingsButton.style.backgroundColor = '#16e086';
+          settingsButton.style.transform = 'translateY(-2px)';
+        });
+        
+        settingsButton.addEventListener('mouseout', () => {
+          settingsButton.style.backgroundColor = '#34495e';
+          settingsButton.style.transform = 'translateY(0)';
+        });
+        
+        settingsButton.addEventListener('click', (e) => {
+          e.preventDefault();
+          document.body.removeChild(quickAccessModal);
+          showAlert('info', 'Funcionalidad de configuración en desarrollo');
+        });
+        
+        // Botón de cerrar
+        const closeButton = document.createElement('button');
+        closeButton.textContent = 'Cerrar';
+        closeButton.style.padding = '12px 25px';
+        closeButton.style.backgroundColor = '#e74c3c';
+        closeButton.style.color = 'white';
+        closeButton.style.border = 'none';
+        closeButton.style.borderRadius = '5px';
+        closeButton.style.cursor = 'pointer';
+        closeButton.style.marginTop = '20px';
+        closeButton.style.transition = 'all 0.3s';
+        closeButton.style.fontWeight = 'bold';
+        
+        closeButton.addEventListener('mouseover', () => {
+          closeButton.style.backgroundColor = '#c0392b';
+          closeButton.style.transform = 'scale(1.05)';
+        });
+        
+        closeButton.addEventListener('mouseout', () => {
+          closeButton.style.backgroundColor = '#e74c3c';
+          closeButton.style.transform = 'scale(1)';
+        });
+        
+        closeButton.addEventListener('click', () => {
+          document.body.removeChild(quickAccessModal);
+        });
+        
+        // Agregar elementos al modal
+        buttonContainer.appendChild(permissionsButton);
+        buttonContainer.appendChild(settingsButton);
+        
+        modalContent.appendChild(title);
+        modalContent.appendChild(buttonContainer);
+        modalContent.appendChild(closeButton);
+        
+        quickAccessModal.appendChild(modalContent);
+        document.body.appendChild(quickAccessModal);
+      }
+      
+      // Supr o Delete para eliminar
+      if (e.key === 'Delete' || e.key === 'Del') {
+        const focusedElement = document.activeElement;
+        if (focusedElement === searchInput || focusedElement === searchByNameInput) {
+          focusedElement.value = '';
+          renderProducts();
+        }
+      }
+      
+      // Enter para aceptar y confirmar pagos
+      if (e.key === 'Enter') {
+        if (efectivoModal.style.display === 'flex') {
+          confirmEfectivo.click();
+        } else if (tarjetaModal.style.display === 'flex') {
+          confirmTarjeta.click();
+        } else if (passwordModal.style.display === 'block') {
+          submitPassword.click();
+        } else if (numericKeyboard.style.display === 'grid') {
+          acceptBtn.click();
+        } else if (textKeyboard.style.display === 'grid') {
+          const enterBtn = document.querySelector('.text-keyboard .enter');
+          if (enterBtn) enterBtn.click();
+        }
+      }
+      
+      // Tab para cambiar de vista 
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        if (currentView === 'grid') {
+          setProductView('list');
+        } else {
+          setProductView('grid');
+        }
+      }
+    });
+
+    // Enfocar automáticamente el campo de búsqueda EAN/UPC al cargar la página
+    window.onload = function() {
+      if (localStorage.getItem('userLoggedIn') === 'true') {
+        searchInput.focus();
+        searchInput.select();
+      } else {
+        loginEmail.focus();
+      }
+    };
+</script>
