@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Venta del Día</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Estilo general */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-user-drag: none;
+      -moz-user-drag: none;
+      user-drag: none;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      color: #ecf0f1;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #47627d;
+      padding: 10px 20px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .header-icons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .icon {
+      color: #15a086;
+      font-size: 1.8em;
+      transition: transform 0.3s ease, color 0.3s ease;
+      cursor: pointer;
+    }
+
+    .icon:hover {
+      transform: scale(1.2);
+      color: #16e086;
+    }
+
+    #invoiceUser {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    /* Main Container */
+    .main-container {
+      margin-top: 60px;
+      flex-grow: 1;
+      min-height: calc(100vh - 120px);
+      padding: 20px;
+    }
+
+    /* Reports Section */
+    .reports-section {
+      background: #34495e;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      height: calc(100vh - 180px);
+      overflow-y: auto;
+    }
+
+    .reports-section h1 {
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      color: #16e086;
+      text-align: center;
+    }
+
+    .date-filter {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .date-filter input {
+      padding: 8px;
+      border-radius: 5px;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ecf0f1;
+    }
+
+    .date-filter button {
+      padding: 8px 15px;
+      background: #16e086;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .date-filter button:hover {
+      background: #15a086;
+    }
+
+    .report-container {
+      display: flex;
+      width: 100%;
+      gap: 20px;
+    }
+
+    .report-list {
+      flex: 1;
+      overflow-y: auto;
+      max-height: calc(100vh - 200px);
+    }
+
+    .report-detail {
+      flex: 1;
+      background: #2c3e50;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+    }
+
+    .report-item {
+      padding: 15px;
+      margin-bottom: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .report-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .report-total {
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-top: 20px;
+      padding: 10px;
+      background: rgba(22, 224, 134, 0.2);
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    .chart-container {
+      margin-top: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .print-btn {
+      background: linear-gradient(135deg, #16e086, #15a086);
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+
+    .print-btn:hover {
+      background: linear-gradient(135deg, #15a086, #16e086);
+      transform: translateY(-2px);
+    }
+
+    .print-btn i {
+      font-size: 16px;
+    }
+
+    /* Footer */
+    .footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #2c3e50;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .footer-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .button {
+      padding: 12px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 1em;
+      color: #ecf0f1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.3s, transform 0.3s;
+      text-decoration: none;
+    }
+
+    .button:hover {
+      transform: scale(1.05);
+    }
+
+    .button i {
+      font-size: 1.2em;
+    }
+
+    .button-home {
+      background-color: #8e44ad;
+    }
+
+    .button-home:hover {
+      background-color: #9b59b6;
+    }
+
+    /* Estilos para navegadores Webkit (scrollbar) */
+    ::-webkit-scrollbar-track {
+      background-color: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: transparent;
+      border-radius: 10px;
+      height: 10px;
+      transition: background-color 0.3s ease;
+    }
+
+    ::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: #15a086;
+    }
+
+    ::-webkit-scrollbar-thumb:active {
+      background-color: #0d705c;
+    }
+
+    /* Responsividad */
+    @media (max-width: 768px) {
+      .report-container {
+        flex-direction: column;
+      }
+      
+      .report-list, .report-detail {
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-icons"> 
+      <a href="index.html" id="homeBtn" title="Inicio"><i class="fa-solid fa-house icon"></i></a>
+      <a href="inventario.html" id="inventoryBtn" title="Inventario"><i class="fa-solid fa-box icon"></i></a>
+      <a href="#" id="reportsBtn" title="Reportes" style="color: #16e086;"><i class="fa-solid fa-chart-line icon"></i></a>
+      <a href="facturas.html" id="invoicesBtn" title="Facturas"><i class="fa-solid fa-receipt icon"></i></a>
+      <a href="analisis.html" id="salesAnalysisBtn" title="Análisis de Ventas"><i class="fa-solid fa-chart-pie icon"></i></a>
+      <a href="usuario.html" id="userBtn" title="Usuario"><i class="fa-solid fa-user icon"></i></a>
+    </div>
+    <span id="invoiceUser">Usuario</span>
+  </header>
+
+  <div class="main-container">
+    <div class="reports-section">
+      <div class="report-container">
+        <div class="report-list">
+          <h1>Ventas del Día</h1>
+          <div class="date-filter">
+            <input type="date" id="salesDateFilter">
+            <button id="applySalesFilter">Filtrar</button>
+            <button id="printSalesReport" class="print-btn"><i class="fas fa-print"></i> Imprimir Reporte</button>
+          </div>
+          <div id="salesReport"></div>
+        </div>
+        <div class="report-detail">
+          <h2>Resumen de Ventas</h2>
+          <div id="salesSummary">
+            <div class="report-total" id="salesTotal"></div>
+            <div class="report-total" id="salesDiscount"></div>
+            <div class="chart-container">
+              <canvas id="salesChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-buttons">
+      <a href="index.html" class="button button-home"><i class="fa-solid fa-house"></i> Volver al Inicio</a>
+    </div>
+    <div id="currentDate" style="color: #ecf0f1;"></div>
+  </div>
+
+  <script type="module">
+    // Importaciones de Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      getDocs,
+      Timestamp,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { 
+      getAuth, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // Elementos del DOM
+    const invoiceUser = document.getElementById("invoiceUser");
+    const salesDateFilter = document.getElementById("salesDateFilter");
+    const applySalesFilter = document.getElementById("applySalesFilter");
+    const printSalesReport = document.getElementById("printSalesReport");
+    const salesReport = document.getElementById("salesReport");
+    const salesTotal = document.getElementById("salesTotal");
+    const salesDiscount = document.getElementById("salesDiscount");
+    const salesChart = document.getElementById("salesChart");
+    const currentDate = document.getElementById("currentDate");
+
+    // Variables globales
+    let currentUser = null;
+    let salesChartInstance = null;
+
+    // Función para cargar el reporte de ventas
+    const loadSalesReport = async (date = null) => {
+      if (!currentUser) return;
+
+      try {
+        let startDate = new Date();
+        startDate.setHours(0, 0, 0, 0);
+        
+        if (date) {
+          startDate = new Date(date);
+          startDate.setHours(0, 0, 0, 0);
+        }
+        
+        const endDate = new Date(startDate);
+        endDate.setHours(23, 59, 59, 999);
+        
+        const salesRef = collection(db, "users", currentUser.uid, "invoiceHistory");
+        const q = query(salesRef, 
+          where("date", ">=", Timestamp.fromDate(startDate)),
+          where("date", "<=", Timestamp.fromDate(endDate))
+        );
+        
+        const querySnapshot = await getDocs(q);
+        salesReport.innerHTML = "";
+        
+        if (querySnapshot.empty) {
+          salesReport.innerHTML = "<p>No hay ventas para esta fecha</p>";
+          salesTotal.textContent = "Total vendido: $0.00";
+          salesDiscount.textContent = "Total descuentos: $0.00";
+          updateSalesChart([], []);
+          return;
+        }
+        
+        const salesByProduct = {};
+        let totalSales = 0;
+        let totalDiscount = 0;
+        
+        querySnapshot.forEach((doc) => {
+          const invoiceData = doc.data();
+          totalSales += invoiceData.total;
+          totalDiscount += invoiceData.discount || 0;
+          
+          invoiceData.items.forEach(item => {
+            if (!salesByProduct[item.name]) {
+              salesByProduct[item.name] = {
+                quantity: 0,
+                total: 0
+              };
+            }
+            salesByProduct[item.name].quantity += item.quantity;
+            salesByProduct[item.name].total += item.total;
+          });
+        });
+        
+        Object.entries(salesByProduct).forEach(([productName, data]) => {
+          const saleDiv = document.createElement("div");
+          saleDiv.classList.add("report-item");
+          saleDiv.innerHTML = `
+            <p><strong>Producto:</strong> ${productName}</p>
+            <p><strong>Cantidad:</strong> ${data.quantity}</p>
+            <p><strong>Total:</strong> $${data.total.toFixed(2)}</p>
+          `;
+          salesReport.appendChild(saleDiv);
+        });
+        
+        salesTotal.textContent = `Total vendido: $${totalSales.toFixed(2)}`;
+        salesDiscount.textContent = `Total descuentos: $${totalDiscount.toFixed(2)}`;
+        
+        const productNames = Object.keys(salesByProduct);
+        const productTotals = productNames.map(name => salesByProduct[name].total);
+        updateSalesChart(productNames, productTotals);
+        
+      } catch (error) {
+        console.error("Error al cargar reporte de ventas:", error);
+        alert('Error al cargar reporte');
+      }
+    };
+
+    // Función para actualizar el gráfico de ventas
+    const updateSalesChart = (labels, data) => {
+      if (salesChartInstance) {
+        salesChartInstance.destroy();
+      }
+      
+      const ctx = salesChart.getContext('2d');
+      salesChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Ventas por Producto',
+            data: data,
+            backgroundColor: 'rgba(22, 224, 134, 0.7)',
+            borderColor: 'rgba(22, 224, 134, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {  
+                  return '$' + value.toFixed(2);
+                }
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return '$' + context.raw.toFixed(2);
+                }
+              }
+            }
+          }
+        }
+      });
+    };
+
+    // Función para imprimir el reporte de ventas
+    const printSalesReportContent = () => {
+      const today = new Date(salesDateFilter.value).toLocaleDateString();
+      const reportHTML = `
+        <div style="width: 100%; max-width: 210mm; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+          <h1 style="text-align: center; margin-bottom: 20px;">Reporte de Ventas</h1>
+          <p style="text-align: center; margin-bottom: 20px;"><strong>Fecha:</strong> ${today}</p>
+          
+          <div style="margin-bottom: 30px;">
+            <h2 style="text-align: center; margin-bottom: 15px;">Resumen de Ventas</h2>
+            <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 20px;">
+              <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; min-width: 200px; text-align: center;">
+                <h3 style="margin-bottom: 10px;">Total Vendido</h3>
+                <p style="font-size: 24px; font-weight: bold;">$${salesTotal.textContent.split('$')[1]}</p>
+              </div>
+              <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; min-width: 200px; text-align: center;">
+                <h3 style="margin-bottom: 10px;">Total Descuentos</h3>
+                <p style="font-size: 24px; font-weight: bold;">$${salesDiscount.textContent.split('$')[1]}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div style="margin-top: 30px; text-align: center;">
+            <p>Reporte generado por: ${currentUser.displayName || currentUser.email.split('@')[0]}</p>
+            <p>${new Date().toLocaleString()}</p>
+          </div>
+        </div>
+      `;
+      
+      const printWindow = window.open('', '', 'width=800,height=600');
+      printWindow.document.write('<html><head><title>Reporte de Ventas</title>');
+      printWindow.document.write('<style>body { font-family: Arial; margin: 0; padding: 20px; }</style>');
+      printWindow.document.write('</head><body>');
+      printWindow.document.write(reportHTML);
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.print();
+    };
+
+    // Event Listeners
+    applySalesFilter.addEventListener('click', () => {
+      loadSalesReport(salesDateFilter.value);
+    });
+
+    printSalesReport.addEventListener('click', printSalesReportContent);
+
+    // Observador de autenticación
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        
+        if (user.displayName) {
+          invoiceUser.textContent = user.displayName;
+        } else {
+          const nameFromEmail = user.email.split('@')[0];
+          invoiceUser.textContent = nameFromEmail;
+        }
+        
+        // Establecer fecha actual
+        const today = new Date().toISOString().split('T')[0];
+        salesDateFilter.value = today;
+        currentDate.textContent = new Date().toLocaleDateString('es-ES', { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+        
+        // Cargar reporte inicial
+        loadSalesReport();
+      } else {
+        // Redirigir al login si no hay usuario autenticado
+        window.location.href = 'login.html';
+      }
+    });
+  </script>
+</body>
+</html>
