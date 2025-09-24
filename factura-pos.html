@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Facturas del Día</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Estilo general */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-user-drag: none;
+      -moz-user-drag: none;
+      user-drag: none;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      color: #ecf0f1;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #47627d;
+      padding: 10px 20px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .header-icons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .icon {
+      color: #15a086;
+      font-size: 1.8em;
+      transition: transform 0.3s ease, color 0.3s ease;
+      cursor: pointer;
+    }
+
+    .icon:hover {
+      transform: scale(1.2);
+      color: #16e086;
+    }
+
+    #invoiceUser {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    /* Main Container */
+    .main-container {
+      margin-top: 60px;
+      flex-grow: 1;
+      min-height: calc(100vh - 120px);
+      padding: 20px;
+    }
+
+    /* Reports Section */
+    .reports-section {
+      background: #34495e;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      height: calc(100vh - 180px);
+      overflow-y: auto;
+    }
+
+    .reports-section h1 {
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      color: #16e086;
+      text-align: center;
+    }
+
+    .date-filter {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .date-filter input {
+      padding: 8px;
+      border-radius: 5px;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ecf0f1;
+    }
+
+    .date-filter button {
+      padding: 8px 15px;
+      background: #16e086;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .date-filter button:hover {
+      background: #15a086;
+    }
+
+    .report-container {
+      display: flex;
+      width: 100%;
+      gap: 20px;
+    }
+
+    .report-list {
+      flex: 1;
+      overflow-y: auto;
+      max-height: calc(100vh - 200px);
+    }
+
+    .report-detail {
+      flex: 1;
+      background: #2c3e50;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+    }
+
+    .report-item {
+      padding: 15px;
+      margin-bottom: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .report-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .invoice-ticket {
+      width: 100%;
+      margin: 0 auto;
+      padding: 10px;
+      font-family: Arial, sans-serif;
+      background: white;
+      color: black;
+      border-radius: 5px;
+    }
+
+    .invoice-header {
+      text-align: center;
+      margin-bottom: 10px;
+      border-bottom: 1px dashed #000;
+      padding-bottom: 10px;
+    }
+
+    .invoice-header h2 {
+      margin: 5px 0;
+      font-size: 18px;
+    }
+
+    .invoice-header p {
+      margin: 3px 0;
+      font-size: 14px;
+    }
+
+    .invoice-user {
+      margin: 10px 0;
+      padding-bottom: 5px;
+      border-bottom: 1px dashed #000;
+    }
+
+    .invoice-products {
+      margin: 10px 0;
+    }
+
+    .product-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .product-name {
+      flex: 3;
+    }
+
+    .product-quantity, .product-price, .product-total {
+      flex: 1;
+      text-align: right;
+      margin-left: 5px;
+    }
+
+    .invoice-totals {
+      margin-top: 15px;
+      border-top: 1px dashed #000;
+      padding-top: 10px;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .barcode {
+      text-align: center;
+      margin-top: 15px;
+      font-family: 'Libre Barcode 39', cursive;
+      font-size: 36px;
+      padding: 5px 0;
+    }
+
+    .thank-you {
+      text-align: center;
+      margin-top: 10px;
+      font-style: italic;
+      padding: 5px 0;
+    }
+
+    .print-btn {
+      background: linear-gradient(135deg, #16e086, #15a086);
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+
+    .print-btn:hover {
+      background: linear-gradient(135deg, #15a086, #16e086);
+      transform: translateY(-2px);
+    }
+
+    .print-btn i {
+      font-size: 16px;
+    }
+
+    /* Footer */
+    .footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #2c3e50;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .footer-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .button {
+      padding: 12px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 1em;
+      color: #ecf0f1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.3s, transform 0.3s;
+      text-decoration: none;
+    }
+
+    .button:hover {
+      transform: scale(1.05);
+    }
+
+    .button i {
+      font-size: 1.2em;
+    }
+
+    .button-home {
+      background-color: #8e44ad;
+    }
+
+    .button-home:hover {
+      background-color: #9b59b6;
+    }
+
+    /* Estilos para navegadores Webkit (scrollbar) */
+    ::-webkit-scrollbar-track {
+      background-color: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: transparent;
+      border-radius: 10px;
+      height: 10px;
+      transition: background-color 0.3s ease;
+    }
+
+    ::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: #15a086;
+    }
+
+    ::-webkit-scrollbar-thumb:active {
+      background-color: #0d705c;
+    }
+
+    /* Responsividad */
+    @media (max-width: 768px) {
+      .report-container {
+        flex-direction: column;
+      }
+      
+      .report-list, .report-detail {
+        max-height: none;
+      }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39+Text&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="header-icons"> 
+      <a href="index.html" id="homeBtn" title="Inicio"><i class="fa-solid fa-house icon"></i></a>
+      <a href="inventario.html" id="inventoryBtn" title="Inventario"><i class="fa-solid fa-box icon"></i></a>
+      <a href="reportes.html" id="reportsBtn" title="Reportes"><i class="fa-solid fa-chart-line icon"></i></a>
+      <a href="#" id="invoicesBtn" title="Facturas" style="color: #16e086;"><i class="fa-solid fa-receipt icon"></i></a>
+      <a href="analisis.html" id="salesAnalysisBtn" title="Análisis de Ventas"><i class="fa-solid fa-chart-pie icon"></i></a>
+      <a href="usuario.html" id="userBtn" title="Usuario"><i class="fa-solid fa-user icon"></i></a>
+    </div>
+    <span id="invoiceUser">Usuario</span>
+  </header>
+
+  <div class="main-container">
+    <div class="reports-section">
+      <div class="report-container">
+        <div class="report-list">
+          <h1>Facturas del Día</h1>
+          <div class="date-filter">
+            <input type="date" id="invoicesDateFilter">
+            <button id="applyInvoicesFilter">Filtrar</button>
+            <button id="printInvoicesReport" class="print-btn"><i class="fas fa-print"></i> Imprimir Reporte</button>
+          </div>
+          <div id="dailyInvoices"></div>
+        </div>
+        <div class="report-detail">
+          <h2>Detalle de Factura</h2>
+          <div id="invoiceDetail" class="invoice-ticket"></div>
+          <button id="printInvoiceDetail" class="print-btn"><i class="fas fa-print"></i> Imprimir Factura</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-buttons">
+      <a href="index.html" class="button button-home"><i class="fa-solid fa-house"></i> Volver al Inicio</a>
+    </div>
+    <div id="currentDate" style="color: #ecf0f1;"></div>
+  </div>
+
+  <script type="module">
+    // Importaciones de Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      getDocs,
+      Timestamp,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { 
+      getAuth, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLi-egzQlgbKW8XV_qIhU6313Gd8gocCg",
+      authDomain: "inventario-35d6b.firebaseapp.com",
+      projectId: "inventario-35d6b",
+      storageBucket: "inventario-35d6b.appspot.com",
+      messagingSenderId: "266100399659",
+      appId: "1:266100399659:web:92358d28cbd803c8a7d46e",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // Elementos del DOM
+    const invoiceUser = document.getElementById("invoiceUser");
+    const invoicesDateFilter = document.getElementById("invoicesDateFilter");
+    const applyInvoicesFilter = document.getElementById("applyInvoicesFilter");
+    const printInvoicesReport = document.getElementById("printInvoicesReport");
+    const dailyInvoices = document.getElementById("dailyInvoices");
+    const invoiceDetail = document.getElementById("invoiceDetail");
+    const printInvoiceDetail = document.getElementById("printInvoiceDetail");
+    const currentDate = document.getElementById("currentDate");
+
+    // Variables globales
+    let currentUser = null;
+    let selectedInvoiceId = null;
+
+    // Función para generar código de barras
+    const generateBarcode = () => {
+      const randomNumber = Math.floor(100000 + Math.random() * 900000).toString();
+      return `*${randomNumber}*`;
+    };
+
+    // Función para cargar las facturas del día
+    const loadDailyInvoices = async (date = null) => {
+      if (!currentUser) return;
+
+      try {
+        let startDate = new Date();
+        startDate.setHours(0, 0, 0, 0);
+        
+        if (date) {
+          startDate = new Date(date);
+          startDate.setHours(0, 0, 0, 0);
+        }
+        
+        const endDate = new Date(startDate);
+        endDate.setHours(23, 59, 59, 999);
+        
+        const invoicesRef = collection(db, "users", currentUser.uid, "invoiceHistory");
+        const q = query(invoicesRef, 
+          where("date", ">=", Timestamp.fromDate(startDate)),
+          where("date", "<=", Timestamp.fromDate(endDate)),
+          orderBy("date", "desc")
+        );
+        
+        const querySnapshot = await getDocs(q);
+        dailyInvoices.innerHTML = "";
+        
+        if (querySnapshot.empty) {
+          dailyInvoices.innerHTML = "<p>No hay facturas para esta fecha</p>";
+          invoiceDetail.innerHTML = "<p>Seleccione una factura para ver el detalle</p>";
+          return;
+        }
+        
+        querySnapshot.forEach((doc) => {
+          const invoiceData = doc.data();
+          const invoiceDate = invoiceData.date.toDate();
+          const invoiceTime = invoiceDate.toLocaleTimeString();
+          
+          const invoiceDiv = document.createElement("div");
+          invoiceDiv.classList.add("report-item");
+          invoiceDiv.dataset.invoiceId = doc.id;
+          invoiceDiv.innerHTML = `
+            <p><strong>Factura ID:</strong> ${doc.id.substring(0, 8)}...</p>
+            <p><strong>Hora:</strong> ${invoiceTime}</p>
+            <p><strong>Total:</strong> $${invoiceData.total.toFixed(2)}</p>
+            <p><strong>Método:</strong> ${invoiceData.paymentType}</p>
+            <p><strong>Productos:</strong> ${invoiceData.items.length}</p>
+          `;
+          
+          invoiceDiv.addEventListener("click", () => {
+            showInvoiceDetail(invoiceData, doc.id);
+            selectedInvoiceId = doc.id;
+          });
+          
+          dailyInvoices.appendChild(invoiceDiv);
+        });
+        
+        if (querySnapshot.docs.length > 0) {
+          const firstDoc = querySnapshot.docs[0];
+          showInvoiceDetail(firstDoc.data(), firstDoc.id);
+          selectedInvoiceId = firstDoc.id;
+        }
+        
+      } catch (error) {
+        console.error("Error al cargar facturas del día:", error);
+        alert('Error al cargar facturas');
+      }
+    };
+
+    // Función para mostrar el detalle de la factura
+    const showInvoiceDetail = (invoiceData, invoiceId) => {
+      const totalITBIS = invoiceData.itbis || 0;
+      const discountAmount = invoiceData.discount || 0;
+      
+      const barcodeHTML = `
+        <div style="text-align: center; margin: 10px 0;">
+          <div style="font-family: 'Libre Barcode 39 Text', cursive; font-size: 48px; letter-spacing: 2px;">
+            ${invoiceData.barcode || generateBarcode()}
+          </div>
+          <div style="font-family: monospace; font-size: 14px; margin-top: 5px;">
+            ${(invoiceData.barcode || generateBarcode()).replace(/\*/g, '')}
+          </div>
+        </div>
+      `;
+      
+      const ticketHTML = `
+        <div class="invoice-header">
+          <h2>${invoiceData.businessName}</h2>
+          <p>RNC: ${invoiceData.businessRNC}</p>
+          <p>${invoiceData.businessAddress}</p>
+        </div>
+        <div class="invoice-user">
+          <p>Factura: ${invoiceId.substring(0, 8)}</p>
+          <p>Fecha: ${invoiceData.date.toDate().toLocaleString()}</p>
+          <p>Atendido por: ${invoiceData.user}</p>
+        </div>
+        <div class="invoice-products">
+          <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px;">
+            <span class="product-name">Producto</span>
+            <span class="product-quantity">Cant</span>
+            <span class="product-price">Precio</span>
+            <span class="product-total">Total</span>
+          </div>
+          ${invoiceData.items.map(item => {
+            return `
+              <div class="product-row">
+                <span class="product-name">${item.name}</span>
+                <span class="product-quantity">${item.quantity}</span>
+                <span class="product-price">$${item.priceWithProfit.toFixed(2)}</span>
+                <span class="product-total">$${item.total.toFixed(2)}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        <div class="invoice-totals">
+          ${discountAmount > 0 ? `
+            <div class="total-row">
+              <span>Descuento (${invoiceData.discountPercentage}%):</span>
+              <span>$${discountAmount.toFixed(2)}</span>
+            </div>
+          ` : ''}
+          <div class="total-row">
+            <span>Total ITBIS:</span>
+            <span>$${totalITBIS.toFixed(2)}</span>
+          </div>
+          ${invoiceData.paymentType === 'Efectivo' ? `
+            <div class="total-row">
+              <span>Monto Recibido:</span>
+              <span>$${invoiceData.amountReceived.toFixed(2)}</span>
+            </div>
+            <div class="total-row">
+              <span>Cambio:</span>
+              <span>$${invoiceData.change.toFixed(2)}</span>
+            </div>
+          ` : ''}
+          <div class="total-row" style="font-weight: bold;">
+            <span>Total general:</span>
+            <span>$${invoiceData.total.toFixed(2)}</span>
+          </div>
+          <div class="total-row">
+            <span>Método de pago:</span>
+            <span>${invoiceData.paymentType}</span>
+          </div>
+        </div>
+        <div class="barcode">
+          ${barcodeHTML}
+        </div>
+        <div class="thank-you">
+          <p>Gracias por su compra</p>
+        </div>
+      `;
+      
+      invoiceDetail.innerHTML = ticketHTML;
+    };
+
+    // Función para imprimir el reporte de facturas
+    const printInvoicesReportContent = () => {
+      const today = new Date(invoicesDateFilter.value).toLocaleDateString();
+      const invoices = Array.from(document.querySelectorAll('#dailyInvoices .report-item'));
+      
+      let invoicesHTML = '';
+      invoices.forEach(invoice => {
+        invoicesHTML += `
+          <div style="margin-bottom: 15px; padding: 10px; border-bottom: 1px solid #eee;">
+            <p><strong>Factura ID:</strong> ${invoice.querySelector('p:nth-child(1)').textContent.split(':')[1].trim()}</p>
+            <p><strong>Hora:</strong> ${invoice.querySelector('p:nth-child(2)').textContent.split(':')[1].trim()}</p>
+            <p><strong>Total:</strong> ${invoice.querySelector('p:nth-child(3)').textContent.split(':')[1].trim()}</p>
+            <p><strong>Método:</strong> ${invoice.querySelector('p:nth-child(4)').textContent.split(':')[1].trim()}</p>
+          </div>
+        `;
+      });
+      
+      const reportHTML = `
+        <div style="width: 100%; max-width: 210mm; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+          <h1 style="text-align: center; margin-bottom: 20px;">Reporte de Facturas</h1>
+          <p style="text-align: center; margin-bottom: 20px;"><strong>Fecha:</strong> ${today}</p>
+          
+          <div style="margin-bottom: 30px;">
+            <h2 style="text-align: center; margin-bottom: 15px;">Resumen de Facturas</h2>
+            <div style="margin-bottom: 20px;">
+              <p style="text-align: center; font-size: 18px;"><strong>Total Facturas:</strong> ${invoices.length}</p>
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 30px;">
+            <h2 style="text-align: center; margin-bottom: 15px;">Listado de Facturas</h2>
+            ${invoicesHTML}
+          </div>
+          
+          <div style="margin-top: 30px; text-align: center;">
+            <p>Reporte generado por: ${currentUser.displayName || currentUser.email.split('@')[0]}</p>
+            <p>${new Date().toLocaleString()}</p>
+          </div>
+        </div>
+      `;
+      
+      const printWindow = window.open('', '', 'width=800,height=600');
+      printWindow.document.write('<html><head><title>Reporte de Facturas</title>');
+      printWindow.document.write('<style>body { font-family: Arial; margin: 0; padding: 20px; }</style>');
+      printWindow.document.write('</head><body>');
+      printWindow.document.write(reportHTML);
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.print();
+    };
+
+    // Función para imprimir el detalle de la factura
+    const printInvoiceDetailContent = () => {
+      const invoiceHTML = invoiceDetail.innerHTML;
+      
+      const printWindow = window.open('', '', 'width=800,height=600');
+      printWindow.document.write('<html><head><title>Factura</title>');
+      printWindow.document.write('<style>body { font-family: Arial; margin: 0; padding: 10px; } .invoice-ticket { width: 100%; max-width: 80mm; margin: 0 auto; padding: 10px; font-family: Arial, sans-serif; } .invoice-header { text-align: center; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 10px; } .invoice-header h2 { margin: 5px 0; font-size: 18px; } .invoice-header p { margin: 3px 0; font-size: 14px; } .invoice-user { margin: 10px 0; padding-bottom: 5px; border-bottom: 1px dashed #000; } .invoice-products { margin: 10px 0; } .product-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; } .product-name { flex: 3; } .product-quantity, .product-price, .product-total { flex: 1; text-align: right; } .invoice-totals { margin-top: 15px; border-top: 1px dashed #000; padding-top: 10px; } .total-row { display: flex; justify-content: space-between; margin-bottom: 5px; } .barcode { text-align: center; margin-top: 15px; font-family: "Libre Barcode 39 Text", cursive; font-size: 36px; } .thank-you { text-align: center; margin-top: 10px; font-style: italic; }</style>');
+      printWindow.document.write('</head><body>');
+      printWindow.document.write(`<div class="invoice-ticket">${invoiceHTML}</div>`);
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.print();
+    };
+
+    // Event Listeners
+    applyInvoicesFilter.addEventListener('click', () => {
+      loadDailyInvoices(invoicesDateFilter.value);
+    });
+
+    printInvoicesReport.addEventListener('click', printInvoicesReportContent);
+    printInvoiceDetail.addEventListener('click', printInvoiceDetailContent);
+
+    // Observador de autenticación
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        
+        if (user.displayName) {
+          invoiceUser.textContent = user.displayName;
+        } else {
+          const nameFromEmail = user.email.split('@')[0];
+          invoiceUser.textContent = nameFromEmail;
+        }
+        
+        // Establecer fecha actual
+        const today = new Date().toISOString().split('T')[0];
+        invoicesDateFilter.value = today;
+        currentDate.textContent = new Date().toLocaleDateString('es-ES', { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+        
+        // Cargar facturas iniciales
+        loadDailyInvoices();
+      } else {
+        // Redirigir al login si no hay usuario autenticado
+        window.location.href = 'login.html';
+      }
+    });
+  </script>
+</body>
+</html>
