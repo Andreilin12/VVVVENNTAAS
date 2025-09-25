@@ -100,6 +100,7 @@
       margin-bottom: 20px;
       align-items: center;
       justify-content: center;
+      flex-wrap: wrap;
     }
 
     .date-filter input {
@@ -329,6 +330,198 @@
       background-color: #0d705c;
     }
 
+    /* Alertas personalizadas */
+    .alert {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      z-index: 2000;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.5s ease;
+      max-width: 300px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .alert.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .alert-success {
+      background-color: #16e086;
+    }
+
+    .alert-error {
+      background-color: #e74c3c;
+    }
+
+    .alert-info {
+      background-color: #3498db;
+    }
+
+    .alert-warning {
+      background-color: #f39c12;
+    }
+
+    /* Botón para cambiar sugerencias */
+    .change-suggestion-btn {
+      background: rgba(22, 224, 134, 0.2);
+      color: #16e086;
+      border: 1px solid #16e086;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 0.8em;
+      margin-top: 10px;
+      transition: all 0.3s;
+    }
+
+    .change-suggestion-btn:hover {
+      background: rgba(22, 224, 134, 0.4);
+    }
+
+    /* Botón de exportar datos */
+    .export-btn {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+
+    .export-btn:hover {
+      background: linear-gradient(135deg, #2980b9, #3498db);
+      transform: translateY(-2px);
+    }
+
+    /* Botón de comparar fechas */
+    .compare-btn {
+      background: linear-gradient(135deg, #9b59b6, #8e44ad);
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+
+    .compare-btn:hover {
+      background: linear-gradient(135deg, #8e44ad, #9b59b6);
+      transform: translateY(-2px);
+    }
+
+    /* Panel de comparación */
+    .comparison-panel {
+      display: none;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+
+    .comparison-panel.active {
+      display: block;
+    }
+
+    .comparison-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .comparison-dates {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .comparison-dates label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+      color: #16e086;
+    }
+
+    .comparison-dates input {
+      padding: 8px;
+      border-radius: 5px;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ecf0f1;
+      width: 100%;
+    }
+
+    .comparison-results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .comparison-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 5px;
+      padding: 15px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .comparison-item-title {
+      font-size: 0.9em;
+      margin-bottom: 10px;
+      color: #95a5a6;
+    }
+
+    .comparison-value {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #16e086;
+      margin-bottom: 5px;
+    }
+
+    .comparison-diff {
+      font-size: 0.9em;
+      padding: 3px 8px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+
+    .diff-positive {
+      background-color: rgba(22, 224, 134, 0.2);
+      color: #16e086;
+    }
+
+    .diff-negative {
+      background-color: rgba(231, 76, 60, 0.2);
+      color: #e74c3c;
+    }
+
+    .comparison-explanation {
+      margin-top: 15px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 5px;
+      font-size: 0.9em;
+      color: #95a5a6;
+    }
+
     /* Responsividad */
     @media (max-width: 768px) {
       .sales-categories {
@@ -342,6 +535,18 @@
       
       .analysis-charts {
         flex-direction: column;
+      }
+      
+      .date-filter {
+        flex-direction: column;
+      }
+      
+      .comparison-dates {
+        flex-direction: column;
+      }
+      
+      .comparison-results {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -366,6 +571,32 @@
         <input type="date" id="analysisDateFilter">
         <button id="applyAnalysisFilter">Filtrar</button>
         <button id="printAnalysisReport" class="print-btn"><i class="fas fa-print"></i> Imprimir Análisis</button>
+        <button id="exportAnalysisData" class="export-btn"><i class="fas fa-download"></i> Exportar Datos</button>
+        <button id="compareDatesBtn" class="compare-btn"><i class="fas fa-exchange-alt"></i> Comparar Fechas</button>
+      </div>
+      
+      <div class="comparison-panel" id="comparisonPanel">
+        <div class="comparison-header">
+          <h3>Comparación de Fechas</h3>
+          <button id="closeComparisonBtn" class="change-suggestion-btn">Cerrar</button>
+        </div>
+        <div class="comparison-dates">
+          <div>
+            <label for="firstDate">Primera Fecha:</label>
+            <input type="date" id="firstDate">
+          </div>
+          <div>
+            <label for="secondDate">Segunda Fecha:</label>
+            <input type="date" id="secondDate">
+          </div>
+          <button id="applyComparisonBtn" class="print-btn">Comparar</button>
+        </div>
+        <div class="comparison-results" id="comparisonResults">
+          <!-- Los resultados de la comparación se mostrarán aquí -->
+        </div>
+        <div class="comparison-explanation" id="comparisonExplanation">
+          <!-- La explicación de los resultados se mostrará aquí -->
+        </div>
       </div>
       
       <div id="salesAnalysisContent">
@@ -379,8 +610,8 @@
               <!-- Se llenará dinámicamente -->
             </div>
             <div class="suggestion">
-              <div class="suggestion-title">Sugerencia</div>
-              <div class="suggestion-text">Promocione estos productos como "Los más populares" para aumentar aún más sus ventas.</div>
+              <div class="suggestion-title">Sugerencia <button class="change-suggestion-btn" data-category="top">Cambiar</button></div>
+              <div class="suggestion-text" id="topSuggestion">Promocione estos productos como "Los más populares" para aumentar aún más sus ventas.</div>
             </div>
           </div>
           
@@ -393,8 +624,8 @@
               <!-- Se llenará dinámicamente -->
             </div>
             <div class="suggestion">
-              <div class="suggestion-title">Sugerencia</div>
-              <div class="suggestion-text">Considere promociones especiales o paquetes para estos productos.</div>
+              <div class="suggestion-title">Sugerencia <button class="change-suggestion-btn" data-category="bottom">Cambiar</button></div>
+              <div class="suggestion-text" id="bottomSuggestion">Considere promociones especiales o paquetes para estos productos.</div>
             </div>
           </div>
           
@@ -407,8 +638,8 @@
               <!-- Se llenará dinámicamente -->
             </div>
             <div class="suggestion">
-              <div class="suggestion-title">Sugerencia</div>
-              <div class="suggestion-text">Revise el precio, ubicación o considere eliminarlos si no generan interés.</div>
+              <div class="suggestion-title">Sugerencia <button class="change-suggestion-btn" data-category="noSales">Cambiar</button></div>
+              <div class="suggestion-text" id="noSalesSuggestion">Revise el precio, ubicación o considere eliminarlos si no generan interés.</div>
             </div>
           </div>
         </div>
@@ -472,9 +703,21 @@
     const analysisDateFilter = document.getElementById("analysisDateFilter");
     const applyAnalysisFilter = document.getElementById("applyAnalysisFilter");
     const printAnalysisReport = document.getElementById("printAnalysisReport");
+    const exportAnalysisData = document.getElementById("exportAnalysisData");
+    const compareDatesBtn = document.getElementById("compareDatesBtn");
+    const comparisonPanel = document.getElementById("comparisonPanel");
+    const closeComparisonBtn = document.getElementById("closeComparisonBtn");
+    const firstDate = document.getElementById("firstDate");
+    const secondDate = document.getElementById("secondDate");
+    const applyComparisonBtn = document.getElementById("applyComparisonBtn");
+    const comparisonResults = document.getElementById("comparisonResults");
+    const comparisonExplanation = document.getElementById("comparisonExplanation");
     const topProducts = document.getElementById("topProducts");
     const bottomProducts = document.getElementById("bottomProducts");
     const noSalesProducts = document.getElementById("noSalesProducts");
+    const topSuggestion = document.getElementById("topSuggestion");
+    const bottomSuggestion = document.getElementById("bottomSuggestion");
+    const noSalesSuggestion = document.getElementById("noSalesSuggestion");
     const topProductsChart = document.getElementById("topProductsChart");
     const bottomProductsChart = document.getElementById("bottomProductsChart");
     const currentDate = document.getElementById("currentDate");
@@ -483,6 +726,113 @@
     let currentUser = null;
     let topProductsChartInstance = null;
     let bottomProductsChartInstance = null;
+    let lastUsedSuggestions = {
+      top: -1,
+      bottom: -1,
+      noSales: -1
+    };
+
+    // Listas de sugerencias para cada categoría
+    const topSuggestions = [
+      "Promocione estos productos como 'Los más populares' para aumentar aún más sus ventas.",
+      "Cree paquetes que incluyan estos productos junto con otros menos vendidos para impulsar las ventas generales.",
+      "Ofrezca descuentos por volumen en estos productos para incentivar compras mayores.",
+      "Destáquelos en la sección principal de su tienda o sitio web para aumentar su visibilidad.",
+      "Utilice estos productos como gancho publicitario en sus campañas de marketing.",
+      "Cree testimonios o reseñas de clientes satisfechos con estos productos para generar confianza.",
+      "Considere aumentar ligeramente el precio si la demanda es consistentemente alta.",
+      "Asegúrese de tener suficiente stock para satisfacer la alta demanda.",
+      "Analice qué características hacen populares estos productos y aplíquelas a otros productos.",
+      "Ofrezca una garantía extendida o servicio post-venta para aumentar el valor percibido."
+    ];
+
+    const bottomSuggestions = [
+      "Considere promociones especiales o paquetes para estos productos.",
+      "Revise el precio de estos productos; podría estar demasiado alto en comparación con la competencia.",
+      "Mejore la descripción y las imágenes de estos productos para hacerlos más atractivos.",
+      "Colóquelos en ubicaciones más visibles en su tienda o sitio web.",
+      "Ofrezca muestras gratuitas o pruebas para que los clientes los conozcan.",
+      "Cree bundles que incluyan estos productos con otros más populares.",
+      "Realice una campaña de marketing específica para estos productos.",
+      "Considere si estos productos siguen siendo relevantes para su mercado objetivo.",
+      "Solicite feedback de los clientes sobre por qué no eligen estos productos.",
+      "Analice la competencia para ver cómo promocionan productos similares."
+    ];
+
+    const noSalesSuggestions = [
+      "Revise el precio, ubicación o considere eliminarlos si no generan interés.",
+      "Realice una promoción de lanzamiento con descuentos especiales para crear interés.",
+      "Mejore significativamente la presentación y descripción de estos productos.",
+      "Considere si estos productos satisfacen una necesidad real de su mercado objetivo.",
+      "Ofrezca estos productos como bonificación gratuita con otras compras.",
+      "Realice pruebas de mercado con un grupo focal antes de decidir su futuro.",
+      "Considere reposicionarlos dirigidos a un segmento de mercado diferente.",
+      "Evalúe si la temporada del año afecta la demanda de estos productos.",
+      "Cree contenido educativo sobre cómo usar estos productos y sus beneficios.",
+      "Considere donarlos para obtener beneficios fiscales y espacio de almacenamiento."
+    ];
+
+    // Función para mostrar alertas
+    const showAlert = (message, type = 'info', duration = 5000) => {
+      // Crear elemento de alerta si no existe
+      let alertElement = document.querySelector('.alert');
+      if (!alertElement) {
+        alertElement = document.createElement('div');
+        alertElement.className = 'alert';
+        document.body.appendChild(alertElement);
+      }
+      
+      // Configurar la alerta
+      alertElement.textContent = message;
+      alertElement.className = `alert alert-${type}`;
+      alertElement.classList.add('show');
+      
+      // Ocultar después del tiempo especificado
+      setTimeout(() => {
+        alertElement.classList.remove('show');
+        setTimeout(() => {
+          if (alertElement.parentNode) {
+            alertElement.parentNode.removeChild(alertElement);
+          }
+        }, 500);
+      }, duration);
+    };
+
+    // Función para obtener una sugerencia aleatoria sin repetir la anterior
+    const getRandomSuggestion = (suggestionsArray, category) => {
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * suggestionsArray.length);
+      } while (randomIndex === lastUsedSuggestions[category] && suggestionsArray.length > 1);
+      
+      lastUsedSuggestions[category] = randomIndex;
+      return suggestionsArray[randomIndex];
+    };
+
+    // Función para cambiar sugerencia
+    const changeSuggestion = (category) => {
+      let suggestionElement, suggestionsArray;
+      
+      switch(category) {
+        case 'top':
+          suggestionElement = topSuggestion;
+          suggestionsArray = topSuggestions;
+          break;
+        case 'bottom':
+          suggestionElement = bottomSuggestion;
+          suggestionsArray = bottomSuggestions;
+          break;
+        case 'noSales':
+          suggestionElement = noSalesSuggestion;
+          suggestionsArray = noSalesSuggestions;
+          break;
+        default:
+          return;
+      }
+      
+      suggestionElement.textContent = getRandomSuggestion(suggestionsArray, category);
+      showAlert('Sugerencia actualizada', 'success', 2000);
+    };
 
     // Función para obtener sugerencias aleatorias de productos
     const getRandomSuggestions = (products, count) => {
@@ -519,6 +869,7 @@
           topProducts.innerHTML = '<div class="no-products">No hay ventas para analizar</div>';
           bottomProducts.innerHTML = '<div class="no-products">No hay ventas para analizar</div>';
           noSalesProducts.innerHTML = '<div class="no-products">No hay productos sin ventas</div>';
+          showAlert('No hay ventas para la fecha seleccionada', 'warning');
           return;
         }
         
@@ -650,9 +1001,16 @@
         updateTopProductsChart(randomTopSelling);
         updateBottomProductsChart(randomLowSelling);
         
+        // Actualizar sugerencias
+        topSuggestion.textContent = getRandomSuggestion(topSuggestions, 'top');
+        bottomSuggestion.textContent = getRandomSuggestion(bottomSuggestions, 'bottom');
+        noSalesSuggestion.textContent = getRandomSuggestion(noSalesSuggestions, 'noSales');
+        
+        showAlert('Análisis de ventas cargado correctamente', 'success');
+        
       } catch (error) {
         console.error("Error al analizar ventas:", error);
-        alert('Error al analizar ventas');
+        showAlert('Error al analizar ventas: ' + error.message, 'error');
       }
     };
 
@@ -693,7 +1051,19 @@
               ticks: {
                 callback: function(value) {
                   return '$' + value.toFixed(2);
-                }
+                },
+                color: '#ecf0f1' // Color mejorado para los títulos
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)' // Líneas de la cuadrícula más visibles
+              }
+            },
+            y: {
+              ticks: {
+                color: '#ecf0f1' // Color mejorado para los títulos
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)' // Líneas de la cuadrícula más visibles
               }
             }
           },
@@ -706,7 +1076,10 @@
                 label: function(context) {
                   return `${context.label}: $${context.raw.toFixed(2)}`;
                 }
-              }
+              },
+              backgroundColor: 'rgba(52, 73, 94, 0.9)', // Fondo del tooltip
+              titleColor: '#ecf0f1', // Color del título del tooltip
+              bodyColor: '#ecf0f1' // Color del cuerpo del tooltip
             }
           }
         }
@@ -750,7 +1123,7 @@
             legend: {
               position: 'right',
               labels: {
-                color: '#333',
+                color: '#ecf0f1', // Color mejorado para las etiquetas
                 font: {
                   size: 12
                 }
@@ -761,7 +1134,10 @@
                 label: function(context) {
                   return `${context.label}: $${context.raw.toFixed(2)}`;
                 }
-              }
+              },
+              backgroundColor: 'rgba(52, 73, 94, 0.9)', // Fondo del tooltip
+              titleColor: '#ecf0f1', // Color del título del tooltip
+              bodyColor: '#ecf0f1' // Color del cuerpo del tooltip
             },
             title: {
               display: false
@@ -842,6 +1218,270 @@
       printWindow.document.write('</body></html>');
       printWindow.document.close();
       printWindow.print();
+      
+      showAlert('Reporte generado para impresión', 'success');
+    };
+
+    // Función para exportar datos a CSV
+    const exportAnalysisDataToCSV = async () => {
+      try {
+        // Obtener datos actuales
+        const today = new Date(analysisDateFilter.value);
+        const startDate = new Date(today);
+        startDate.setHours(0, 0, 0, 0);
+        const endDate = new Date(today);
+        endDate.setHours(23, 59, 59, 999);
+        
+        // Obtener todas las facturas del día
+        const salesRef = collection(db, "users", currentUser.uid, "invoiceHistory");
+        const q = query(salesRef, 
+          where("date", ">=", Timestamp.fromDate(startDate)),
+          where("date", "<=", Timestamp.fromDate(endDate))
+        );
+        
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+          showAlert('No hay datos para exportar', 'warning');
+          return;
+        }
+        
+        // Procesar datos para CSV
+        let csvContent = "Producto,Cantidad Vendida,Total Vendido,Categoría\n";
+        
+        // Obtener todos los productos disponibles
+        const businessesRef = collection(db, "businesses");
+        const businessesSnapshot = await getDocs(businessesRef);
+        
+        const allProducts = [];
+        const businessPromises = [];
+        
+        businessesSnapshot.forEach(businessDoc => {
+          const productsRef = collection(db, "businesses", businessDoc.id, "products");
+          const promise = getDocs(productsRef).then(productsSnapshot => {
+            productsSnapshot.forEach(productDoc => {
+              allProducts.push({
+                id: productDoc.id,
+                name: productDoc.data().name,
+                businessName: businessDoc.id,
+                sold: 0,
+                total: 0
+              });
+            });
+          });
+          businessPromises.push(promise);
+        });
+        
+        await Promise.all(businessPromises);
+        
+        // Procesar ventas
+        const salesByProduct = {};
+        
+        querySnapshot.forEach(doc => {
+          const invoiceData = doc.data();
+          invoiceData.items.forEach(item => {
+            if (!salesByProduct[item.name]) {
+              salesByProduct[item.name] = {
+                quantity: 0,
+                total: 0
+              };
+            }
+            salesByProduct[item.name].quantity += item.quantity;
+            salesByProduct[item.name].total += item.total;
+          });
+        });
+        
+        // Actualizar productos vendidos
+        allProducts.forEach(product => {
+          if (salesByProduct[product.name]) {
+            product.sold = salesByProduct[product.name].quantity;
+            product.total = salesByProduct[product.name].total;
+          }
+        });
+        
+        // Separar productos en categorías
+        const soldProducts = allProducts.filter(p => p.sold > 0);
+        const notSoldProducts = allProducts.filter(p => p.sold === 0);
+        
+        // Ordenar productos vendidos por cantidad
+        soldProducts.sort((a, b) => b.total - a.total);
+        
+        // Agregar productos más vendidos al CSV
+        soldProducts.slice(0, 10).forEach(product => {
+          csvContent += `"${product.name}",${product.sold},${product.total.toFixed(2)},"Más Vendidos"\n`;
+        });
+        
+        // Agregar productos menos vendidos al CSV
+        soldProducts.slice(-10).forEach(product => {
+          csvContent += `"${product.name}",${product.sold},${product.total.toFixed(2)},"Menos Vendidos"\n`;
+        });
+        
+        // Agregar productos sin ventas al CSV
+        notSoldProducts.slice(0, 10).forEach(product => {
+          csvContent += `"${product.name}",0,0,"Sin Ventas"\n`;
+        });
+        
+        // Crear y descargar archivo CSV
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `analisis_ventas_${today.toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showAlert('Datos exportados correctamente', 'success');
+      } catch (error) {
+        console.error("Error al exportar datos:", error);
+        showAlert('Error al exportar datos: ' + error.message, 'error');
+      }
+    };
+
+    // Función para comparar fechas
+    const compareDates = async () => {
+      if (!firstDate.value || !secondDate.value) {
+        showAlert('Seleccione ambas fechas para comparar', 'warning');
+        return;
+      }
+      
+      try {
+        // Obtener datos para la primera fecha
+        const firstDateData = await getSalesDataForDate(firstDate.value);
+        // Obtener datos para la segunda fecha
+        const secondDateData = await getSalesDataForDate(secondDate.value);
+        
+        // Calcular diferencias
+        const totalSalesDiff = secondDateData.totalSales - firstDateData.totalSales;
+        const totalProductsDiff = secondDateData.totalProducts - firstDateData.totalProducts;
+        const avgSaleDiff = secondDateData.avgSale - firstDateData.avgSale;
+        const productsWithSalesDiff = secondDateData.productsWithSales - firstDateData.productsWithSales;
+        
+        // Calcular porcentajes de cambio
+        const totalSalesChange = firstDateData.totalSales > 0 ? (totalSalesDiff / firstDateData.totalSales) * 100 : 0;
+        const totalProductsChange = firstDateData.totalProducts > 0 ? (totalProductsDiff / firstDateData.totalProducts) * 100 : 0;
+        const avgSaleChange = firstDateData.avgSale > 0 ? (avgSaleDiff / firstDateData.avgSale) * 100 : 0;
+        
+        // Mostrar resultados
+        comparisonResults.innerHTML = `
+          <div class="comparison-item">
+            <div class="comparison-item-title">Ventas Totales</div>
+            <div class="comparison-value">$${secondDateData.totalSales.toFixed(2)}</div>
+            <div class="comparison-diff ${totalSalesDiff >= 0 ? 'diff-positive' : 'diff-negative'}">
+              ${totalSalesDiff >= 0 ? '+' : ''}$${totalSalesDiff.toFixed(2)} (${totalSalesChange >= 0 ? '+' : ''}${totalSalesChange.toFixed(1)}%)
+            </div>
+          </div>
+          <div class="comparison-item">
+            <div class="comparison-item-title">Productos Vendidos</div>
+            <div class="comparison-value">${secondDateData.totalProducts}</div>
+            <div class="comparison-diff ${totalProductsDiff >= 0 ? 'diff-positive' : 'diff-negative'}">
+              ${totalProductsDiff >= 0 ? '+' : ''}${totalProductsDiff} (${totalProductsChange >= 0 ? '+' : ''}${totalProductsChange.toFixed(1)}%)
+            </div>
+          </div>
+          <div class="comparison-item">
+            <div class="comparison-item-title">Venta Promedio</div>
+            <div class="comparison-value">$${secondDateData.avgSale.toFixed(2)}</div>
+            <div class="comparison-diff ${avgSaleDiff >= 0 ? 'diff-positive' : 'diff-negative'}">
+              ${avgSaleDiff >= 0 ? '+' : ''}$${avgSaleDiff.toFixed(2)} (${avgSaleChange >= 0 ? '+' : ''}${avgSaleChange.toFixed(1)}%)
+            </div>
+          </div>
+          <div class="comparison-item">
+            <div class="comparison-item-title">Productos con Ventas</div>
+            <div class="comparison-value">${secondDateData.productsWithSales}</div>
+            <div class="comparison-diff ${productsWithSalesDiff >= 0 ? 'diff-positive' : 'diff-negative'}">
+              ${productsWithSalesDiff >= 0 ? '+' : ''}${productsWithSalesDiff}
+            </div>
+          </div>
+        `;
+        
+        // Generar explicación de los resultados
+        let explanation = "<strong>Análisis de Comparación:</strong><br>";
+        
+        if (totalSalesDiff > 0) {
+          explanation += `• Las ventas aumentaron un ${totalSalesChange.toFixed(1)}% respecto a la primera fecha.<br>`;
+        } else if (totalSalesDiff < 0) {
+          explanation += `• Las ventas disminuyeron un ${Math.abs(totalSalesChange).toFixed(1)}% respecto a la primera fecha.<br>`;
+        } else {
+          explanation += "• Las ventas se mantuvieron iguales en ambas fechas.<br>";
+        }
+        
+        if (totalProductsDiff > 0) {
+          explanation += `• Se vendieron ${totalProductsDiff} productos más.<br>`;
+        } else if (totalProductsDiff < 0) {
+          explanation += `• Se vendieron ${Math.abs(totalProductsDiff)} productos menos.<br>`;
+        } else {
+          explanation += "• La cantidad de productos vendidos se mantuvo igual.<br>";
+        }
+        
+        if (avgSaleDiff > 0) {
+          explanation += `• El valor promedio por venta aumentó un ${avgSaleChange.toFixed(1)}%.<br>`;
+        } else if (avgSaleDiff < 0) {
+          explanation += `• El valor promedio por venta disminuyó un ${Math.abs(avgSaleChange).toFixed(1)}%.<br>`;
+        } else {
+          explanation += "• El valor promedio por venta se mantuvo igual.<br>";
+        }
+        
+        if (productsWithSalesDiff > 0) {
+          explanation += `• ${productsWithSalesDiff} productos más tuvieron ventas.<br>`;
+        } else if (productsWithSalesDiff < 0) {
+          explanation += `• ${Math.abs(productsWithSalesDiff)} productos menos tuvieron ventas.<br>`;
+        } else {
+          explanation += "• La variedad de productos vendidos se mantuvo igual.<br>";
+        }
+        
+        comparisonExplanation.innerHTML = explanation;
+        
+        showAlert('Comparación completada', 'success');
+      } catch (error) {
+        console.error("Error al comparar fechas:", error);
+        showAlert('Error al comparar fechas: ' + error.message, 'error');
+      }
+    };
+
+    // Función auxiliar para obtener datos de ventas para una fecha específica
+    const getSalesDataForDate = async (date) => {
+      const startDate = new Date(date);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(date);
+      endDate.setHours(23, 59, 59, 999);
+      
+      // Obtener todas las facturas del día
+      const salesRef = collection(db, "users", currentUser.uid, "invoiceHistory");
+      const q = query(salesRef, 
+        where("date", ">=", Timestamp.fromDate(startDate)),
+        where("date", "<=", Timestamp.fromDate(endDate))
+      );
+      
+      const querySnapshot = await getDocs(q);
+      
+      let totalSales = 0;
+      let totalProducts = 0;
+      let productsWithSales = 0;
+      const salesByProduct = {};
+      
+      querySnapshot.forEach(doc => {
+        const invoiceData = doc.data();
+        totalSales += invoiceData.total || 0;
+        
+        invoiceData.items.forEach(item => {
+          totalProducts += item.quantity;
+          
+          if (!salesByProduct[item.name]) {
+            salesByProduct[item.name] = true;
+            productsWithSales++;
+          }
+        });
+      });
+      
+      const avgSale = totalProducts > 0 ? totalSales / totalProducts : 0;
+      
+      return {
+        totalSales,
+        totalProducts,
+        avgSale,
+        productsWithSales
+      };
     };
 
     // Event Listeners
@@ -850,6 +1490,26 @@
     });
 
     printAnalysisReport.addEventListener('click', printAnalysisReportContent);
+    
+    exportAnalysisData.addEventListener('click', exportAnalysisDataToCSV);
+    
+    compareDatesBtn.addEventListener('click', () => {
+      comparisonPanel.classList.toggle('active');
+    });
+    
+    closeComparisonBtn.addEventListener('click', () => {
+      comparisonPanel.classList.remove('active');
+    });
+    
+    applyComparisonBtn.addEventListener('click', compareDates);
+    
+    // Event listeners para cambiar sugerencias
+    document.querySelectorAll('.change-suggestion-btn').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const category = e.target.getAttribute('data-category');
+        changeSuggestion(category);
+      });
+    });
 
     // Observador de autenticación
     onAuthStateChanged(auth, async (user) => {
@@ -866,6 +1526,8 @@
         // Establecer fecha actual
         const today = new Date().toISOString().split('T')[0];
         analysisDateFilter.value = today;
+        firstDate.value = today;
+        secondDate.value = today;
         currentDate.textContent = new Date().toLocaleDateString('es-ES', { 
           weekday: 'long', 
           year: 'numeric', 
